@@ -30,7 +30,7 @@
     }
     .container { max-width: 480px; margin: 0 auto; }
 
-    /* 헤더 & 날짜 바 */
+    /* 상단 헤더 & 날짜 */
     .header {
       display: flex; justify-content: space-between; align-items: center;
       padding: 10px 2px; margin-bottom: 6px;
@@ -59,7 +59,7 @@
     .tab-pane.active { display: block; animation: fadeIn 0.18s ease-in-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* 공통 카드 */
+    /* 카드 공통 */
     .card {
       background: var(--card); border-radius: 18px; padding: 18px;
       margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.04);
@@ -113,7 +113,7 @@
     .progress-bar-fill.purple { background: var(--purple); }
     .progress-bar-fill.danger { background: var(--danger); }
 
-    /* 입력 요소 */
+    /* 폼 입력 */
     select, input[type="text"], input[type="number"] {
       width: 100%; padding: 11px 12px; border: 1px solid var(--border);
       border-radius: 12px; font-size: 16px; background: #F9FAFB;
@@ -122,6 +122,7 @@
     }
     .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .row-3 { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 8px; }
+    .row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
     .field-label { font-size: 12px; font-weight: 600; color: var(--sub); margin-bottom: 4px; display: block; }
 
     .btn-primary {
@@ -130,9 +131,56 @@
       font-weight: 700; cursor: pointer; margin-top: 4px;
     }
     .btn-green { background: var(--green); }
-    .btn-purple { background: var(--purple); }
+    .btn-dark { background: #1E293B; }
 
-    /* 리스트 */
+    /* 실시간 음식 검색 결과 & 영양성분표 박스 */
+    .search-bar-wrap { display: flex; gap: 6px; margin-bottom: 8px; }
+    .search-bar-wrap input { margin-bottom: 0; flex: 1; }
+    .btn-search {
+      background: #1E293B; color: #FFF; border: none; border-radius: 12px;
+      padding: 0 14px; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0;
+    }
+    .search-results {
+      max-height: 210px; overflow-y: auto; border: 1px solid var(--border);
+      border-radius: 12px; background: #FFFFFF; margin-bottom: 10px; display: none;
+    }
+    .search-item {
+      padding: 10px 12px; border-bottom: 1px solid #F3F4F6; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .search-item:last-child { border-bottom: none; }
+    .search-item:active { background: #EFF6FF; }
+    .s-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .s-meta { font-size: 11px; color: var(--sub); margin-top: 2px; }
+    .s-kcal { font-size: 13px; font-weight: 800; color: var(--green); flex-shrink: 0; }
+
+    /* 실제 영양성분표 스타일 카드 */
+    .nutrition-label-box {
+      display: none; border: 2px solid #111827; border-radius: 12px;
+      padding: 12px; background: #FFFFFF; margin-bottom: 12px;
+    }
+    .nf-header {
+      border-bottom: 3px solid #111827; padding-bottom: 6px; margin-bottom: 8px;
+      display: flex; justify-content: space-between; align-items: flex-end;
+    }
+    .nf-title { font-size: 16px; font-weight: 900; letter-spacing: -0.5px; }
+    .nf-serving { font-size: 12px; font-weight: 600; color: var(--sub); }
+    .nf-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; text-align: center;
+    }
+    .nf-cell {
+      background: #F8FAFC; border-radius: 8px; padding: 7px 4px; border: 1px solid #E2E8F0;
+    }
+    .nf-cell .c-name { font-size: 11px; color: var(--sub); display: block; }
+    .nf-cell .c-val { font-size: 13px; font-weight: 800; color: #111827; }
+
+    /* 운동 계산 프리뷰 박스 */
+    .ex-calc-preview {
+      background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px;
+      padding: 11px 12px; margin-bottom: 10px; font-size: 12px; color: #1E3A8A; line-height: 1.5;
+    }
+
+    /* 기록 리스트 */
     .log-list { list-style: none; padding: 0; margin: 10px 0 0 0; }
     .log-item {
       display: flex; justify-content: space-between; align-items: center;
@@ -150,18 +198,18 @@
     }
     .empty-msg { text-align: center; color: var(--sub); font-size: 13px; padding: 14px 0; }
 
-    /* 운동 패턴 버튼 그리드 */
+    /* 운동 패턴 버튼 */
     .pattern-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 12px; }
     .pattern-btn {
       background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px;
-      padding: 11px 12px; text-align: left; cursor: pointer; transition: all 0.15s;
+      padding: 11px 12px; text-align: left; cursor: pointer;
     }
     .pattern-btn:active { background: #EFF6FF; border-color: var(--primary); }
     .pattern-btn .p-top { display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; color: var(--text); }
     .pattern-btn .p-kcal { color: var(--primary); }
     .pattern-btn .p-desc { font-size: 12px; color: var(--sub); margin-top: 4px; }
 
-    /* 영양제 체크 카드 */
+    /* 영양제 카드 */
     .supp-item {
       background: #F9FAFB; border: 1px solid #F3F4F6; border-radius: 14px;
       padding: 12px; margin-bottom: 10px;
@@ -180,7 +228,7 @@
       font-size: 12px; color: #374151; line-height: 1.45;
     }
 
-    /* 하단 고정 탭바 */
+    /* 하단 탭바 */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0;
       background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(10px);
@@ -224,7 +272,7 @@
     <button onclick="changeDate(1)">›</button>
   </div>
 
-  <!-- [탭 1] 홈 대시보드 -->
+  <!-- [탭 1] 홈 요약 -->
   <div id="tab-home" class="tab-pane active">
     <div class="card">
       <div class="card-title">
@@ -277,7 +325,6 @@
         </div>
       </div>
 
-      <!-- 칼로리 바 -->
       <div class="progress-wrap">
         <div class="progress-header">
           <span id="calStatusText">남은 섭취 가능: 1,764 kcal</span>
@@ -288,7 +335,6 @@
         </div>
       </div>
 
-      <!-- 단백질 바 -->
       <div class="progress-wrap">
         <div class="progress-header">
           <span id="protStatusText">근손실 방지 단백질: 0g / 130g</span>
@@ -299,7 +345,6 @@
         </div>
       </div>
 
-      <!-- 영양제 달성 바 -->
       <div class="progress-wrap">
         <div class="progress-header">
           <span id="suppStatusText">오늘의 영양제 섭취율 (대사·회복 보조)</span>
@@ -311,7 +356,6 @@
       </div>
     </div>
 
-    <!-- 오늘의 종합 피드백 카드 -->
     <div class="card">
       <div class="card-title">
         <span>💡 실시간 신체 시너지 분석 리포트</span>
@@ -320,14 +364,44 @@
     </div>
   </div>
 
-  <!-- [탭 2] 식단 기록 -->
+  <!-- [탭 2] 식단 & 실시간 영양성분표 검색 -->
   <div id="tab-food" class="tab-pane">
     <div class="card">
       <div class="card-title">
-        <span>🥗 오늘 먹은 식단 기록</span>
+        <span>🔍 실시간 음식 검색 & 영양성분표</span>
         <span class="badge green" id="foodTabBadge">0 kcal</span>
       </div>
 
+      <label class="field-label">음식명 검색 (예: 햇반, 오뚜기밥, 신라면, 컵라면, 닭가슴살 등)</label>
+      <div class="search-bar-wrap">
+        <input type="text" id="foodSearchInput" placeholder="먹은 음식 이름을 입력하세요..." oninput="onFoodSearchInput()" />
+        <button class="btn-search" onclick="searchOnlineFood()">온라인 DB 검색</button>
+      </div>
+      <div style="display:flex; gap:6px; margin-bottom:10px;">
+        <button class="btn-outline" style="flex:1; font-size:11px;" onclick="openWebNutritionSearch('naver')">📗 네이버 영양성분표 바로보기</button>
+        <button class="btn-outline" style="flex:1; font-size:11px;" onclick="openWebNutritionSearch('google')">🌐 구글 영양성분 검색</button>
+      </div>
+
+      <!-- 실시간 검색 결과 드롭다운 -->
+      <div class="search-results" id="foodSearchResults"></div>
+
+      <!-- 선택된 음식 영양성분표 라벨 -->
+      <div class="nutrition-label-box" id="nutritionLabelBox">
+        <div class="nf-header">
+          <span class="nf-title" id="nfTitle">영양성분표</span>
+          <span class="nf-serving" id="nfServing">1회 제공량 기준</span>
+        </div>
+        <div class="nf-grid">
+          <div class="nf-cell"><span class="c-name">열량</span><span class="c-val" id="nfKcal">0 kcal</span></div>
+          <div class="nf-cell"><span class="c-name">탄수화물</span><span class="c-val" id="nfCarb">0 g</span></div>
+          <div class="nf-cell"><span class="c-name">단백질</span><span class="c-val" style="color:var(--green);" id="nfProt">0 g</span></div>
+          <div class="nf-cell"><span class="c-name">지방(포화)</span><span class="c-val" id="nfFat">0 g</span></div>
+          <div class="nf-cell"><span class="c-name">당류</span><span class="c-val" id="nfSugar">0 g</span></div>
+          <div class="nf-cell"><span class="c-name">나트륨</span><span class="c-val" id="nfSodium">0 mg</span></div>
+        </div>
+      </div>
+
+      <!-- 식단 입력 폼 -->
       <div class="row-2">
         <select id="mealType">
           <option value="아침">아침</option>
@@ -335,67 +409,87 @@
           <option value="저녁">저녁</option>
           <option value="간식/야식">간식/야식</option>
         </select>
-        <select id="foodPreset" onchange="applyFoodPreset()">
-          <option value="">자주 먹는 음식 선택...</option>
-          <option value="닭가슴살 (100g)|110|23">닭가슴살 100g (110kcal)</option>
-          <option value="현미/잡곡밥 (1공기)|300|6">현미/잡곡밥 1공기 (300kcal)</option>
-          <option value="흰쌀밥 (1공기)|310|5">흰쌀밥 1공기 (310kcal)</option>
-          <option value="삶은 계란 (2개)|150|13">삶은 계란 2개 (150kcal)</option>
-          <option value="단백질 쉐이크 (1스쿱)|120|24">단백질 쉐이크 (120kcal)</option>
-          <option value="고구마 (1개 150g)|190|2">고구마 1개 (190kcal)</option>
-          <option value="돼지 목살구이 (200g)|450|42">돼지 목살 200g (450kcal)</option>
-          <option value="소고기 우둔살 (200g)|280|44">소고기 우둔살 200g (280kcal)</option>
-          <option value="일반 한식 백반|700|25">일반 한식 백반 (700kcal)</option>
-        </select>
-      </div>
-
-      <div class="row-3">
         <input type="text" id="foodName" placeholder="음식 이름" />
-        <input type="number" id="foodKcal" placeholder="칼로리(kcal)" inputmode="numeric" />
-        <input type="number" id="foodProt" placeholder="단백질(g)" inputmode="numeric" />
       </div>
 
-      <button class="btn-primary btn-green" onclick="addFood()">+ 식단 추가하기</button>
+      <div class="row-4">
+        <div>
+          <label class="field-label">칼로리(kcal)</label>
+          <input type="number" id="foodKcal" placeholder="kcal" inputmode="numeric" />
+        </div>
+        <div>
+          <label class="field-label">탄수화물(g)</label>
+          <input type="number" id="foodCarb" placeholder="g" inputmode="numeric" />
+        </div>
+        <div>
+          <label class="field-label">단백질(g)</label>
+          <input type="number" id="foodProt" placeholder="g" inputmode="numeric" />
+        </div>
+        <div>
+          <label class="field-label">지방(g)</label>
+          <input type="number" id="foodFat" placeholder="g" inputmode="numeric" />
+        </div>
+      </div>
+
+      <button class="btn-primary btn-green" onclick="addFood()">+ 식단에 추가하기</button>
       <ul class="log-list" id="foodList"></ul>
     </div>
   </div>
 
-  <!-- [탭 3] 맞춤 운동 패턴 -->
+  <!-- [탭 3] 횟수·시간 정밀 운동 계산 & 패턴 -->
   <div id="tab-workout" class="tab-pane">
     <div class="card">
       <div class="card-title">
-        <span>🔥 내 신체(81kg·골격근 36.9kg) 맞춤 패턴</span>
+        <span>🏋️ 횟수(개) + 시간(분) 정밀 칼로리 계산기</span>
+        <span class="badge" id="exTabBadge">-0 kcal</span>
       </div>
       <p style="font-size: 12px; color: var(--sub); margin: -6px 0 10px 0;">
-        패턴을 누르면 골격근량(36.9kg)에 따른 <b>운동 후 애프터번(EPOC) 칼로리</b>까지 합산되어 바로 기록됩니다.
+        예: <b>팔굽혀펴기 15분 동안 100개</b>를 입력하면 내 체중(81.0kg)과 골격근(36.9kg)에 맞춰 횟수 볼륨 + 시간 대사 + 애프터번(EPOC)이 자동 계산됩니다.
       </p>
 
-      <div class="pattern-grid" id="patternGrid"></div>
+      <label class="field-label">운동 종목 선택</label>
+      <select id="exPreset" onchange="applyExPreset()">
+        <option value="pushup">팔굽혀펴기 / 푸쉬업 (상체 체중 부하)</option>
+        <option value="squat">맨몸 스쿼트 / 점프 스쿼트 (하체)</option>
+        <option value="lunge">불가리안 스플릿 스쿼트 / 런지 (왼다리 균형)</option>
+        <option value="pullup">턱걸이 / 풀업 (등·상체 고강도)</option>
+        <option value="situp">윗몸일으키기 / 크런치 / 레그레이즈 (복부)</option>
+        <option value="burpee">버피테스트 (전신 고강도 유무산소)</option>
+        <option value="weight_lower">헬스 하체 웨이트 (바벨/머신)</option>
+        <option value="weight_upper">헬스 상체 웨이트 (가슴/등/어깨)</option>
+        <option value="incline_walk">인클라인 트레드밀 (경사도 빠른 걸음)</option>
+        <option value="running">러닝 / 조깅 (시속 8~10km)</option>
+        <option value="custom">직접 입력</option>
+      </select>
+
+      <div class="row-3">
+        <div>
+          <label class="field-label">운동 시간(분)</label>
+          <input type="number" id="exMin" value="15" inputmode="numeric" oninput="calcExKcal()" />
+        </div>
+        <div>
+          <label class="field-label">총 횟수(개·선택)</label>
+          <input type="number" id="exReps" value="100" placeholder="횟수(개)" inputmode="numeric" oninput="calcExKcal()" />
+        </div>
+        <div>
+          <label class="field-label">소모 열량(kcal)</label>
+          <input type="number" id="exKcal" inputmode="numeric" />
+        </div>
+      </div>
+
+      <input type="text" id="exName" value="팔굽혀펴기 (푸쉬업)" placeholder="운동 이름" />
+
+      <div class="ex-calc-preview" id="exCalcBreakdown"></div>
+
+      <button class="btn-primary" onclick="addExercise()">+ 이 운동 기록하기</button>
+      <ul class="log-list" id="exList"></ul>
     </div>
 
     <div class="card">
       <div class="card-title">
-        <span>🏋️ 개별 운동 직접 추가</span>
-        <span class="badge" id="exTabBadge">-0 kcal</span>
+        <span>🔥 원클릭 60분/30분 루틴 패턴 추가</span>
       </div>
-
-      <select id="exPreset" onchange="applyExPreset()">
-        <option value="6.0|0.12|하체 균형 웨이트 (왼다리 집중)">하체 균형 웨이트 (왼다리 스플릿 스쿼트/런지)</option>
-        <option value="5.0|0.10|상체 웨이트 트레이닝">상체 웨이트 트레이닝 (가슴/등/어깨)</option>
-        <option value="5.5|0.05|인클라인 트레드밀 (경사 걷기)">인클라인 트레드밀 (복부지방 타겟 경사 걷기)</option>
-        <option value="8.5|0.15|고강도 인터벌 러닝 (HIIT)">고강도 인터벌 러닝 (HIIT)</option>
-        <option value="6.0|0.06|실내 사이클 (중강도)">실내 사이클 (중강도)</option>
-        <option value="0|0|">직접 입력</option>
-      </select>
-
-      <div class="row-3">
-        <input type="text" id="exName" value="하체 균형 웨이트 (왼다리 집중)" placeholder="운동명" />
-        <input type="number" id="exMin" value="45" placeholder="시간(분)" inputmode="numeric" oninput="calcExKcal()" />
-        <input type="number" id="exKcal" placeholder="총 소모(kcal)" inputmode="numeric" />
-      </div>
-
-      <button class="btn-primary" onclick="addExercise()">+ 운동 기록하기</button>
-      <ul class="log-list" id="exList"></ul>
+      <div class="pattern-grid" id="patternGrid"></div>
     </div>
   </div>
 
@@ -406,10 +500,6 @@
         <span>💊 오늘 먹은 영양제 & 성분 분석</span>
         <span class="badge purple" id="suppTabBadge">대사 시너지 +0kcal</span>
       </div>
-      <p style="font-size: 12px; color: var(--sub); margin: -6px 0 12px 0;">
-        섭취한 용량(mg)을 입력하거나 <b>[1회분 추가]</b>를 누르면 내 인바디 상태에 맞춘 실제 효능과 운동 대사 보너스가 계산됩니다.
-      </p>
-
       <div id="suppContainer"></div>
     </div>
   </div>
@@ -423,11 +513,11 @@
   </button>
   <button class="nav-btn" onclick="switchTab('food', this)">
     <span class="icon">🥗</span>
-    <span>식단 기록</span>
+    <span>식단·영양표</span>
   </button>
   <button class="nav-btn" onclick="switchTab('workout', this)">
     <span class="icon">🏋️</span>
-    <span>운동 패턴</span>
+    <span>운동 계산기</span>
   </button>
   <button class="nav-btn" onclick="switchTab('supp', this)">
     <span class="icon">💊</span>
@@ -479,56 +569,85 @@
 </div>
 
 <script>
-  const STORAGE_KEY = "INBODY_IOS_APP_V2";
-  const OLD_KEY = "INBODY_IOS_APP_V1";
+  const STORAGE_KEY = "INBODY_IOS_APP_V3";
+  const PREV_KEYS = ["INBODY_IOS_APP_V2", "INBODY_IOS_APP_V1"];
 
-  // 영양제 메타데이터 (권장량, 단위, 효능 설명)
+  // 한국인 다빈도 편의점/식단 정밀 영양성분표 DB (햇반, 오뚜기밥, 컵라면 포함)
+  const KOREAN_FOOD_DB = [
+    { name: "CJ 햇반 (백미 210g)", serving: "1개 (210g)", kcal: 315, carb: 70, prot: 5, fat: 1.5, satFat: 0, sugar: 0, sodium: 5 },
+    { name: "CJ 햇반 작은공기 (130g)", serving: "1개 (130g)", kcal: 190, carb: 43, prot: 3, fat: 0.6, satFat: 0, sugar: 0, sodium: 3 },
+    { name: "CJ 햇반 흑미밥/잡곡밥 (210g)", serving: "1개 (210g)", kcal: 305, carb: 67, prot: 6, fat: 1.5, satFat: 0, sugar: 0, sodium: 10 },
+    { name: "오뚜기밥 (백미 210g)", serving: "1개 (210g)", kcal: 310, carb: 69, prot: 5, fat: 1.2, satFat: 0, sugar: 0, sodium: 10 },
+    { name: "오뚜기밥 발아현미밥 (210g)", serving: "1개 (210g)", kcal: 300, carb: 66, prot: 6, fat: 1.6, satFat: 0, sugar: 0, sodium: 10 },
+    { name: "농심 신라면 소컵 (컵라면 65g)", serving: "1개 (65g)", kcal: 300, carb: 47, prot: 5, fat: 10, satFat: 5, sugar: 2, sodium: 1320 },
+    { name: "농심 신라면 큰사발면 (114g)", serving: "1개 (114g)", kcal: 500, carb: 78, prot: 9, fat: 17, satFat: 9, sugar: 4, sodium: 1620 },
+    { name: "오뚜기 진라면 매운맛 소컵 (65g)", serving: "1개 (65g)", kcal: 290, carb: 45, prot: 6, fat: 10, satFat: 5, sugar: 3, sodium: 1180 },
+    { name: "오뚜기 진라면 큰컵 (110g)", serving: "1개 (110g)", kcal: 490, carb: 75, prot: 10, fat: 16, satFat: 8, sugar: 4, sodium: 1680 },
+    { name: "농심 육개장 사발면 (컵라면 86g)", serving: "1개 (86g)", kcal: 385, carb: 55, prot: 7, fat: 15, satFat: 7, sugar: 3, sodium: 1590 },
+    { name: "삼양 불닭볶음면 큰컵 (105g)", serving: "1개 (105g)", kcal: 425, carb: 65, prot: 9, fat: 14, satFat: 7, sugar: 6, sodium: 1070 },
+    { name: "농심 짜파게티 범벅 (70g)", serving: "1개 (70g)", kcal: 315, carb: 48, prot: 6, fat: 11, satFat: 5, sugar: 5, sodium: 810 },
+    { name: "오뚜기 컵누들 매콤한맛 (37.8g)", serving: "1개 (37.8g)", kcal: 120, carb: 27, prot: 2, fat: 0.5, satFat: 0, sugar: 3, sodium: 890 },
+    { name: "편의점 참치마요 삼각김밥", serving: "1개 (110g)", kcal: 205, carb: 34, prot: 4, fat: 5.5, satFat: 1, sugar: 1, sodium: 390 },
+    { name: "편의점 전주비빔 삼각김밥", serving: "1개 (115g)", kcal: 195, carb: 36, prot: 4, fat: 3.5, satFat: 0.8, sugar: 2, sodium: 450 },
+    { name: "닭가슴살 오리지널/훈제 (100g)", serving: "1팩 (100g)", kcal: 110, carb: 1, prot: 23, fat: 1.5, satFat: 0.4, sugar: 0.5, sodium: 220 },
+    { name: "삶은 계란 / 구운란 (2개)", serving: "2개 (100g)", kcal: 145, carb: 1.5, prot: 13, fat: 9.5, satFat: 3, sugar: 0.5, sodium: 130 },
+    { name: "단백질 쉐이크 / 프로틴 음료", serving: "1회분 (1팩)", kcal: 125, carb: 4, prot: 24, fat: 1.5, satFat: 0.5, sugar: 1, sodium: 150 },
+    { name: "찐 고구마 (중 1개 150g)", serving: "1개 (150g)", kcal: 195, carb: 45, prot: 2.5, fat: 0.3, satFat: 0, sugar: 12, sodium: 25 },
+    { name: "바나나 (중 1개)", serving: "1개 (110g)", kcal: 98, carb: 25, prot: 1.2, fat: 0.3, satFat: 0, sugar: 14, sodium: 1 },
+    { name: "돼지고기 목살/삼겹살 구이 (200g)", serving: "1인분 (200g)", kcal: 510, carb: 1, prot: 38, fat: 39, satFat: 14, sugar: 0, sodium: 160 },
+    { name: "소고기 우둔살/부채살 구이 (200g)", serving: "1인분 (200g)", kcal: 310, carb: 0, prot: 44, fat: 14, satFat: 5, sugar: 0, sodium: 140 },
+    { name: "제육볶음 정식 (밥 포함 1인분)", serving: "1인분", kcal: 780, carb: 85, prot: 34, fat: 32, satFat: 10, sugar: 14, sodium: 1450 },
+    { name: "돼지국밥 / 순대국밥 (1그릇)", serving: "1그릇 (밥포함)", kcal: 750, carb: 74, prot: 38, fat: 32, satFat: 12, sugar: 2, sodium: 1650 },
+    { name: "김밥 (일반 야채/참치김밥 1줄)", serving: "1줄 (250g)", kcal: 460, carb: 68, prot: 14, fat: 14, satFat: 3, sugar: 3, sodium: 980 },
+    { name: "후라이드 치킨 (반 마리 / 4조각)", serving: "반 마리", kcal: 950, carb: 42, prot: 58, fat: 62, satFat: 16, sugar: 4, sodium: 1350 }
+  ];
+
+  // 횟수 + 시간 정밀 운동 계수
+  const EX_CONFIG = {
+    pushup: { name: "팔굽혀펴기 (푸쉬업)", baseMets: 3.8, repFactor: 0.0068, epocRate: 0.13, hasReps: true },
+    squat: { name: "맨몸 스쿼트", baseMets: 4.0, repFactor: 0.0075, epocRate: 0.12, hasReps: true },
+    lunge: { name: "스플릿 스쿼트 / 런지 (왼다리 집중)", baseMets: 4.2, repFactor: 0.0082, epocRate: 0.13, hasReps: true },
+    pullup: { name: "턱걸이 (풀업)", baseMets: 4.5, repFactor: 0.0125, epocRate: 0.15, hasReps: true },
+    situp: { name: "윗몸일으키기 / 크런치", baseMets: 3.2, repFactor: 0.0040, epocRate: 0.08, hasReps: true },
+    burpee: { name: "버피테스트 (전신 고강도)", baseMets: 6.0, repFactor: 0.0150, epocRate: 0.18, hasReps: true },
+    weight_lower: { name: "헬스 하체 웨이트 루틴", baseMets: 6.0, repFactor: 0, epocRate: 0.13, hasReps: false },
+    weight_upper: { name: "헬스 상체 웨이트 루틴", baseMets: 5.2, repFactor: 0, epocRate: 0.11, hasReps: false },
+    incline_walk: { name: "인클라인 트레드밀 (경사 걷기)", baseMets: 5.5, repFactor: 0, epocRate: 0.05, hasReps: false },
+    running: { name: "러닝 / 조깅 (시속 8km)", baseMets: 8.2, repFactor: 0, epocRate: 0.12, hasReps: false },
+    custom: { name: "", baseMets: 0, repFactor: 0, epocRate: 0, hasReps: true }
+  };
+
+  // 영양제 메타데이터
   const SUPP_META = [
     {
-      id: "omega3",
-      name: "오메가-3 (EPA+DHA 합산)",
-      unit: "mg",
-      target: 1200,
-      step: 1000,
+      id: "omega3", name: "오메가-3 (EPA+DHA 합산)", unit: "mg", target: 1200, step: 1000,
       role: "체지방 산화 효소 활성화 & 복부지방(9.0kg) 대사 보조",
       getEffectText: (amt, hasEx) => {
         const pct = Math.min(100, Math.round((amt / 1200) * 100));
         if (amt === 0) return "미섭취: 식후 1,000~2,000mg 섭취 시 인슐린 민감성을 개선해 복부 지방 연소를 돕습니다.";
-        return `권장량의 ${pct}% 충족: 혈중 중성지방 개선 및 근육 염증 완화 중입니다. ${hasEx ? "오늘 운동과 결합되어 지방 산화 효율이 약 5~8% 높아졌습니다!" : "유산소 운동을 병행하면 체지방 분해 시너지가 극대화됩니다."}`;
+        return `권장량의 ${pct}% 충족: 혈중 중성지방 개선 및 근육 염증 완화 중입니다. ${hasEx ? "오늘 운동과 결합되어 지방 산화 효율이 약 5~8% 높아졌습니다!" : ""}`;
       }
     },
     {
-      id: "arginine",
-      name: "L-아르기닌 (운동 전 부스터)",
-      unit: "mg",
-      target: 4000,
-      step: 3000,
+      id: "arginine", name: "L-아르기닌 (운동 전 부스터)", unit: "mg", target: 4000, step: 3000,
       role: "산화질소 혈관 확장 & 웨이트 운동 볼륨(수행능력) 향상",
       getEffectText: (amt, hasEx) => {
         const pct = Math.min(100, Math.round((amt / 4000) * 100));
         if (amt === 0) return "미섭취: 운동 30분 전 3,000~5,000mg 섭취 시 근육 혈류량을 늘려 운동 소모 칼로리를 높여줍니다.";
-        return `권장량의 ${pct}% 충족: 혈관 확장 및 혈류량 증가 상태입니다. ${hasEx ? "오늘 수행한 운동의 퍼포먼스와 열량 소모를 약 5~7% 추가 부스팅했습니다!" : "웨이트 트레이닝 전에 드시면 골격근(36.9kg) 펌핑과 운동 볼륨이 올라갑니다."}`;
+        return `권장량의 ${pct}% 충족: 혈관 확장 및 혈류량 증가 상태입니다. ${hasEx ? "오늘 수행한 운동의 퍼포먼스와 열량 소모를 약 5~7% 추가 부스팅했습니다!" : ""}`;
       }
     },
     {
-      id: "vitc",
-      name: "비타민 C (항산화·코르티솔 억제)",
-      unit: "mg",
-      target: 1000,
-      step: 1000,
+      id: "vitc", name: "비타민 C (항산화·코르티솔 억제)", unit: "mg", target: 1000, step: 1000,
       role: "다이어트 중 근손실 호르몬(코르티솔) 억제 & 카르니틴 합성",
       getEffectText: (amt) => {
         const pct = Math.min(100, Math.round((amt / 1000) * 100));
         if (amt === 0) return "미섭취: 1,000mg 섭취 시 운동 후 활성산소를 제거하고 골격근(36.9kg) 손실을 방어합니다.";
-        return `권장량의 ${pct}% 충족: 지방을 미토콘드리아로 운반하는 카르니틴 합성을 돕고, 칼로리 적자 상태에서도 근손실을 방어합니다.`;
+        return `권장량의 ${pct}% 충족: 지방을 미토콘드리아로 운반하는 카르니틴 합성을 돕고 근손실을 방어합니다.`;
       }
     },
     {
-      id: "milkthistle",
-      name: "밀크씨슬 (실리마린 기준)",
-      unit: "mg",
-      target: 130,
-      step: 130,
+      id: "milkthistle", name: "밀크씨슬 (실리마린 기준)", unit: "mg", target: 130, step: 130,
       role: "고단백 식단(130g/일) 대사 시 간 피로도 완화",
       getEffectText: (amt) => {
         const pct = Math.min(100, Math.round((amt / 130) * 100));
@@ -538,56 +657,23 @@
     }
   ];
 
-  // 체중/골격근 기반 추천 운동 패턴
   const WORKOUT_PATTERNS = [
-    {
-      title: "패턴 A: 하체 균형(왼다리 집중) + 사이클",
-      mins: 60,
-      mets: 6.2,
-      epocRate: 0.12,
-      desc: "하체 웨이트 45분 + 인터벌 사이클 15분 (왼다리 9.7kg 불균형 교정 + 최대 칼로리 연소)"
-    },
-    {
-      title: "패턴 B: 상체 근력 + 인클라인 경사 걷기",
-      mins: 60,
-      mets: 5.3,
-      epocRate: 0.10,
-      desc: "상체 웨이트 40분 + 경사도 걷기 20분 (골격근 36.9kg 유지 + 몸통 체지방 9.0kg 집중 타겟)"
-    },
-    {
-      title: "패턴 C: 고강도 서킷 / HIIT (단시간 극대화)",
-      mins: 30,
-      mets: 8.5,
-      epocRate: 0.16,
-      desc: "전신 서킷 및 인터벌 30분 (운동 후 애프터번 지방 연소 극대화)"
-    },
-    {
-      title: "패턴 D: 유산소 단독 (회복일·지방 연소)",
-      mins: 45,
-      mets: 5.2,
-      epocRate: 0.04,
-      desc: "인클라인 빠른 걸음 또는 가벼운 조깅 45분 (근피로 없이 체지방 감량)"
-    }
+    { title: "패턴 A: 하체 균형(왼다리 집중) + 사이클", mins: 60, mets: 6.2, epocRate: 0.12, desc: "하체 웨이트 45분 + 사이클 15분 (왼다리 9.7kg 교정)" },
+    { title: "패턴 B: 상체 근력 + 인클라인 경사 걷기", mins: 60, mets: 5.3, epocRate: 0.10, desc: "상체 웨이트 40분 + 경사 걷기 20분 (복부지방 9.0kg 타겟)" },
+    { title: "패턴 C: 고강도 서킷 / HIIT (단시간 극대화)", mins: 30, mets: 8.5, epocRate: 0.16, desc: "전신 서킷 및 인터벌 30분 (애프터번 극대화)" }
   ];
 
   const defaultState = {
     profile: {
-      name: "김동욱",
-      height: 180,
-      weight: 81.0,
-      targetWeight: 75.9,
-      smm: 36.9,
-      bfm: 16.5,
-      pbf: 20.3,
-      bmr: 1764,
-      activity: 1.2,
-      deficit: 500
+      name: "김동욱", height: 180, weight: 81.0, targetWeight: 75.9,
+      smm: 36.9, bfm: 16.5, pbf: 20.3, bmr: 1764, activity: 1.2, deficit: 500
     },
     logs: {}
   };
 
   let state = loadState();
   let currentDate = getTodayStr();
+  let currentSearchMatches = [];
 
   function getTodayStr() {
     const d = new Date();
@@ -597,12 +683,11 @@
 
   function loadState() {
     try {
-      const savedV2 = localStorage.getItem(STORAGE_KEY);
-      if (savedV2) return JSON.parse(savedV2);
-      const savedV1 = localStorage.getItem(OLD_KEY);
-      if (savedV1) {
-        const parsed = JSON.parse(savedV1);
-        return { ...defaultState, ...parsed };
+      const s = localStorage.getItem(STORAGE_KEY);
+      if (s) return JSON.parse(s);
+      for (const k of PREV_KEYS) {
+        const old = localStorage.getItem(k);
+        if (old) return { ...defaultState, ...JSON.parse(old) };
       }
     } catch (e) {}
     return JSON.parse(JSON.stringify(defaultState));
@@ -614,11 +699,7 @@
 
   function ensureDateLog(dateStr) {
     if (!state.logs[dateStr]) {
-      state.logs[dateStr] = {
-        foods: [],
-        exercises: [],
-        supplements: { omega3: 0, arginine: 0, vitc: 0, milkthistle: 0 }
-      };
+      state.logs[dateStr] = { foods: [], exercises: [], supplements: { omega3: 0, arginine: 0, vitc: 0, milkthistle: 0 } };
     }
     if (!state.logs[dateStr].supplements) {
       state.logs[dateStr].supplements = { omega3: 0, arginine: 0, vitc: 0, milkthistle: 0 };
@@ -632,10 +713,162 @@
     btnEl.classList.add("active");
   }
 
+  // ===== 실시간 음식 검색 & 영양성분표 기능 =====
+  function onFoodSearchInput() {
+    const q = document.getElementById("foodSearchInput").value.trim().toLowerCase();
+    const resBox = document.getElementById("foodSearchResults");
+    if (!q) {
+      resBox.style.display = "none";
+      return;
+    }
+    const matches = KOREAN_FOOD_DB.filter(item =>
+      item.name.toLowerCase().includes(q) ||
+      (q === "컵라면" && (item.name.includes("소컵") || item.name.includes("사발") || item.name.includes("큰컵") || item.name.includes("컵누들"))) ||
+      (q === "밥" && (item.name.includes("햇반") || item.name.includes("오뚜기밥")))
+    );
+    renderFoodSearchResults(matches);
+  }
+
+  function renderFoodSearchResults(list) {
+    currentSearchMatches = list;
+    const resBox = document.getElementById("foodSearchResults");
+    if (!list || list.length === 0) {
+      resBox.style.display = "block";
+      resBox.innerHTML = `<div style="padding:12px; font-size:12px; color:#6B7280; text-align:center;">
+        내장 DB에 일치하는 항목이 없습니다. 우측 <b>[온라인 DB 검색]</b> 또는 아래 <b>[네이버 영양성분표 바로보기]</b>를 눌러보세요!
+      </div>`;
+      return;
+    }
+    resBox.style.display = "block";
+    resBox.innerHTML = list.map((item, idx) => `
+      <div class="search-item" onclick="selectSearchedFood(${idx})">
+        <div>
+          <div class="s-name">${item.name}</div>
+          <div class="s-meta">${item.serving} | 탄 ${item.carb}g · 단 ${item.prot}g · 지 ${item.fat}g · 나트륨 ${item.sodium}mg</div>
+        </div>
+        <div class="s-kcal">${item.kcal} kcal</div>
+      </div>
+    `).join("");
+  }
+
+  async function searchOnlineFood() {
+    const q = document.getElementById("foodSearchInput").value.trim();
+    if (!q) {
+      alert("검색할 음식 이름을 먼저 입력해주세요. (예: 햇반, 오뚜기밥, 신라면)");
+      return;
+    }
+    const resBox = document.getElementById("foodSearchResults");
+    resBox.style.display = "block";
+    resBox.innerHTML = `<div style="padding:12px; font-size:12px; text-align:center;">🌐 실시간 온라인 식품 영양성분 DB 조회 중...</div>`;
+
+    try {
+      const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=8`;
+      const resp = await fetch(url);
+      const data = await resp.json();
+      const onlineMatches = (data.products || []).filter(p => p.product_name).map(p => {
+        const n = p.nutriments || {};
+        return {
+          name: p.product_name_ko || p.product_name,
+          serving: p.serving_size || "100g/1회분 기준",
+          kcal: Math.round(n["energy-kcal_serving"] || n["energy-kcal_100g"] || 0),
+          carb: Math.round(n.carbohydrates_serving || n.carbohydrates_100g || 0),
+          prot: Math.round(n.proteins_serving || n.proteins_100g || 0),
+          fat: Math.round(n.fat_serving || n.fat_100g || 0),
+          satFat: Math.round(n["saturated-fat_serving"] || n["saturated-fat_100g"] || 0),
+          sugar: Math.round(n.sugars_serving || n.sugars_100g || 0),
+          sodium: Math.round((n.sodium_serving || n.sodium_100g || 0) * 1000)
+        };
+      }).filter(item => item.kcal > 0);
+
+      const localMatches = KOREAN_FOOD_DB.filter(item => item.name.toLowerCase().includes(q.toLowerCase()));
+      renderFoodSearchResults([...localMatches, ...onlineMatches]);
+    } catch (err) {
+      onFoodSearchInput();
+    }
+  }
+
+  function selectSearchedFood(idx) {
+    const item = currentSearchMatches[idx];
+    if (!item) return;
+
+    document.getElementById("foodName").value = item.name;
+    document.getElementById("foodKcal").value = item.kcal;
+    document.getElementById("foodCarb").value = item.carb;
+    document.getElementById("foodProt").value = item.prot;
+    document.getElementById("foodFat").value = item.fat;
+
+    // 영양성분표 라벨 표시
+    const nfBox = document.getElementById("nutritionLabelBox");
+    nfBox.style.display = "block";
+    document.getElementById("nfTitle").textContent = `📋 ${item.name}`;
+    document.getElementById("nfServing").textContent = item.serving || "1회 제공량";
+    document.getElementById("nfKcal").textContent = `${item.kcal} kcal`;
+    document.getElementById("nfCarb").textContent = `${item.carb} g`;
+    document.getElementById("nfProt").textContent = `${item.prot} g`;
+    document.getElementById("nfFat").textContent = `${item.fat}g (포화 ${item.satFat || 0}g)`;
+    document.getElementById("nfSugar").textContent = `${item.sugar || 0} g`;
+    document.getElementById("nfSodium").textContent = `${item.sodium || 0} mg`;
+
+    document.getElementById("foodSearchResults").style.display = "none";
+  }
+
+  function openWebNutritionSearch(engine) {
+    const q = document.getElementById("foodSearchInput").value.trim() || "햇반 오뚜기밥 컵라면";
+    const queryText = encodeURIComponent(q + " 칼로리 영양성분표");
+    const url = engine === "naver"
+      ? `https://m.search.naver.com/search.naver?query=${queryText}`
+      : `https://www.google.com/search?q=${queryText}`;
+    window.open(url, "_blank");
+  }
+
+  // ===== 횟수 + 시간 정밀 운동 칼로리 계산 =====
+  function applyExPreset() {
+    const key = document.getElementById("exPreset").value;
+    const cfg = EX_CONFIG[key];
+    if (cfg && cfg.name) {
+      document.getElementById("exName").value = cfg.name;
+    }
+    if (key === "pushup") {
+      document.getElementById("exMin").value = 15;
+      document.getElementById("exReps").value = 100;
+    } else if (!cfg.hasReps) {
+      document.getElementById("exReps").value = "";
+    }
+    calcExKcal();
+  }
+
+  function calcExKcal() {
+    const key = document.getElementById("exPreset").value;
+    const cfg = EX_CONFIG[key] || EX_CONFIG.custom;
+    const p = state.profile;
+    const mins = parseFloat(document.getElementById("exMin").value) || 0;
+    const reps = parseFloat(document.getElementById("exReps").value) || 0;
+
+    if (key === "custom") {
+      document.getElementById("exCalcBreakdown").innerHTML = "직접 운동명과 소모 칼로리를 입력해 추가할 수 있습니다.";
+      return;
+    }
+
+    // 1) 시간 기반 기본 대사 소모 (세트 간 호흡·심박수 유지)
+    const timeKcal = Math.round(1.05 * cfg.baseMets * p.weight * (mins / 60));
+    // 2) 횟수(볼륨) 기반 기계적·근육 에너지 소모 (체중 비례)
+    const repKcal = reps > 0 ? Math.round(p.weight * cfg.repFactor * reps) : 0;
+    // 3) 골격근량(36.9kg) 비례 애프터번(EPOC) 추가 연소
+    const smmFactor = p.smm / 32.0;
+    const epocKcal = Math.round((timeKcal + repKcal) * cfg.epocRate * smmFactor);
+    const total = timeKcal + repKcal + epocKcal;
+
+    document.getElementById("exKcal").value = total;
+    document.getElementById("exCalcBreakdown").innerHTML = `
+      <b>📊 내 신체(${p.weight}kg · 골격근 ${p.smm}kg) 맞춤 계산 상세:</b><br/>
+      • ${mins}분 시간·심박 소모: <b>${timeKcal} kcal</b> ${reps > 0 ? `+ ${reps}개 수행 볼륨 소모: <b>${repKcal} kcal</b>` : ""}<br/>
+      • 골격근량(${p.smm}kg) 애프터번(EPOC) 보너스: <b>+${epocKcal} kcal</b> → <b>총 ${total} kcal 소모</b>
+    `;
+  }
+
   function calcPatternCalories(mets, mins, epocRate) {
     const p = state.profile;
     const activeKcal = Math.round(1.05 * mets * p.weight * (mins / 60));
-    // 골격근량(36.9kg) 비례 애프터번(EPOC) 보너스 계산
     const smmFactor = p.smm / 32.0;
     const epocKcal = Math.round(activeKcal * epocRate * smmFactor);
     return { activeKcal, epocKcal, total: activeKcal + epocKcal };
@@ -652,8 +885,7 @@
             <span class="p-kcal">-${c.total} kcal</span>
           </div>
           <div class="p-desc">
-            ${pt.desc}<br/>
-            <span style="color:#2563EB; font-weight:600;">운동 ${c.activeKcal}kcal + 근육 애프터번(EPOC) +${c.epocKcal}kcal</span>
+            ${pt.desc} (운동 ${c.activeKcal} + EPOC ${c.epocKcal}kcal)
           </div>
         </button>
       `;
@@ -665,58 +897,38 @@
     const c = calcPatternCalories(pt.mets, pt.mins, pt.epocRate);
     ensureDateLog(currentDate);
     state.logs[currentDate].exercises.push({
-      name: `${pt.title} (EPOC +${c.epocKcal}포함)`,
+      name: `${pt.title}`,
       mins: pt.mins,
+      reps: 0,
       kcal: c.total
     });
     saveState();
     render();
   }
 
-  function applyFoodPreset() {
-    const val = document.getElementById("foodPreset").value;
-    if (!val) return;
-    const [name, kcal, prot] = val.split("|");
-    document.getElementById("foodName").value = name;
-    document.getElementById("foodKcal").value = kcal;
-    document.getElementById("foodProt").value = prot;
-  }
-
-  function applyExPreset() {
-    const val = document.getElementById("exPreset").value;
-    const [mets, epoc, name] = val.split("|");
-    if (name) document.getElementById("exName").value = name;
-    calcExKcal();
-  }
-
-  function calcExKcal() {
-    const val = document.getElementById("exPreset").value;
-    const parts = val.split("|");
-    const mets = parseFloat(parts[0]) || 0;
-    const epocRate = parseFloat(parts[1]) || 0;
-    const mins = parseFloat(document.getElementById("exMin").value) || 0;
-    if (mets > 0 && mins > 0) {
-      const c = calcPatternCalories(mets, mins, epocRate);
-      document.getElementById("exKcal").value = c.total;
-    }
-  }
-
   function addFood() {
     const meal = document.getElementById("mealType").value;
     const name = document.getElementById("foodName").value.trim();
     const kcal = parseInt(document.getElementById("foodKcal").value, 10);
+    const carb = parseInt(document.getElementById("foodCarb").value || "0", 10);
     const prot = parseInt(document.getElementById("foodProt").value || "0", 10);
+    const fat = parseInt(document.getElementById("foodFat").value || "0", 10);
+
     if (!name || isNaN(kcal)) {
       alert("음식 이름과 칼로리를 입력해주세요.");
       return;
     }
     ensureDateLog(currentDate);
-    state.logs[currentDate].foods.push({ meal, name, kcal, prot });
+    state.logs[currentDate].foods.push({ meal, name, kcal, carb, prot, fat });
     saveState();
+
     document.getElementById("foodName").value = "";
     document.getElementById("foodKcal").value = "";
+    document.getElementById("foodCarb").value = "";
     document.getElementById("foodProt").value = "";
-    document.getElementById("foodPreset").value = "";
+    document.getElementById("foodFat").value = "";
+    document.getElementById("foodSearchInput").value = "";
+    document.getElementById("nutritionLabelBox").style.display = "none";
     render();
   }
 
@@ -727,15 +939,18 @@
   }
 
   function addExercise() {
-    const name = document.getElementById("exName").value.trim();
+    const baseName = document.getElementById("exName").value.trim();
     const mins = parseInt(document.getElementById("exMin").value || "0", 10);
+    const reps = parseInt(document.getElementById("exReps").value || "0", 10);
     const kcal = parseInt(document.getElementById("exKcal").value, 10);
-    if (!name || isNaN(kcal)) {
+
+    if (!baseName || isNaN(kcal)) {
       alert("운동 이름과 소모 칼로리를 입력해주세요.");
       return;
     }
+    const fullName = reps > 0 ? `${baseName} (${mins}분 · ${reps}개)` : baseName;
     ensureDateLog(currentDate);
-    state.logs[currentDate].exercises.push({ name, mins, kcal });
+    state.logs[currentDate].exercises.push({ name: fullName, mins, reps, kcal });
     saveState();
     render();
   }
@@ -794,6 +1009,7 @@
     const supps = log.supplements;
 
     renderPatternButtons();
+    calcExKcal();
 
     document.getElementById("headerTitle").textContent = `📊 ${p.name}님의 인바디 매니저`;
     document.getElementById("chipWeight").textContent = `${p.weight} / ${p.targetWeight}kg`;
@@ -803,18 +1019,17 @@
     const baseTdee = Math.round(p.bmr * p.activity);
     const exKcal = log.exercises.reduce((sum, item) => sum + item.kcal, 0);
 
-    // 영양제 + 운동 결합 시 대사 시너지 계산 (운동 수행 시 아르기닌·오메가3 보너스)
     let suppSynergyKcal = 0;
     if (exKcal > 0) {
-      if ((supps.arginine || 0) >= 2000) suppSynergyKcal += Math.round(exKcal * 0.05); // 혈류량·운동볼륨 5% 보너스
-      if ((supps.omega3 || 0) >= 1000) suppSynergyKcal += Math.round(exKcal * 0.04);   // 지방산화 대사 4% 보너스
+      if ((supps.arginine || 0) >= 2000) suppSynergyKcal += Math.round(exKcal * 0.05);
+      if ((supps.omega3 || 0) >= 1000) suppSynergyKcal += Math.round(exKcal * 0.04);
     }
 
     const totalBurned = baseTdee + exKcal + suppSynergyKcal;
     const targetIntake = Math.max(p.bmr, totalBurned - (p.deficit || 500));
 
     const eatenKcal = log.foods.reduce((sum, item) => sum + item.kcal, 0);
-    const eatenProt = log.foods.reduce((sum, item) => sum + item.prot, 0);
+    const eatenProt = log.foods.reduce((sum, item) => sum + (item.prot || 0), 0);
     const targetProt = Math.round(p.weight * 1.6);
 
     document.getElementById("valBmr").textContent = `${p.bmr.toLocaleString()} kcal`;
@@ -826,7 +1041,6 @@
     const netDiff = eatenKcal - totalBurned;
     document.getElementById("valNetSub").textContent = `총 소모 대비: ${netDiff > 0 ? "+" : ""}${netDiff.toLocaleString()} kcal`;
 
-    // 칼로리 바
     const remain = targetIntake - eatenKcal;
     const calPct = Math.min(100, Math.round((eatenKcal / Math.max(1, targetIntake)) * 100));
     const calBar = document.getElementById("calBar");
@@ -840,33 +1054,29 @@
     }
     document.getElementById("calPctText").textContent = `${calPct}%`;
 
-    // 단백질 바
     const protPct = Math.min(100, Math.round((eatenProt / Math.max(1, targetProt)) * 100));
     document.getElementById("protBar").style.width = `${protPct}%`;
     document.getElementById("protStatusText").textContent = `근손실 방지 단백질: ${eatenProt}g / ${targetProt}g`;
     document.getElementById("protPctText").textContent = `${protPct}%`;
 
-    // 영양제 달성률 계산
     const suppScores = SUPP_META.map(m => Math.min(1, (supps[m.id] || 0) / m.target));
     const suppAvgPct = Math.round((suppScores.reduce((a, b) => a + b, 0) / SUPP_META.length) * 100);
     document.getElementById("suppBar").style.width = `${suppAvgPct}%`;
     document.getElementById("suppPctText").textContent = `${suppAvgPct}%`;
 
-    // 탭 배지 업데이트
     document.getElementById("foodTabBadge").textContent = `${eatenKcal.toLocaleString()} kcal / 단백질 ${eatenProt}g`;
     document.getElementById("exTabBadge").textContent = `-${exKcal.toLocaleString()} kcal`;
     document.getElementById("suppTabBadge").textContent = `운동 시너지 +${suppSynergyKcal} kcal`;
 
-    // 식단 리스트
     const foodList = document.getElementById("foodList");
     if (log.foods.length === 0) {
-      foodList.innerHTML = `<li class="empty-msg">오늘 기록된 식단이 없습니다.</li>`;
+      foodList.innerHTML = `<li class="empty-msg">위 검색창에 '햇반', '오뚜기밥', '컵라면' 등을 검색해 보세요!</li>`;
     } else {
       foodList.innerHTML = log.foods.map((f, i) => `
         <li class="log-item">
           <div class="log-left">
             <span class="log-title">[${f.meal}] ${f.name}</span>
-            <span class="log-sub">단백질 ${f.prot}g</span>
+            <span class="log-sub">탄수화물 ${f.carb || 0}g · 단백질 ${f.prot || 0}g · 지방 ${f.fat || 0}g</span>
           </div>
           <div class="log-right">
             <span class="log-kcal">+${f.kcal} kcal</span>
@@ -876,10 +1086,9 @@
       `).join("");
     }
 
-    // 운동 리스트
     const exList = document.getElementById("exList");
     if (log.exercises.length === 0) {
-      exList.innerHTML = `<li class="empty-msg">오늘 기록된 운동이 없습니다. 위 맞춤 패턴을 눌러보세요!</li>`;
+      exList.innerHTML = `<li class="empty-msg">오늘 기록된 운동이 없습니다.</li>`;
     } else {
       exList.innerHTML = log.exercises.map((ex, i) => `
         <li class="log-item">
@@ -895,7 +1104,6 @@
       `).join("");
     }
 
-    // 영양제 리스트 렌더링
     const suppContainer = document.getElementById("suppContainer");
     const hasEx = exKcal > 0;
     suppContainer.innerHTML = SUPP_META.map(m => {
@@ -919,12 +1127,11 @@
       `;
     }).join("");
 
-    // 홈 화면 종합 리포트
     const expectedFatLossGrams = netDiff < 0 ? Math.round(Math.abs(netDiff) / 7.7) : 0;
     document.getElementById("dailyInsightBox").innerHTML = `
-      • <b>예상 체지방 감량 속도:</b> 오늘 현재 칼로리 적자(<b>${netDiff} kcal</b>) 기준 약 <b>${expectedFatLossGrams}g</b>의 순수 체지방이 연소되는 페이스입니다. (목표 -5.1kg 달성 진행 중)<br/>
-      • <b>근육 보존 & 간 대사 상태:</b> 골격근량(${p.smm}kg) 유지를 위한 단백질 달성률은 <b>${protPct}%</b>이며, 밀크씨슬·비타민C 복용 달성률은 <b>${suppAvgPct}%</b>입니다.<br/>
-      • <b>운동 & 영양제 시너지:</b> ${hasEx ? `운동(${exKcal}kcal)과 아르기닌·오메가3가 결합되어 <b>+${suppSynergyKcal}kcal</b>의 추가 지방 산화 및 혈류 부스팅 효과가 반영되었습니다.` : "오늘 운동 기록이 아직 없습니다. [운동 패턴] 탭에서 루틴을 선택하면 골격근 애프터번(EPOC)과 영양제 시너지가 자동 합산됩니다."}
+      • <b>예상 체지방 감량 속도:</b> 오늘 현재 칼로리 밸런스(<b>${netDiff} kcal</b>) 기준 약 <b>${expectedFatLossGrams}g</b>의 체지방이 연소되는 페이스입니다.<br/>
+      • <b>근육 보존 & 단백질:</b> 골격근량(${p.smm}kg) 유지를 위한 단백질 달성률은 <b>${protPct}%</b>(${eatenProt}g/${targetProt}g)입니다.<br/>
+      • <b>운동 & 영양제 시너지:</b> ${hasEx ? `운동(${exKcal}kcal)과 영양제가 결합되어 <b>+${suppSynergyKcal}kcal</b>의 추가 대사 시너지가 반영되었습니다.` : "[운동 계산기] 탭에서 팔굽혀펴기 15분 100개 등을 바로 추가해 보세요!"}
     `;
   }
 
@@ -954,14 +1161,12 @@
     p.pbf = parseFloat(document.getElementById("pPbf").value) || 20.3;
     p.bmr = parseInt(document.getElementById("pBmr").value, 10) || 1764;
     saveState();
-    calcExKcal();
     render();
     closeModal();
   }
 
   document.getElementById("datePicker").value = currentDate;
   document.getElementById("activitySelect").value = String(state.profile.activity);
-  calcExKcal();
   render();
 </script>
 </body>
