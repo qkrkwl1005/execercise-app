@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="인바디 매니저" />
+  <title>인바디 프로 매니저</title>
+  <style>
+    :root {
+      --bg: #F2F4F8;
+      --card: #FFFFFF;
+      --text: #111827;
+      --sub: #6B7280;
+      --primary: #2563EB;
+      --green: #10B981;
+      --purple: #7C3AED;
+      --amber: #F59E0B;
+      --danger: #EF4444;
+      --border: #E5E7EB;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      padding: env(safe-area-inset-top, 20px) 16px calc(env(safe-area-inset-bottom, 20px) + 84px);
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+    }
+    .container { max-width: 480px; margin: 0 auto; }
+
+    /* 헤더 & 날짜 바 */
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 2px; margin-bottom: 6px;
+    }
+    .header h1 { font-size: 20px; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
+    .btn-outline {
+      background: #FFFFFF; border: 1px solid var(--border); border-radius: 10px;
+      padding: 6px 11px; font-size: 12px; font-weight: 600; color: #374151; cursor: pointer;
+    }
+    .date-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--card); border-radius: 14px; padding: 8px 12px;
+      margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .date-bar button {
+      background: #F3F4F6; border: none; border-radius: 8px;
+      width: 32px; height: 32px; font-size: 16px; font-weight: bold; cursor: pointer;
+    }
+    .date-bar input[type="date"] {
+      border: none; font-size: 15px; font-weight: 700; color: var(--text);
+      background: transparent; text-align: center; font-family: inherit;
+    }
+
+    /* 탭 화면 전환 */
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; animation: fadeIn 0.18s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* 공통 카드 */
+    .card {
+      background: var(--card); border-radius: 18px; padding: 18px;
+      margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+    .card-title {
+      font-size: 16px; font-weight: 700; margin: 0 0 12px 0;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .badge {
+      font-size: 11px; font-weight: 700; padding: 4px 8px;
+      border-radius: 99px; background: #EFF6FF; color: var(--primary);
+    }
+    .badge.purple { background: #F3E8FF; color: var(--purple); }
+    .badge.green { background: #ECFDF5; color: var(--green); }
+
+    /* 인바디 칩 */
+    .inbody-chips {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;
+    }
+    .chip {
+      background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 12px;
+      padding: 9px 6px; text-align: center;
+    }
+    .chip .label { font-size: 11px; color: var(--sub); display: block; margin-bottom: 3px; }
+    .chip .val { font-size: 13px; font-weight: 800; color: var(--text); }
+
+    /* 대사량 그리드 */
+    .metrics-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 12px 0;
+    }
+    .metric-box { background: #F9FAFB; border-radius: 12px; padding: 12px; }
+    .metric-box .m-label { font-size: 11px; color: var(--sub); margin-bottom: 4px; }
+    .metric-box .m-val { font-size: 17px; font-weight: 800; }
+    .metric-box .m-sub { font-size: 11px; color: var(--sub); margin-top: 2px; }
+
+    /* 프로그레스 바 */
+    .progress-wrap { margin-top: 12px; }
+    .progress-header {
+      display: flex; justify-content: space-between; font-size: 12px;
+      font-weight: 600; margin-bottom: 5px;
+    }
+    .progress-bar-bg {
+      width: 100%; height: 11px; background: #E5E7EB;
+      border-radius: 99px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%; background: var(--primary); border-radius: 99px;
+      transition: width 0.25s ease;
+    }
+    .progress-bar-fill.green { background: var(--green); }
+    .progress-bar-fill.purple { background: var(--purple); }
+    .progress-bar-fill.danger { background: var(--danger); }
+
+    /* 입력 요소 */
+    select, input[type="text"], input[type="number"] {
+      width: 100%; padding: 11px 12px; border: 1px solid var(--border);
+      border-radius: 12px; font-size: 16px; background: #F9FAFB;
+      color: var(--text); font-family: inherit; margin-bottom: 8px;
+      appearance: none; -webkit-appearance: none;
+    }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .row-3 { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 8px; }
+    .field-label { font-size: 12px; font-weight: 600; color: var(--sub); margin-bottom: 4px; display: block; }
+
+    .btn-primary {
+      width: 100%; padding: 13px; border: none; border-radius: 12px;
+      background: var(--primary); color: #FFFFFF; font-size: 15px;
+      font-weight: 700; cursor: pointer; margin-top: 4px;
+    }
+    .btn-green { background: var(--green); }
+    .btn-purple { background: var(--purple); }
+
+    /* 리스트 */
+    .log-list { list-style: none; padding: 0; margin: 10px 0 0 0; }
+    .log-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 11px 4px; border-bottom: 1px solid #F3F4F6; font-size: 14px;
+    }
+    .log-item:last-child { border-bottom: none; }
+    .log-left { display: flex; flex-direction: column; padding-right: 8px; }
+    .log-title { font-weight: 600; color: var(--text); }
+    .log-sub { font-size: 12px; color: var(--sub); margin-top: 2px; line-height: 1.35; }
+    .log-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .log-kcal { font-weight: 700; font-size: 14px; }
+    .btn-del {
+      background: #FEE2E2; color: #DC2626; border: none;
+      border-radius: 8px; padding: 5px 9px; font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+    .empty-msg { text-align: center; color: var(--sub); font-size: 13px; padding: 14px 0; }
+
+    /* 운동 패턴 버튼 그리드 */
+    .pattern-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 12px; }
+    .pattern-btn {
+      background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px;
+      padding: 11px 12px; text-align: left; cursor: pointer; transition: all 0.15s;
+    }
+    .pattern-btn:active { background: #EFF6FF; border-color: var(--primary); }
+    .pattern-btn .p-top { display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; color: var(--text); }
+    .pattern-btn .p-kcal { color: var(--primary); }
+    .pattern-btn .p-desc { font-size: 12px; color: var(--sub); margin-top: 4px; }
+
+    /* 영양제 체크 카드 */
+    .supp-item {
+      background: #F9FAFB; border: 1px solid #F3F4F6; border-radius: 14px;
+      padding: 12px; margin-bottom: 10px;
+    }
+    .supp-top { display: flex; justify-content: space-between; align-items: center; }
+    .supp-name { font-weight: 700; font-size: 15px; }
+    .supp-target { font-size: 11px; color: var(--sub); }
+    .supp-controls { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+    .supp-controls input { margin-bottom: 0; padding: 7px 10px; font-size: 14px; width: 95px; background: #FFF; }
+    .btn-quick {
+      background: #E0E7FF; color: #1D4ED8; border: none; border-radius: 8px;
+      padding: 7px 10px; font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+    .supp-effect {
+      margin-top: 8px; padding-top: 8px; border-top: 1px dashed #E5E7EB;
+      font-size: 12px; color: #374151; line-height: 1.45;
+    }
+
+    /* 하단 고정 탭바 */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-around;
+      padding: 8px 8px calc(env(safe-area-inset-bottom, 12px) + 6px);
+      z-index: 90;
+    }
+    .nav-btn {
+      background: none; border: none; flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 3px; color: var(--sub); font-size: 11px; font-weight: 600; cursor: pointer;
+    }
+    .nav-btn .icon { font-size: 19px; }
+    .nav-btn.active { color: var(--primary); font-weight: 800; }
+
+    /* 모달 */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 100; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal {
+      background: #FFFFFF; width: 100%; max-width: 400px;
+      border-radius: 20px; padding: 20px; max-height: 85vh; overflow-y: auto;
+    }
+    .modal h3 { margin: 0 0 14px 0; font-size: 18px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 상단 헤더 -->
+  <div class="header">
+    <h1 id="headerTitle">📊 김동욱님의 인바디 매니저</h1>
+    <button class="btn-outline" onclick="openModal()">인바디 수정</button>
+  </div>
+
+  <!-- 날짜 선택 -->
+  <div class="date-bar">
+    <button onclick="changeDate(-1)">‹</button>
+    <input type="date" id="datePicker" onchange="onDateChange()" />
+    <button onclick="changeDate(1)">›</button>
+  </div>
+
+  <!-- [탭 1] 홈 대시보드 -->
+  <div id="tab-home" class="tab-pane active">
+    <div class="card">
+      <div class="card-title">
+        <span>⚡ 오늘의 대사량 & 칼로리 밸런스</span>
+        <span class="badge">인바디 79점</span>
+      </div>
+
+      <div class="inbody-chips">
+        <div class="chip">
+          <span class="label">현재 / 적정체중</span>
+          <span class="val" id="chipWeight">81.0 / 75.9kg</span>
+        </div>
+        <div class="chip">
+          <span class="label">골격근량</span>
+          <span class="val" id="chipSmm">36.9 kg</span>
+        </div>
+        <div class="chip">
+          <span class="label">체지방(체지방률)</span>
+          <span class="val" id="chipBfm">16.5kg (20.3%)</span>
+        </div>
+      </div>
+
+      <label class="field-label">평소 일상 활동량</label>
+      <select id="activitySelect" onchange="changeActivity()">
+        <option value="1.2">좌식 생활 (학업·사무 위주 / 운동 별도 계산)</option>
+        <option value="1.35">가벼운 활동 (일상 걸음 많음)</option>
+        <option value="1.5">활동적 (육체 활동 많음)</option>
+      </select>
+
+      <div class="metrics-grid">
+        <div class="metric-box">
+          <div class="m-label">기초대사량 (BMR)</div>
+          <div class="m-val" id="valBmr">1,764 kcal</div>
+          <div class="m-sub">가만히 있어도 소모</div>
+        </div>
+        <div class="metric-box">
+          <div class="m-label">총 소모량 (활동+운동+시너지)</div>
+          <div class="m-val" style="color: var(--primary);" id="valTdee">2,117 kcal</div>
+          <div class="m-sub" id="valTdeeSub">운동 0 + 시너지 0 kcal</div>
+        </div>
+        <div class="metric-box">
+          <div class="m-label">권장 섭취 목표 (-500)</div>
+          <div class="m-val" style="color: var(--green);" id="valTarget">1,764 kcal</div>
+          <div class="m-sub">지방 -5.1kg 감량 기준</div>
+        </div>
+        <div class="metric-box">
+          <div class="m-label">오늘 섭취한 칼로리</div>
+          <div class="m-val" style="color: var(--danger);" id="valEaten">0 kcal</div>
+          <div class="m-sub" id="valNetSub">순 밸런스: 0 kcal</div>
+        </div>
+      </div>
+
+      <!-- 칼로리 바 -->
+      <div class="progress-wrap">
+        <div class="progress-header">
+          <span id="calStatusText">남은 섭취 가능: 1,764 kcal</span>
+          <span id="calPctText">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="calBar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- 단백질 바 -->
+      <div class="progress-wrap">
+        <div class="progress-header">
+          <span id="protStatusText">근손실 방지 단백질: 0g / 130g</span>
+          <span id="protPctText">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill green" id="protBar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- 영양제 달성 바 -->
+      <div class="progress-wrap">
+        <div class="progress-header">
+          <span id="suppStatusText">오늘의 영양제 섭취율 (대사·회복 보조)</span>
+          <span id="suppPctText">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill purple" id="suppBar" style="width: 0%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 오늘의 종합 피드백 카드 -->
+    <div class="card">
+      <div class="card-title">
+        <span>💡 실시간 신체 시너지 분석 리포트</span>
+      </div>
+      <div id="dailyInsightBox" style="font-size: 13px; color: #374151; line-height: 1.55;"></div>
+    </div>
+  </div>
+
+  <!-- [탭 2] 식단 기록 -->
+  <div id="tab-food" class="tab-pane">
+    <div class="card">
+      <div class="card-title">
+        <span>🥗 오늘 먹은 식단 기록</span>
+        <span class="badge green" id="foodTabBadge">0 kcal</span>
+      </div>
+
+      <div class="row-2">
+        <select id="mealType">
+          <option value="아침">아침</option>
+          <option value="점심">점심</option>
+          <option value="저녁">저녁</option>
+          <option value="간식/야식">간식/야식</option>
+        </select>
+        <select id="foodPreset" onchange="applyFoodPreset()">
+          <option value="">자주 먹는 음식 선택...</option>
+          <option value="닭가슴살 (100g)|110|23">닭가슴살 100g (110kcal)</option>
+          <option value="현미/잡곡밥 (1공기)|300|6">현미/잡곡밥 1공기 (300kcal)</option>
+          <option value="흰쌀밥 (1공기)|310|5">흰쌀밥 1공기 (310kcal)</option>
+          <option value="삶은 계란 (2개)|150|13">삶은 계란 2개 (150kcal)</option>
+          <option value="단백질 쉐이크 (1스쿱)|120|24">단백질 쉐이크 (120kcal)</option>
+          <option value="고구마 (1개 150g)|190|2">고구마 1개 (190kcal)</option>
+          <option value="돼지 목살구이 (200g)|450|42">돼지 목살 200g (450kcal)</option>
+          <option value="소고기 우둔살 (200g)|280|44">소고기 우둔살 200g (280kcal)</option>
+          <option value="일반 한식 백반|700|25">일반 한식 백반 (700kcal)</option>
+        </select>
+      </div>
+
+      <div class="row-3">
+        <input type="text" id="foodName" placeholder="음식 이름" />
+        <input type="number" id="foodKcal" placeholder="칼로리(kcal)" inputmode="numeric" />
+        <input type="number" id="foodProt" placeholder="단백질(g)" inputmode="numeric" />
+      </div>
+
+      <button class="btn-primary btn-green" onclick="addFood()">+ 식단 추가하기</button>
+      <ul class="log-list" id="foodList"></ul>
+    </div>
+  </div>
+
+  <!-- [탭 3] 맞춤 운동 패턴 -->
+  <div id="tab-workout" class="tab-pane">
+    <div class="card">
+      <div class="card-title">
+        <span>🔥 내 신체(81kg·골격근 36.9kg) 맞춤 패턴</span>
+      </div>
+      <p style="font-size: 12px; color: var(--sub); margin: -6px 0 10px 0;">
+        패턴을 누르면 골격근량(36.9kg)에 따른 <b>운동 후 애프터번(EPOC) 칼로리</b>까지 합산되어 바로 기록됩니다.
+      </p>
+
+      <div class="pattern-grid" id="patternGrid"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span>🏋️ 개별 운동 직접 추가</span>
+        <span class="badge" id="exTabBadge">-0 kcal</span>
+      </div>
+
+      <select id="exPreset" onchange="applyExPreset()">
+        <option value="6.0|0.12|하체 균형 웨이트 (왼다리 집중)">하체 균형 웨이트 (왼다리 스플릿 스쿼트/런지)</option>
+        <option value="5.0|0.10|상체 웨이트 트레이닝">상체 웨이트 트레이닝 (가슴/등/어깨)</option>
+        <option value="5.5|0.05|인클라인 트레드밀 (경사 걷기)">인클라인 트레드밀 (복부지방 타겟 경사 걷기)</option>
+        <option value="8.5|0.15|고강도 인터벌 러닝 (HIIT)">고강도 인터벌 러닝 (HIIT)</option>
+        <option value="6.0|0.06|실내 사이클 (중강도)">실내 사이클 (중강도)</option>
+        <option value="0|0|">직접 입력</option>
+      </select>
+
+      <div class="row-3">
+        <input type="text" id="exName" value="하체 균형 웨이트 (왼다리 집중)" placeholder="운동명" />
+        <input type="number" id="exMin" value="45" placeholder="시간(분)" inputmode="numeric" oninput="calcExKcal()" />
+        <input type="number" id="exKcal" placeholder="총 소모(kcal)" inputmode="numeric" />
+      </div>
+
+      <button class="btn-primary" onclick="addExercise()">+ 운동 기록하기</button>
+      <ul class="log-list" id="exList"></ul>
+    </div>
+  </div>
+
+  <!-- [탭 4] 영양제 성분 & 효능 분석 -->
+  <div id="tab-supp" class="tab-pane">
+    <div class="card">
+      <div class="card-title">
+        <span>💊 오늘 먹은 영양제 & 성분 분석</span>
+        <span class="badge purple" id="suppTabBadge">대사 시너지 +0kcal</span>
+      </div>
+      <p style="font-size: 12px; color: var(--sub); margin: -6px 0 12px 0;">
+        섭취한 용량(mg)을 입력하거나 <b>[1회분 추가]</b>를 누르면 내 인바디 상태에 맞춘 실제 효능과 운동 대사 보너스가 계산됩니다.
+      </p>
+
+      <div id="suppContainer"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 하단 고정 네비게이션 바 -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="switchTab('home', this)">
+    <span class="icon">📊</span>
+    <span>홈 요약</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('food', this)">
+    <span class="icon">🥗</span>
+    <span>식단 기록</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('workout', this)">
+    <span class="icon">🏋️</span>
+    <span>운동 패턴</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('supp', this)">
+    <span class="icon">💊</span>
+    <span>영양제 분석</span>
+  </button>
+</nav>
+
+<!-- 인바디 수정 모달 -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal">
+    <h3>내 인바디 수치 수정</h3>
+    <label class="field-label">이름</label>
+    <input type="text" id="pName" />
+    <div class="row-2">
+      <div>
+        <label class="field-label">현재 체중 (kg)</label>
+        <input type="number" step="0.1" id="pWeight" />
+      </div>
+      <div>
+        <label class="field-label">목표 적정체중 (kg)</label>
+        <input type="number" step="0.1" id="pTargetWeight" />
+      </div>
+    </div>
+    <div class="row-2">
+      <div>
+        <label class="field-label">골격근량 (kg)</label>
+        <input type="number" step="0.1" id="pSmm" />
+      </div>
+      <div>
+        <label class="field-label">체지방량 (kg)</label>
+        <input type="number" step="0.1" id="pBfm" />
+      </div>
+    </div>
+    <div class="row-2">
+      <div>
+        <label class="field-label">체지방률 (%)</label>
+        <input type="number" step="0.1" id="pPbf" />
+      </div>
+      <div>
+        <label class="field-label">기초대사량 (kcal)</label>
+        <input type="number" id="pBmr" />
+      </div>
+    </div>
+    <div class="row-2" style="margin-top: 8px;">
+      <button class="btn-outline" style="padding: 12px;" onclick="closeModal()">취소</button>
+      <button class="btn-primary" style="margin-top: 0;" onclick="saveProfile()">저장하기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = "INBODY_IOS_APP_V2";
+  const OLD_KEY = "INBODY_IOS_APP_V1";
+
+  // 영양제 메타데이터 (권장량, 단위, 효능 설명)
+  const SUPP_META = [
+    {
+      id: "omega3",
+      name: "오메가-3 (EPA+DHA 합산)",
+      unit: "mg",
+      target: 1200,
+      step: 1000,
+      role: "체지방 산화 효소 활성화 & 복부지방(9.0kg) 대사 보조",
+      getEffectText: (amt, hasEx) => {
+        const pct = Math.min(100, Math.round((amt / 1200) * 100));
+        if (amt === 0) return "미섭취: 식후 1,000~2,000mg 섭취 시 인슐린 민감성을 개선해 복부 지방 연소를 돕습니다.";
+        return `권장량의 ${pct}% 충족: 혈중 중성지방 개선 및 근육 염증 완화 중입니다. ${hasEx ? "오늘 운동과 결합되어 지방 산화 효율이 약 5~8% 높아졌습니다!" : "유산소 운동을 병행하면 체지방 분해 시너지가 극대화됩니다."}`;
+      }
+    },
+    {
+      id: "arginine",
+      name: "L-아르기닌 (운동 전 부스터)",
+      unit: "mg",
+      target: 4000,
+      step: 3000,
+      role: "산화질소 혈관 확장 & 웨이트 운동 볼륨(수행능력) 향상",
+      getEffectText: (amt, hasEx) => {
+        const pct = Math.min(100, Math.round((amt / 4000) * 100));
+        if (amt === 0) return "미섭취: 운동 30분 전 3,000~5,000mg 섭취 시 근육 혈류량을 늘려 운동 소모 칼로리를 높여줍니다.";
+        return `권장량의 ${pct}% 충족: 혈관 확장 및 혈류량 증가 상태입니다. ${hasEx ? "오늘 수행한 운동의 퍼포먼스와 열량 소모를 약 5~7% 추가 부스팅했습니다!" : "웨이트 트레이닝 전에 드시면 골격근(36.9kg) 펌핑과 운동 볼륨이 올라갑니다."}`;
+      }
+    },
+    {
+      id: "vitc",
+      name: "비타민 C (항산화·코르티솔 억제)",
+      unit: "mg",
+      target: 1000,
+      step: 1000,
+      role: "다이어트 중 근손실 호르몬(코르티솔) 억제 & 카르니틴 합성",
+      getEffectText: (amt) => {
+        const pct = Math.min(100, Math.round((amt / 1000) * 100));
+        if (amt === 0) return "미섭취: 1,000mg 섭취 시 운동 후 활성산소를 제거하고 골격근(36.9kg) 손실을 방어합니다.";
+        return `권장량의 ${pct}% 충족: 지방을 미토콘드리아로 운반하는 카르니틴 합성을 돕고, 칼로리 적자 상태에서도 근손실을 방어합니다.`;
+      }
+    },
+    {
+      id: "milkthistle",
+      name: "밀크씨슬 (실리마린 기준)",
+      unit: "mg",
+      target: 130,
+      step: 130,
+      role: "고단백 식단(130g/일) 대사 시 간 피로도 완화",
+      getEffectText: (amt) => {
+        const pct = Math.min(100, Math.round((amt / 130) * 100));
+        if (amt === 0) return "미섭취: 실리마린 130mg 섭취 시 고단백 식단 대사로 인한 간 피로를 줄여 기초대사 저하를 예방합니다.";
+        return `권장량의 ${pct}% 충족: 간세포 보호 및 단백질 대사 노폐물 해독 효율을 정상 유지하고 있습니다.`;
+      }
+    }
+  ];
+
+  // 체중/골격근 기반 추천 운동 패턴
+  const WORKOUT_PATTERNS = [
+    {
+      title: "패턴 A: 하체 균형(왼다리 집중) + 사이클",
+      mins: 60,
+      mets: 6.2,
+      epocRate: 0.12,
+      desc: "하체 웨이트 45분 + 인터벌 사이클 15분 (왼다리 9.7kg 불균형 교정 + 최대 칼로리 연소)"
+    },
+    {
+      title: "패턴 B: 상체 근력 + 인클라인 경사 걷기",
+      mins: 60,
+      mets: 5.3,
+      epocRate: 0.10,
+      desc: "상체 웨이트 40분 + 경사도 걷기 20분 (골격근 36.9kg 유지 + 몸통 체지방 9.0kg 집중 타겟)"
+    },
+    {
+      title: "패턴 C: 고강도 서킷 / HIIT (단시간 극대화)",
+      mins: 30,
+      mets: 8.5,
+      epocRate: 0.16,
+      desc: "전신 서킷 및 인터벌 30분 (운동 후 애프터번 지방 연소 극대화)"
+    },
+    {
+      title: "패턴 D: 유산소 단독 (회복일·지방 연소)",
+      mins: 45,
+      mets: 5.2,
+      epocRate: 0.04,
+      desc: "인클라인 빠른 걸음 또는 가벼운 조깅 45분 (근피로 없이 체지방 감량)"
+    }
+  ];
+
+  const defaultState = {
+    profile: {
+      name: "김동욱",
+      height: 180,
+      weight: 81.0,
+      targetWeight: 75.9,
+      smm: 36.9,
+      bfm: 16.5,
+      pbf: 20.3,
+      bmr: 1764,
+      activity: 1.2,
+      deficit: 500
+    },
+    logs: {}
+  };
+
+  let state = loadState();
+  let currentDate = getTodayStr();
+
+  function getTodayStr() {
+    const d = new Date();
+    const offset = d.getTimezoneOffset() * 60000;
+    return new Date(d.getTime() - offset).toISOString().split("T")[0];
+  }
+
+  function loadState() {
+    try {
+      const savedV2 = localStorage.getItem(STORAGE_KEY);
+      if (savedV2) return JSON.parse(savedV2);
+      const savedV1 = localStorage.getItem(OLD_KEY);
+      if (savedV1) {
+        const parsed = JSON.parse(savedV1);
+        return { ...defaultState, ...parsed };
+      }
+    } catch (e) {}
+    return JSON.parse(JSON.stringify(defaultState));
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function ensureDateLog(dateStr) {
+    if (!state.logs[dateStr]) {
+      state.logs[dateStr] = {
+        foods: [],
+        exercises: [],
+        supplements: { omega3: 0, arginine: 0, vitc: 0, milkthistle: 0 }
+      };
+    }
+    if (!state.logs[dateStr].supplements) {
+      state.logs[dateStr].supplements = { omega3: 0, arginine: 0, vitc: 0, milkthistle: 0 };
+    }
+  }
+
+  function switchTab(tabId, btnEl) {
+    document.querySelectorAll(".tab-pane").forEach(el => el.classList.remove("active"));
+    document.getElementById("tab-" + tabId).classList.add("active");
+    document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
+    btnEl.classList.add("active");
+  }
+
+  function calcPatternCalories(mets, mins, epocRate) {
+    const p = state.profile;
+    const activeKcal = Math.round(1.05 * mets * p.weight * (mins / 60));
+    // 골격근량(36.9kg) 비례 애프터번(EPOC) 보너스 계산
+    const smmFactor = p.smm / 32.0;
+    const epocKcal = Math.round(activeKcal * epocRate * smmFactor);
+    return { activeKcal, epocKcal, total: activeKcal + epocKcal };
+  }
+
+  function renderPatternButtons() {
+    const grid = document.getElementById("patternGrid");
+    grid.innerHTML = WORKOUT_PATTERNS.map((pt, idx) => {
+      const c = calcPatternCalories(pt.mets, pt.mins, pt.epocRate);
+      return `
+        <button class="pattern-btn" onclick="addPatternWorkout(${idx})">
+          <div class="p-top">
+            <span>${pt.title}</span>
+            <span class="p-kcal">-${c.total} kcal</span>
+          </div>
+          <div class="p-desc">
+            ${pt.desc}<br/>
+            <span style="color:#2563EB; font-weight:600;">운동 ${c.activeKcal}kcal + 근육 애프터번(EPOC) +${c.epocKcal}kcal</span>
+          </div>
+        </button>
+      `;
+    }).join("");
+  }
+
+  function addPatternWorkout(idx) {
+    const pt = WORKOUT_PATTERNS[idx];
+    const c = calcPatternCalories(pt.mets, pt.mins, pt.epocRate);
+    ensureDateLog(currentDate);
+    state.logs[currentDate].exercises.push({
+      name: `${pt.title} (EPOC +${c.epocKcal}포함)`,
+      mins: pt.mins,
+      kcal: c.total
+    });
+    saveState();
+    render();
+  }
+
+  function applyFoodPreset() {
+    const val = document.getElementById("foodPreset").value;
+    if (!val) return;
+    const [name, kcal, prot] = val.split("|");
+    document.getElementById("foodName").value = name;
+    document.getElementById("foodKcal").value = kcal;
+    document.getElementById("foodProt").value = prot;
+  }
+
+  function applyExPreset() {
+    const val = document.getElementById("exPreset").value;
+    const [mets, epoc, name] = val.split("|");
+    if (name) document.getElementById("exName").value = name;
+    calcExKcal();
+  }
+
+  function calcExKcal() {
+    const val = document.getElementById("exPreset").value;
+    const parts = val.split("|");
+    const mets = parseFloat(parts[0]) || 0;
+    const epocRate = parseFloat(parts[1]) || 0;
+    const mins = parseFloat(document.getElementById("exMin").value) || 0;
+    if (mets > 0 && mins > 0) {
+      const c = calcPatternCalories(mets, mins, epocRate);
+      document.getElementById("exKcal").value = c.total;
+    }
+  }
+
+  function addFood() {
+    const meal = document.getElementById("mealType").value;
+    const name = document.getElementById("foodName").value.trim();
+    const kcal = parseInt(document.getElementById("foodKcal").value, 10);
+    const prot = parseInt(document.getElementById("foodProt").value || "0", 10);
+    if (!name || isNaN(kcal)) {
+      alert("음식 이름과 칼로리를 입력해주세요.");
+      return;
+    }
+    ensureDateLog(currentDate);
+    state.logs[currentDate].foods.push({ meal, name, kcal, prot });
+    saveState();
+    document.getElementById("foodName").value = "";
+    document.getElementById("foodKcal").value = "";
+    document.getElementById("foodProt").value = "";
+    document.getElementById("foodPreset").value = "";
+    render();
+  }
+
+  function removeFood(idx) {
+    state.logs[currentDate].foods.splice(idx, 1);
+    saveState();
+    render();
+  }
+
+  function addExercise() {
+    const name = document.getElementById("exName").value.trim();
+    const mins = parseInt(document.getElementById("exMin").value || "0", 10);
+    const kcal = parseInt(document.getElementById("exKcal").value, 10);
+    if (!name || isNaN(kcal)) {
+      alert("운동 이름과 소모 칼로리를 입력해주세요.");
+      return;
+    }
+    ensureDateLog(currentDate);
+    state.logs[currentDate].exercises.push({ name, mins, kcal });
+    saveState();
+    render();
+  }
+
+  function removeExercise(idx) {
+    state.logs[currentDate].exercises.splice(idx, 1);
+    saveState();
+    render();
+  }
+
+  function updateSupp(id, val) {
+    ensureDateLog(currentDate);
+    state.logs[currentDate].supplements[id] = Math.max(0, parseInt(val || "0", 10));
+    saveState();
+    render();
+  }
+
+  function addSuppStep(id, step) {
+    ensureDateLog(currentDate);
+    const cur = state.logs[currentDate].supplements[id] || 0;
+    state.logs[currentDate].supplements[id] = cur + step;
+    saveState();
+    render();
+  }
+
+  function resetSupp(id) {
+    ensureDateLog(currentDate);
+    state.logs[currentDate].supplements[id] = 0;
+    saveState();
+    render();
+  }
+
+  function onDateChange() {
+    currentDate = document.getElementById("datePicker").value || getTodayStr();
+    render();
+  }
+
+  function changeDate(days) {
+    const d = new Date(currentDate);
+    d.setDate(d.getDate() + days);
+    currentDate = d.toISOString().split("T")[0];
+    document.getElementById("datePicker").value = currentDate;
+    render();
+  }
+
+  function changeActivity() {
+    state.profile.activity = parseFloat(document.getElementById("activitySelect").value);
+    saveState();
+    render();
+  }
+
+  function render() {
+    ensureDateLog(currentDate);
+    const p = state.profile;
+    const log = state.logs[currentDate];
+    const supps = log.supplements;
+
+    renderPatternButtons();
+
+    document.getElementById("headerTitle").textContent = `📊 ${p.name}님의 인바디 매니저`;
+    document.getElementById("chipWeight").textContent = `${p.weight} / ${p.targetWeight}kg`;
+    document.getElementById("chipSmm").textContent = `${p.smm} kg`;
+    document.getElementById("chipBfm").textContent = `${p.bfm}kg (${p.pbf}%)`;
+
+    const baseTdee = Math.round(p.bmr * p.activity);
+    const exKcal = log.exercises.reduce((sum, item) => sum + item.kcal, 0);
+
+    // 영양제 + 운동 결합 시 대사 시너지 계산 (운동 수행 시 아르기닌·오메가3 보너스)
+    let suppSynergyKcal = 0;
+    if (exKcal > 0) {
+      if ((supps.arginine || 0) >= 2000) suppSynergyKcal += Math.round(exKcal * 0.05); // 혈류량·운동볼륨 5% 보너스
+      if ((supps.omega3 || 0) >= 1000) suppSynergyKcal += Math.round(exKcal * 0.04);   // 지방산화 대사 4% 보너스
+    }
+
+    const totalBurned = baseTdee + exKcal + suppSynergyKcal;
+    const targetIntake = Math.max(p.bmr, totalBurned - (p.deficit || 500));
+
+    const eatenKcal = log.foods.reduce((sum, item) => sum + item.kcal, 0);
+    const eatenProt = log.foods.reduce((sum, item) => sum + item.prot, 0);
+    const targetProt = Math.round(p.weight * 1.6);
+
+    document.getElementById("valBmr").textContent = `${p.bmr.toLocaleString()} kcal`;
+    document.getElementById("valTdee").textContent = `${totalBurned.toLocaleString()} kcal`;
+    document.getElementById("valTdeeSub").textContent = `운동 ${exKcal} + 영양제시너지 ${suppSynergyKcal} kcal`;
+    document.getElementById("valTarget").textContent = `${targetIntake.toLocaleString()} kcal`;
+    document.getElementById("valEaten").textContent = `${eatenKcal.toLocaleString()} kcal`;
+
+    const netDiff = eatenKcal - totalBurned;
+    document.getElementById("valNetSub").textContent = `총 소모 대비: ${netDiff > 0 ? "+" : ""}${netDiff.toLocaleString()} kcal`;
+
+    // 칼로리 바
+    const remain = targetIntake - eatenKcal;
+    const calPct = Math.min(100, Math.round((eatenKcal / Math.max(1, targetIntake)) * 100));
+    const calBar = document.getElementById("calBar");
+    calBar.style.width = `${calPct}%`;
+    if (remain >= 0) {
+      document.getElementById("calStatusText").textContent = `남은 섭취 가능: ${remain.toLocaleString()} kcal`;
+      calBar.classList.remove("danger");
+    } else {
+      document.getElementById("calStatusText").textContent = `권장 목표 초과: +${Math.abs(remain).toLocaleString()} kcal`;
+      calBar.classList.add("danger");
+    }
+    document.getElementById("calPctText").textContent = `${calPct}%`;
+
+    // 단백질 바
+    const protPct = Math.min(100, Math.round((eatenProt / Math.max(1, targetProt)) * 100));
+    document.getElementById("protBar").style.width = `${protPct}%`;
+    document.getElementById("protStatusText").textContent = `근손실 방지 단백질: ${eatenProt}g / ${targetProt}g`;
+    document.getElementById("protPctText").textContent = `${protPct}%`;
+
+    // 영양제 달성률 계산
+    const suppScores = SUPP_META.map(m => Math.min(1, (supps[m.id] || 0) / m.target));
+    const suppAvgPct = Math.round((suppScores.reduce((a, b) => a + b, 0) / SUPP_META.length) * 100);
+    document.getElementById("suppBar").style.width = `${suppAvgPct}%`;
+    document.getElementById("suppPctText").textContent = `${suppAvgPct}%`;
+
+    // 탭 배지 업데이트
+    document.getElementById("foodTabBadge").textContent = `${eatenKcal.toLocaleString()} kcal / 단백질 ${eatenProt}g`;
+    document.getElementById("exTabBadge").textContent = `-${exKcal.toLocaleString()} kcal`;
+    document.getElementById("suppTabBadge").textContent = `운동 시너지 +${suppSynergyKcal} kcal`;
+
+    // 식단 리스트
+    const foodList = document.getElementById("foodList");
+    if (log.foods.length === 0) {
+      foodList.innerHTML = `<li class="empty-msg">오늘 기록된 식단이 없습니다.</li>`;
+    } else {
+      foodList.innerHTML = log.foods.map((f, i) => `
+        <li class="log-item">
+          <div class="log-left">
+            <span class="log-title">[${f.meal}] ${f.name}</span>
+            <span class="log-sub">단백질 ${f.prot}g</span>
+          </div>
+          <div class="log-right">
+            <span class="log-kcal">+${f.kcal} kcal</span>
+            <button class="btn-del" onclick="removeFood(${i})">삭제</button>
+          </div>
+        </li>
+      `).join("");
+    }
+
+    // 운동 리스트
+    const exList = document.getElementById("exList");
+    if (log.exercises.length === 0) {
+      exList.innerHTML = `<li class="empty-msg">오늘 기록된 운동이 없습니다. 위 맞춤 패턴을 눌러보세요!</li>`;
+    } else {
+      exList.innerHTML = log.exercises.map((ex, i) => `
+        <li class="log-item">
+          <div class="log-left">
+            <span class="log-title">${ex.name}</span>
+            <span class="log-sub">${ex.mins}분 수행</span>
+          </div>
+          <div class="log-right">
+            <span class="log-kcal" style="color: var(--primary);">-${ex.kcal} kcal</span>
+            <button class="btn-del" onclick="removeExercise(${i})">삭제</button>
+          </div>
+        </li>
+      `).join("");
+    }
+
+    // 영양제 리스트 렌더링
+    const suppContainer = document.getElementById("suppContainer");
+    const hasEx = exKcal > 0;
+    suppContainer.innerHTML = SUPP_META.map(m => {
+      const amt = supps[m.id] || 0;
+      const pct = Math.min(100, Math.round((amt / m.target) * 100));
+      return `
+        <div class="supp-item">
+          <div class="supp-top">
+            <span class="supp-name">${m.name}</span>
+            <span class="supp-target">권장 ${m.target}${m.unit} (${pct}%)</span>
+          </div>
+          <div style="font-size:11px; color:var(--purple); font-weight:600; margin-top:2px;">핵심 역할: ${m.role}</div>
+          <div class="supp-controls">
+            <input type="number" value="${amt}" inputmode="numeric" onchange="updateSupp('${m.id}', this.value)" />
+            <span style="font-size:13px; font-weight:600;">${m.unit}</span>
+            <button class="btn-quick" onclick="addSuppStep('${m.id}', ${m.step})">+${m.step}${m.unit}</button>
+            <button class="btn-del" onclick="resetSupp('${m.id}')">초기화</button>
+          </div>
+          <div class="supp-effect">${m.getEffectText(amt, hasEx)}</div>
+        </div>
+      `;
+    }).join("");
+
+    // 홈 화면 종합 리포트
+    const expectedFatLossGrams = netDiff < 0 ? Math.round(Math.abs(netDiff) / 7.7) : 0;
+    document.getElementById("dailyInsightBox").innerHTML = `
+      • <b>예상 체지방 감량 속도:</b> 오늘 현재 칼로리 적자(<b>${netDiff} kcal</b>) 기준 약 <b>${expectedFatLossGrams}g</b>의 순수 체지방이 연소되는 페이스입니다. (목표 -5.1kg 달성 진행 중)<br/>
+      • <b>근육 보존 & 간 대사 상태:</b> 골격근량(${p.smm}kg) 유지를 위한 단백질 달성률은 <b>${protPct}%</b>이며, 밀크씨슬·비타민C 복용 달성률은 <b>${suppAvgPct}%</b>입니다.<br/>
+      • <b>운동 & 영양제 시너지:</b> ${hasEx ? `운동(${exKcal}kcal)과 아르기닌·오메가3가 결합되어 <b>+${suppSynergyKcal}kcal</b>의 추가 지방 산화 및 혈류 부스팅 효과가 반영되었습니다.` : "오늘 운동 기록이 아직 없습니다. [운동 패턴] 탭에서 루틴을 선택하면 골격근 애프터번(EPOC)과 영양제 시너지가 자동 합산됩니다."}
+    `;
+  }
+
+  function openModal() {
+    const p = state.profile;
+    document.getElementById("pName").value = p.name;
+    document.getElementById("pWeight").value = p.weight;
+    document.getElementById("pTargetWeight").value = p.targetWeight;
+    document.getElementById("pSmm").value = p.smm;
+    document.getElementById("pBfm").value = p.bfm;
+    document.getElementById("pPbf").value = p.pbf;
+    document.getElementById("pBmr").value = p.bmr;
+    document.getElementById("profileModal").style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("profileModal").style.display = "none";
+  }
+
+  function saveProfile() {
+    const p = state.profile;
+    p.name = document.getElementById("pName").value.trim() || "사용자";
+    p.weight = parseFloat(document.getElementById("pWeight").value) || 81.0;
+    p.targetWeight = parseFloat(document.getElementById("pTargetWeight").value) || 75.9;
+    p.smm = parseFloat(document.getElementById("pSmm").value) || 36.9;
+    p.bfm = parseFloat(document.getElementById("pBfm").value) || 16.5;
+    p.pbf = parseFloat(document.getElementById("pPbf").value) || 20.3;
+    p.bmr = parseInt(document.getElementById("pBmr").value, 10) || 1764;
+    saveState();
+    calcExKcal();
+    render();
+    closeModal();
+  }
+
+  document.getElementById("datePicker").value = currentDate;
+  document.getElementById("activitySelect").value = String(state.profile.activity);
+  calcExKcal();
+  render();
+</script>
+</body>
+</html>
