@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="인바디 매니저" />
-  <title>인바디 프로 매니저</title>
+  <title>인바디 프로 매니저 마스터</title>
   <style>
     :root {
       --bg: #F2F4F8;
@@ -18,6 +18,7 @@
       --green: #10B981;
       --purple: #7C3AED;
       --amber: #D97706;
+      --cyan: #0891B2;
       --danger: #EF4444;
       --border: #E5E7EB;
       --nav-bg: rgba(255, 255, 255, 0.94);
@@ -30,8 +31,9 @@
       --sub: #94A3B8;
       --primary: #3B82F6;
       --green: #10B981;
-      --purple: #A78bfa;
+      --purple: #A78BFA;
       --amber: #F59E0B;
+      --cyan: #22D3EE;
       --danger: #F87171;
       --border: #2A364F;
       --nav-bg: rgba(21, 29, 46, 0.95);
@@ -39,7 +41,7 @@
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
       margin: 0;
-      padding: env(safe-area-inset-top, 20px) 16px calc(env(safe-area-inset-bottom, 20px) + 84px);
+      padding: env(safe-area-inset-top, 20px) 14px calc(env(safe-area-inset-bottom, 20px) + 86px);
       font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif;
       background-color: var(--bg);
       color: var(--text);
@@ -50,18 +52,18 @@
     /* 상단 헤더 & 날짜 */
     .header {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 10px 2px; margin-bottom: 6px;
+      padding: 8px 2px; margin-bottom: 6px;
     }
-    .header h1 { font-size: 19px; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
-    .header-actions { display: flex; gap: 6px; }
+    .header h1 { font-size: 18px; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
+    .header-actions { display: flex; gap: 5px; }
     .btn-outline {
       background: var(--card); border: 1px solid var(--border); border-radius: 10px;
       padding: 6px 10px; font-size: 12px; font-weight: 700; color: var(--text); cursor: pointer;
     }
     .date-bar {
       display: flex; justify-content: space-between; align-items: center;
-      background: var(--card); border-radius: 14px; padding: 8px 12px;
-      margin-bottom: 14px; border: 1px solid var(--border);
+      background: var(--card); border-radius: 14px; padding: 7px 12px;
+      margin-bottom: 12px; border: 1px solid var(--border);
     }
     .date-bar button {
       background: var(--box); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
@@ -72,6 +74,22 @@
       background: transparent; text-align: center; font-family: inherit; color-scheme: light dark;
     }
 
+    /* 헬스장 상단 고정/미니 휴식 타이머 바 */
+    .timer-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 8px 12px; margin-bottom: 12px;
+    }
+    .timer-display {
+      font-size: 15px; font-weight: 900; color: var(--primary); font-variant-numeric: tabular-nums;
+    }
+    .timer-btns { display: flex; gap: 5px; }
+    .timer-btn {
+      background: var(--box); border: 1px solid var(--border); border-radius: 8px;
+      padding: 5px 8px; font-size: 11px; font-weight: 700; color: var(--text); cursor: pointer;
+    }
+    .timer-btn.active { background: var(--primary); color: #FFF; border-color: var(--primary); }
+
     /* 탭 전환 */
     .tab-pane { display: none; }
     .tab-pane.active { display: block; animation: fadeIn 0.16s ease-in-out; }
@@ -79,12 +97,12 @@
 
     /* 카드 공통 */
     .card {
-      background: var(--card); border-radius: 18px; padding: 18px;
+      background: var(--card); border-radius: 18px; padding: 16px;
       margin-bottom: 14px; border: 1px solid var(--border);
       box-shadow: 0 2px 10px rgba(0,0,0,0.04);
     }
     .card-title {
-      font-size: 16px; font-weight: 700; margin: 0 0 12px 0;
+      font-size: 15px; font-weight: 800; margin: 0 0 12px 0;
       display: flex; justify-content: space-between; align-items: center;
     }
     .badge {
@@ -93,6 +111,7 @@
     }
     .badge.purple { background: rgba(124, 58, 237, 0.16); color: var(--purple); }
     .badge.green { background: rgba(16, 185, 129, 0.16); color: var(--green); }
+    .badge.cyan { background: rgba(8, 145, 178, 0.16); color: var(--cyan); }
 
     /* 인바디 칩 */
     .inbody-chips {
@@ -100,28 +119,28 @@
     }
     .chip {
       background: var(--box); border: 1px solid var(--border); border-radius: 12px;
-      padding: 9px 6px; text-align: center;
+      padding: 8px 6px; text-align: center;
     }
     .chip .label { font-size: 11px; color: var(--sub); display: block; margin-bottom: 3px; }
     .chip .val { font-size: 13px; font-weight: 800; color: var(--text); }
 
     /* 대사량 그리드 */
     .metrics-grid {
-      display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 12px 0;
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0;
     }
-    .metric-box { background: var(--box); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
-    .metric-box .m-label { font-size: 11px; color: var(--sub); margin-bottom: 4px; }
-    .metric-box .m-val { font-size: 17px; font-weight: 800; }
+    .metric-box { background: var(--box); border: 1px solid var(--border); border-radius: 12px; padding: 11px; }
+    .metric-box .m-label { font-size: 11px; color: var(--sub); margin-bottom: 3px; }
+    .metric-box .m-val { font-size: 16px; font-weight: 800; }
     .metric-box .m-sub { font-size: 11px; color: var(--sub); margin-top: 2px; }
 
     /* 프로그레스 바 */
-    .progress-wrap { margin-top: 12px; }
+    .progress-wrap { margin-top: 10px; }
     .progress-header {
       display: flex; justify-content: space-between; font-size: 12px;
-      font-weight: 600; margin-bottom: 5px;
+      font-weight: 600; margin-bottom: 4px;
     }
     .progress-bar-bg {
-      width: 100%; height: 11px; background: var(--box); border: 1px solid var(--border);
+      width: 100%; height: 10px; background: var(--box); border: 1px solid var(--border);
       border-radius: 99px; overflow: hidden;
     }
     .progress-bar-fill {
@@ -130,12 +149,26 @@
     }
     .progress-bar-fill.green { background: var(--green); }
     .progress-bar-fill.purple { background: var(--purple); }
+    .progress-bar-fill.amber { background: var(--amber); }
+    .progress-bar-fill.cyan { background: var(--cyan); }
     .progress-bar-fill.danger { background: var(--danger); }
 
+    /* 탄단지 3분할 미니 그리드 */
+    .macro-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px;
+      padding-top: 12px; border-top: 1px dashed var(--border);
+    }
+    .macro-box {
+      background: var(--box); border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px; text-align: center;
+    }
+    .macro-box .mc-title { font-size: 11px; color: var(--sub); font-weight: 700; }
+    .macro-box .mc-val { font-size: 13px; font-weight: 800; margin: 3px 0; }
+
     /* 폼 입력 */
-    select, input[type="text"], input[type="number"] {
-      width: 100%; padding: 11px 12px; border: 1px solid var(--border);
-      border-radius: 12px; font-size: 16px; background: var(--box);
+    select, input[type="text"], input[type="number"], textarea {
+      width: 100%; padding: 10px 11px; border: 1px solid var(--border);
+      border-radius: 12px; font-size: 15px; background: var(--box);
       color: var(--text); font-family: inherit; margin-bottom: 8px;
       appearance: none; -webkit-appearance: none;
     }
@@ -145,45 +178,56 @@
     .field-label { font-size: 11px; font-weight: 700; color: var(--sub); margin-bottom: 4px; display: block; }
 
     .btn-primary {
-      width: 100%; padding: 13px; border: none; border-radius: 12px;
-      background: var(--primary); color: #FFFFFF; font-size: 15px;
+      width: 100%; padding: 12px; border: none; border-radius: 12px;
+      background: var(--primary); color: #FFFFFF; font-size: 14px;
       font-weight: 700; cursor: pointer; margin-top: 4px;
     }
     .btn-green { background: var(--green); }
     .btn-amber { background: #D97706; }
+    .btn-cyan { background: var(--cyan); }
 
     /* 서브 모드 전환 스위치 */
     .sub-tabs {
       display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
-      background: var(--box); border: 1px solid var(--border); padding: 4px; border-radius: 12px; margin-bottom: 14px;
+      background: var(--box); border: 1px solid var(--border); padding: 4px; border-radius: 12px; margin-bottom: 12px;
     }
     .sub-tab-btn {
-      border: none; background: transparent; padding: 9px 6px;
-      border-radius: 9px; font-size: 13px; font-weight: 800; color: var(--sub); cursor: pointer;
+      border: none; background: transparent; padding: 8px 6px;
+      border-radius: 9px; font-size: 12px; font-weight: 800; color: var(--sub); cursor: pointer;
     }
     .sub-tab-btn.active {
       background: var(--card); color: var(--text); box-shadow: 0 2px 5px rgba(0,0,0,0.12);
     }
 
-    /* 부위 칩 선택기 */
+    /* 부위 칩 & 프리셋 칩 */
     .cat-chips {
       display: flex; gap: 5px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 8px;
     }
     .cat-chip {
       border: 1px solid var(--border); background: var(--box); border-radius: 99px;
-      padding: 6px 11px; font-size: 12px; font-weight: 700; color: var(--text);
+      padding: 6px 11px; font-size: 11px; font-weight: 700; color: var(--text);
       white-space: nowrap; cursor: pointer;
     }
     .cat-chip.active {
       background: var(--primary); color: #FFFFFF; border-color: var(--primary);
     }
 
+    /* 빠른 복사 & 루틴 저장 바 */
+    .quick-action-bar {
+      display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap;
+    }
+    .btn-soft {
+      flex: 1; background: var(--box); border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px 8px; font-size: 11px; font-weight: 700; color: var(--text); cursor: pointer; text-align: center;
+    }
+    .btn-soft:active { background: rgba(37, 99, 235, 0.15); border-color: var(--primary); }
+
     /* 실시간 음식 검색창 & 결과 */
     .search-bar-wrap { display: flex; gap: 6px; margin-bottom: 8px; }
     .search-bar-wrap input { margin-bottom: 0; flex: 1; border: 2px solid var(--primary); background: var(--card); }
     .btn-search {
       background: var(--primary); color: #FFF; border: none; border-radius: 12px;
-      padding: 0 13px; font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0;
+      padding: 0 12px; font-size: 12px; font-weight: 700; cursor: pointer; flex-shrink: 0;
     }
     .portal-btns {
       display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px;
@@ -193,7 +237,7 @@
       padding: 7px 4px; font-size: 11px; font-weight: 700; color: var(--text); cursor: pointer;
     }
     .search-results {
-      max-height: 250px; overflow-y: auto; border: 1px solid var(--border);
+      max-height: 240px; overflow-y: auto; border: 1px solid var(--border);
       border-radius: 12px; background: var(--card); margin-bottom: 12px; display: none;
       box-shadow: 0 4px 14px rgba(0,0,0,0.15);
     }
@@ -203,14 +247,14 @@
     }
     .search-item:last-child { border-bottom: none; }
     .search-item:active { background: var(--box); }
-    .s-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .s-name { font-size: 13px; font-weight: 700; color: var(--text); }
     .s-tag {
       display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 5px;
       border-radius: 4px; margin-right: 4px; background: rgba(37, 99, 235, 0.16); color: var(--primary);
     }
     .s-tag.web { background: rgba(245, 158, 11, 0.2); color: var(--amber); }
     .s-meta { font-size: 11px; color: var(--sub); margin-top: 3px; }
-    .s-kcal { font-size: 14px; font-weight: 800; color: var(--green); flex-shrink: 0; margin-left: 8px; }
+    .s-kcal { font-size: 13px; font-weight: 800; color: var(--green); flex-shrink: 0; margin-left: 8px; }
 
     /* 영양성분표 라벨 */
     .nutrition-label-box {
@@ -221,7 +265,7 @@
       border-bottom: 2px solid var(--text); padding-bottom: 6px; margin-bottom: 8px;
       display: flex; justify-content: space-between; align-items: flex-end;
     }
-    .nf-title { font-size: 15px; font-weight: 900; letter-spacing: -0.5px; }
+    .nf-title { font-size: 14px; font-weight: 900; letter-spacing: -0.5px; }
     .nf-serving { font-size: 11px; font-weight: 700; color: var(--primary); }
     .portion-bar { display: flex; gap: 5px; margin-bottom: 8px; align-items: center; }
     .portion-btn {
@@ -230,23 +274,33 @@
     }
     .portion-btn.active { background: var(--primary); color: #FFFFFF; border-color: var(--primary); }
     .nf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; text-align: center; }
-    .nf-cell { background: var(--box); border-radius: 8px; padding: 7px 4px; border: 1px solid var(--border); }
-    .nf-cell .c-name { font-size: 11px; color: var(--sub); display: block; }
-    .nf-cell .c-val { font-size: 13px; font-weight: 800; color: var(--text); }
+    .nf-cell { background: var(--box); border-radius: 8px; padding: 6px 4px; border: 1px solid var(--border); }
+    .nf-cell .c-name { font-size: 10px; color: var(--sub); display: block; }
+    .nf-cell .c-val { font-size: 12px; font-weight: 800; color: var(--text); }
 
     .paste-scanner {
       display: none; background: var(--box); border: 1px dashed var(--sub);
       border-radius: 12px; padding: 10px; margin-bottom: 10px;
     }
 
+    /* 피라미드 세트 빌더 */
+    .pyramid-box {
+      display: none; background: var(--box); border: 1px solid var(--border);
+      border-radius: 12px; padding: 10px; margin-bottom: 10px;
+    }
+    .pyramid-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 12px; padding: 5px 4px; border-bottom: 1px solid var(--border);
+    }
+
     /* 운동 계산 상세 박스 */
     .ex-calc-preview {
       background: rgba(37, 99, 235, 0.1); border: 1px solid rgba(37, 99, 235, 0.3); border-radius: 12px;
-      padding: 12px; margin-bottom: 10px; font-size: 12px; color: var(--text); line-height: 1.55;
+      padding: 11px; margin-bottom: 10px; font-size: 12px; color: var(--text); line-height: 1.5;
     }
     .cardio-calc-preview {
       background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 12px;
-      padding: 12px; margin-bottom: 10px; font-size: 12px; color: var(--text); line-height: 1.55;
+      padding: 11px; margin-bottom: 10px; font-size: 12px; color: var(--text); line-height: 1.5;
     }
 
     /* 유산소 타이밍 버튼 */
@@ -255,7 +309,7 @@
     }
     .timing-btn {
       background: var(--box); border: 1px solid var(--border); border-radius: 10px;
-      padding: 9px 4px; font-size: 12px; font-weight: 700; color: var(--text);
+      padding: 8px 4px; font-size: 11px; font-weight: 700; color: var(--text);
       text-align: center; cursor: pointer;
     }
     .timing-btn.active {
@@ -266,64 +320,72 @@
     .log-list { list-style: none; padding: 0; margin: 10px 0 0 0; }
     .log-item {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 11px 4px; border-bottom: 1px solid var(--border); font-size: 14px;
+      padding: 10px 4px; border-bottom: 1px solid var(--border); font-size: 13px;
     }
     .log-item:last-child { border-bottom: none; }
     .log-left { display: flex; flex-direction: column; padding-right: 8px; }
-    .log-title { font-weight: 600; color: var(--text); }
-    .log-sub { font-size: 12px; color: var(--sub); margin-top: 2px; line-height: 1.35; }
+    .log-title { font-weight: 700; color: var(--text); }
+    .log-sub { font-size: 11px; color: var(--sub); margin-top: 2px; line-height: 1.35; }
     .log-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .log-kcal { font-weight: 700; font-size: 14px; }
+    .log-kcal { font-weight: 800; font-size: 13px; }
     .btn-del {
       background: rgba(239, 68, 68, 0.16); color: var(--danger); border: none;
-      border-radius: 8px; padding: 5px 9px; font-size: 12px; font-weight: 700; cursor: pointer;
+      border-radius: 8px; padding: 5px 8px; font-size: 11px; font-weight: 700; cursor: pointer;
     }
-    .empty-msg { text-align: center; color: var(--sub); font-size: 13px; padding: 14px 0; }
+    .empty-msg { text-align: center; color: var(--sub); font-size: 12px; padding: 12px 0; }
 
-    /* 영양제 카드 & 타임라인 */
+    /* 영양제 카드 */
     .timeline-box {
       background: var(--box); border: 1px solid var(--border); border-radius: 14px;
       padding: 12px; margin-bottom: 14px; font-size: 12px; line-height: 1.6;
     }
     .supp-item {
       background: var(--box); border: 1px solid var(--border); border-radius: 14px;
-      padding: 13px; margin-bottom: 12px;
+      padding: 12px; margin-bottom: 10px;
     }
     .supp-top { display: flex; justify-content: space-between; align-items: center; }
-    .supp-name { font-weight: 800; font-size: 15px; color: var(--text); }
+    .supp-name { font-weight: 800; font-size: 14px; color: var(--text); }
     .supp-target { font-size: 11px; color: var(--sub); font-weight: 700; }
     .timing-badge {
       display: inline-block; margin-top: 5px; padding: 4px 8px; border-radius: 6px;
       font-size: 11px; font-weight: 800; background: rgba(16, 185, 129, 0.16); color: var(--green);
     }
-    .timing-badge.fasted {
-      background: rgba(245, 158, 11, 0.18); color: var(--amber);
-    }
-    .supp-controls { display: flex; align-items: center; gap: 6px; margin-top: 9px; }
-    .supp-controls input { margin-bottom: 0; padding: 7px 10px; font-size: 14px; width: 95px; background: var(--card); }
+    .timing-badge.fasted { background: rgba(245, 158, 11, 0.18); color: var(--amber); }
+    .supp-controls { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+    .supp-controls input { margin-bottom: 0; padding: 6px 8px; font-size: 14px; width: 90px; background: var(--card); }
     .btn-quick {
       background: rgba(37, 99, 235, 0.16); color: var(--primary); border: none; border-radius: 8px;
-      padding: 7px 10px; font-size: 12px; font-weight: 700; cursor: pointer;
+      padding: 7px 10px; font-size: 11px; font-weight: 700; cursor: pointer;
     }
     .supp-effect {
-      margin-top: 9px; padding-top: 9px; border-top: 1px dashed var(--border);
-      font-size: 12px; color: var(--text); line-height: 1.5;
+      margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border);
+      font-size: 11.5px; color: var(--text); line-height: 1.5;
     }
 
-    /* 하단 탭바 */
+    /* 7일 리포트 차트 */
+    .chart-row {
+      display: grid; grid-template-columns: 68px 1fr 78px; align-items: center;
+      gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 12px;
+    }
+    .chart-bar-wrap {
+      width: 100%; height: 12px; background: var(--box); border-radius: 99px; overflow: hidden;
+    }
+    .chart-bar-inner { height: 100%; border-radius: 99px; }
+
+    /* 하단 5탭 네비게이션 */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0;
       background: var(--nav-bg); backdrop-filter: blur(12px);
       border-top: 1px solid var(--border);
       display: flex; justify-content: space-around;
-      padding: 8px 8px calc(env(safe-area-inset-bottom, 12px) + 6px);
+      padding: 7px 4px calc(env(safe-area-inset-bottom, 12px) + 5px);
       z-index: 90;
     }
     .nav-btn {
       background: none; border: none; flex: 1; display: flex; flex-direction: column;
-      align-items: center; gap: 3px; color: var(--sub); font-size: 11px; font-weight: 600; cursor: pointer;
+      align-items: center; gap: 2px; color: var(--sub); font-size: 10.5px; font-weight: 600; cursor: pointer;
     }
-    .nav-btn .icon { font-size: 19px; }
+    .nav-btn .icon { font-size: 18px; }
     .nav-btn.active { color: var(--primary); font-weight: 800; }
 
     /* 모달 */
@@ -341,7 +403,7 @@
 <body>
 
 <div class="container">
-  <!-- 상단 헤더 (다크모드 토글 포함) -->
+  <!-- 상단 헤더 -->
   <div class="header">
     <h1 id="headerTitle">📊 김동욱님의 인바디 매니저</h1>
     <div class="header-actions">
@@ -350,14 +412,28 @@
     </div>
   </div>
 
-  <!-- 날짜 선택 -->
+  <!-- 날짜 선택 바 -->
   <div class="date-bar">
     <button onclick="changeDate(-1)">‹</button>
     <input type="date" id="datePicker" onchange="onDateChange()" />
     <button onclick="changeDate(1)">›</button>
   </div>
 
-  <!-- [탭 1] 홈 요약 -->
+  <!-- 상단 헬스장 세트 휴식 타이머 (알람음 지원) -->
+  <div class="timer-bar">
+    <div>
+      <span style="font-size:11px; font-weight:700; color:var(--sub); margin-right:6px;">⏱️ 세트 휴식 타이머</span>
+      <span class="timer-display" id="restTimerDisplay">대기중</span>
+    </div>
+    <div class="timer-btns">
+      <button class="timer-btn" onclick="startRestTimer(60)">60초</button>
+      <button class="timer-btn" onclick="startRestTimer(90)">90초</button>
+      <button class="timer-btn" onclick="startRestTimer(120)">120초</button>
+      <button class="timer-btn" style="color:var(--danger);" onclick="stopRestTimer()">정지</button>
+    </div>
+  </div>
+
+  <!-- ==================== [탭 1] 홈 대시보드 ==================== -->
   <div id="tab-home" class="tab-pane active">
     <div class="card">
       <div class="card-title">
@@ -380,12 +456,21 @@
         </div>
       </div>
 
-      <label class="field-label">평소 일상 활동량</label>
-      <select id="activitySelect" onchange="changeActivity()">
-        <option value="1.2">좌식 생활 (학업·사무 위주 / 운동 별도 계산)</option>
-        <option value="1.35">가벼운 활동 (일상 걸음 많음)</option>
-        <option value="1.5">활동적 (육체 활동 많음)</option>
-      </select>
+      <!-- 오늘 공복 체중 빠른 기록 & 일상 활동량 -->
+      <div class="row-2" style="margin-bottom:4px;">
+        <div>
+          <label class="field-label">오늘 공복 체중 기록 (kg)</label>
+          <input type="number" step="0.1" id="dailyWeightInput" placeholder="81.0" onchange="saveDailyWeight()" style="margin-bottom:0;" />
+        </div>
+        <div>
+          <label class="field-label">평소 일상 활동량</label>
+          <select id="activitySelect" onchange="changeActivity()" style="margin-bottom:0;">
+            <option value="1.2">좌식 생활 (운동 별도)</option>
+            <option value="1.35">가벼운 활동 (이동 많음)</option>
+            <option value="1.5">활동적 (육체 활동)</option>
+          </select>
+        </div>
+      </div>
 
       <div class="metrics-grid">
         <div class="metric-box">
@@ -410,6 +495,7 @@
         </div>
       </div>
 
+      <!-- 칼로리 게이지 -->
       <div class="progress-wrap">
         <div class="progress-header">
           <span id="calStatusText">남은 섭취 가능: 1,764 kcal</span>
@@ -420,24 +506,51 @@
         </div>
       </div>
 
-      <div class="progress-wrap">
-        <div class="progress-header">
-          <span id="protStatusText">근손실 방지 단백질: 0g / 130g</span>
-          <span id="protPctText">0%</span>
+      <!-- 탄·단·지 3대 영양소 정밀 밸런스 -->
+      <div class="macro-grid">
+        <div class="macro-box">
+          <div class="mc-title">🍚 탄수화물 (복부관리)</div>
+          <div class="mc-val" id="macroCarbText">0 / 200g</div>
+          <div class="progress-bar-bg" style="height:7px;">
+            <div class="progress-bar-fill amber" id="macroCarbBar" style="width:0%;"></div>
+          </div>
         </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill green" id="protBar" style="width: 0%;"></div>
+        <div class="macro-box">
+          <div class="mc-title">🥩 단백질 (근손실방지)</div>
+          <div class="mc-val" style="color:var(--green);" id="macroProtText">0 / 130g</div>
+          <div class="progress-bar-bg" style="height:7px;">
+            <div class="progress-bar-fill green" id="macroProtBar" style="width:0%;"></div>
+          </div>
+        </div>
+        <div class="macro-box">
+          <div class="mc-title">🥑 지방 (호르몬유지)</div>
+          <div class="mc-val" id="macroFatText">0 / 50g</div>
+          <div class="progress-bar-bg" style="height:7px;">
+            <div class="progress-bar-fill purple" id="macroFatBar" style="width:0%;"></div>
+          </div>
         </div>
       </div>
+    </div>
 
-      <div class="progress-wrap">
+    <!-- 수분 & 나트륨 관리 카드 (체수분 47.1L / 세포외수분비 0.368 관리) -->
+    <div class="card">
+      <div class="card-title">
+        <span>💧 수분 섭취 & 나트륨(부종) 트래커</span>
+        <span class="badge cyan" id="waterBadge">0 / 2,800 ml</span>
+      </div>
+      <div class="progress-wrap" style="margin-top:0; margin-bottom:10px;">
         <div class="progress-header">
-          <span id="suppStatusText">오늘의 영양제 섭취율 (대사·회복 보조)</span>
-          <span id="suppPctText">0%</span>
+          <span id="sodiumStatusText">오늘 섭취 나트륨: 0 mg (적정 2,000mg 이하)</span>
+          <span id="waterPctText">0%</span>
         </div>
         <div class="progress-bar-bg">
-          <div class="progress-bar-fill purple" id="suppBar" style="width: 0%;"></div>
+          <div class="progress-bar-fill cyan" id="waterBar" style="width: 0%;"></div>
         </div>
+      </div>
+      <div class="quick-action-bar" style="margin-bottom:0;">
+        <button class="btn-soft" onclick="addWater(250)">+ 250ml (종이컵/한컵)</button>
+        <button class="btn-soft" onclick="addWater(500)">+ 500ml (생수 1병)</button>
+        <button class="btn-soft" style="flex:0.4; color:var(--danger);" onclick="resetWater()">초기화</button>
       </div>
     </div>
 
@@ -445,17 +558,24 @@
       <div class="card-title">
         <span>💡 실시간 신체 시너지 분석 리포트</span>
       </div>
-      <div id="dailyInsightBox" style="font-size: 13px; line-height: 1.6;"></div>
+      <div id="dailyInsightBox" style="font-size: 12.5px; line-height: 1.6;"></div>
     </div>
   </div>
 
-  <!-- [탭 2] 초고속 음식 검색 & 영양성분표 -->
+  <!-- ==================== [탭 2] 식단 & 프리셋 ==================== -->
   <div id="tab-food" class="tab-pane">
     <div class="card">
       <div class="card-title">
         <span>⚡ 초고속 음식·과일·브랜드 검색</span>
         <span class="badge green" id="foodTabBadge">0 kcal</span>
       </div>
+
+      <!-- 어제 식단 복사 & 나만의 식단 세트 버튼 -->
+      <div class="quick-action-bar">
+        <button class="btn-soft" onclick="copyYesterday('foods')">📋 어제 식단 그대로 불러오기</button>
+        <button class="btn-soft" onclick="saveCurrentMealPreset()">⭐ 현재 식단 세트로 저장</button>
+      </div>
+      <div class="cat-chips" id="customMealPresetChips"></div>
 
       <label class="field-label">타이핑 즉시(0.001초) 내장 DB가 뜨며, 없는 제품은 [⚡ 초고속 웹검색]을 누르세요</label>
       <div class="search-bar-wrap">
@@ -536,13 +656,20 @@
     </div>
   </div>
 
-  <!-- [탭 3] 정밀 웨이트 & ACSM 유산소 계산기 -->
+  <!-- ==================== [탭 3] 정밀 웨이트(피라미드 세트 지원) & 유산소 ==================== -->
   <div id="tab-workout" class="tab-pane">
     <div class="card">
       <div class="card-title">
         <span>🏋️ 내 신체 맞춤 웨이트 · 유산소 계산기</span>
         <span class="badge" id="exTabBadge">-0 kcal</span>
       </div>
+
+      <!-- 어제 운동 복사 & 루틴 저장 -->
+      <div class="quick-action-bar">
+        <button class="btn-soft" onclick="copyYesterday('exercises')">📋 어제 운동 그대로 불러오기</button>
+        <button class="btn-soft" onclick="saveCurrentWorkoutRoutine()">⭐ 오늘 운동 루틴으로 저장</button>
+      </div>
+      <div class="cat-chips" id="customWorkoutRoutineChips"></div>
 
       <div class="sub-tabs">
         <button class="sub-tab-btn active" id="btnModeWeight" onclick="switchWorkoutMode('weight')">🏋️ 근력 운동 (웨이트·맨몸)</button>
@@ -586,6 +713,13 @@
           </div>
         </div>
 
+        <!-- 피라미드 세트(세트별 중량이 다를 때) 누적 버튼 -->
+        <div class="quick-action-bar" style="margin-top:-2px;">
+          <button class="btn-soft" onclick="addPyramidSet()">➕ 피라미드 세트 추가 (세트별 무게가 다를 때)</button>
+          <button class="btn-soft" style="flex:0.35; color:var(--danger);" onclick="clearPyramidSets()">세트 초기화</button>
+        </div>
+        <div class="pyramid-box" id="pyramidBox"></div>
+
         <div class="row-2">
           <div>
             <label class="field-label">기록될 운동명</label>
@@ -619,11 +753,11 @@
 
         <div class="row-3">
           <div>
-            <label class="field-label" id="lblCardioSpeed">속도 (km/h)</label>
+            <label class="field-label">속도 (km/h)</label>
             <input type="number" step="0.1" id="cardioSpeed" value="5.5" inputmode="decimal" oninput="calcCardioKcal()" />
           </div>
           <div>
-            <label class="field-label" id="lblCardioGrade">경사도 (%)</label>
+            <label class="field-label">경사도 (%)</label>
             <input type="number" step="0.5" id="cardioGrade" value="0" inputmode="decimal" oninput="calcCardioKcal()" />
           </div>
           <div>
@@ -662,7 +796,7 @@
     </div>
   </div>
 
-  <!-- [탭 4] 영양제 복용 타이밍 & 약학·생리학 팩트 분석 -->
+  <!-- ==================== [탭 4] 영양제 복용 타이밍 & 팩트 분석 ==================== -->
   <div id="tab-supp" class="tab-pane">
     <div class="card">
       <div class="card-title">
@@ -680,25 +814,62 @@
       <div id="suppContainer"></div>
     </div>
   </div>
+
+  <!-- ==================== [탭 5] 주간 리포트 & 데이터 영구 백업/복원 ==================== -->
+  <div id="tab-report" class="tab-pane">
+    <div class="card">
+      <div class="card-title">
+        <span>📈 최근 7일 칼로리 적자 & 체중 추이</span>
+        <span class="badge" id="weeklyFatLossBadge">7일 누적 분석</span>
+      </div>
+      <div id="weeklySummaryBox" style="font-size:12.5px; line-height:1.55; margin-bottom:12px; padding:10px; background:var(--box); border-radius:12px; border:1px solid var(--border);"></div>
+      <div id="weeklyChartContainer"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <span>💾 데이터 영구 백업 & 복원 (증발 방지)</span>
+      </div>
+      <p style="font-size:12px; color:var(--sub); margin-top:-4px; line-height:1.45;">
+        아이폰 사파리 캐시 삭제나 기기 변경에 대비해 전체 기록을 파일이나 텍스트로 안전하게 백업하고 복원할 수 있습니다.
+      </p>
+      <div class="row-2" style="margin-bottom:8px;">
+        <button class="btn-primary" style="margin-top:0;" onclick="exportBackupClipboard()">📋 백업코드 복사하기</button>
+        <button class="btn-primary btn-green" style="margin-top:0;" onclick="downloadBackupFile()">📥 백업파일(.json) 저장</button>
+      </div>
+
+      <label class="field-label">복원할 백업 코드 붙여넣기 또는 파일 선택</label>
+      <textarea id="backupJsonArea" rows="3" placeholder="여기에 복사해둔 백업 코드를 붙여넣고 아래 [데이터 복원하기]를 누르세요..." style="font-size:12px;"></textarea>
+      <div class="row-2">
+        <button class="btn-outline" onclick="document.getElementById('backupFileInput').click()">📂 백업 파일 불러오기</button>
+        <button class="btn-primary btn-amber" style="margin-top:0;" onclick="restoreFromTextarea()">🔄 데이터 복원하기</button>
+      </div>
+      <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none;" onchange="restoreFromFile(event)" />
+    </div>
+  </div>
 </div>
 
-<!-- 하단 고정 네비게이션 바 -->
+<!-- 하단 5탭 고정 네비게이션 바 -->
 <nav class="bottom-nav">
   <button class="nav-btn active" onclick="switchTab('home', this)">
     <span class="icon">📊</span>
-    <span>홈 요약</span>
+    <span>홈</span>
   </button>
   <button class="nav-btn" onclick="switchTab('food', this)">
     <span class="icon">🥗</span>
-    <span>식단·영양표</span>
+    <span>식단</span>
   </button>
   <button class="nav-btn" onclick="switchTab('workout', this)">
     <span class="icon">🏋️</span>
-    <span>운동 계산기</span>
+    <span>운동</span>
   </button>
   <button class="nav-btn" onclick="switchTab('supp', this)">
     <span class="icon">💊</span>
-    <span>영양제 분석</span>
+    <span>영양제</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('report', this)">
+    <span class="icon">📈</span>
+    <span>리포트·백업</span>
   </button>
 </nav>
 
@@ -746,8 +917,8 @@
 </div>
 
 <script>
-  const STORAGE_KEY = "INBODY_IOS_APP_V6";
-  const PREV_KEYS = ["INBODY_IOS_APP_V5", "INBODY_IOS_APP_V4", "INBODY_IOS_APP_V3", "INBODY_IOS_APP_V2", "INBODY_IOS_APP_V1"];
+  const STORAGE_KEY = "INBODY_IOS_APP_V7";
+  const PREV_KEYS = ["INBODY_IOS_APP_V6", "INBODY_IOS_APP_V5", "INBODY_IOS_APP_V4", "INBODY_IOS_APP_V3", "INBODY_IOS_APP_V2", "INBODY_IOS_APP_V1"];
   const WEB_FOOD_CACHE_KEY = "INBODY_FOOD_WEB_CACHE_V1";
 
   // ===== [1] 웨이트 트레이닝 60+ 전 종목 정밀 역학 데이터베이스 =====
@@ -803,9 +974,8 @@
     { id: "burpee", cat: "맨몸/복근", name: "버피테스트 (전신 고강도)", defKg: 0, rom: 0.85, mets: 7.5, stab: 1.25, epoc: 0.20, isBodyweight: 0.85, note: "전신 유·무산소 결합 최고 강도 칼로리 폭격 운동" }
   ];
 
-  // ===== [2] 초고속 0.001초 응답을 위한 대확장 한국 식품·과일·브랜드 DB =====
+  // ===== [2] 초고속 0.001초 응답을 위한 한국 식품·과일·브랜드 DB =====
   const KOREAN_FOOD_DB = [
-    // 과일 & 구황작물
     { name: "샤인머스캣 / 샤인머스켓 (100g, 약 10~12알)", keys: "샤인머스캣 샤인머스켓 포도 청포도 과일", serving: "100g (약 10알)", kcal: 68, carb: 17.5, prot: 0.6, fat: 0.2, satFat: 0, sugar: 15, sodium: 2 },
     { name: "샤인머스캣 / 샤인머스켓 (한 송이 500g)", keys: "샤인머스캣 샤인머스켓 포도 한송이 과일", serving: "1송이 (500g)", kcal: 340, carb: 88, prot: 3, fat: 1, satFat: 0, sugar: 75, sodium: 10 },
     { name: "사과 (중간 크기 1개 200g)", keys: "사과 부사 홍로 아오리 감홍 과일", serving: "1개 (200g)", kcal: 114, carb: 30, prot: 0.5, fat: 0.3, satFat: 0, sugar: 22, sodium: 2 },
@@ -820,19 +990,14 @@
     { name: "수박 (1조각 200g)", keys: "수박 과일", serving: "1조각 (200g)", kcal: 62, carb: 15.6, prot: 1.2, fat: 0.2, satFat: 0, sugar: 12, sodium: 2 },
     { name: "참외 / 멜론 (1개/1인분 250g)", keys: "참외 메론 멜론 과일", serving: "250g", kcal: 78, carb: 19, prot: 1.5, fat: 0.3, satFat: 0, sugar: 15, sodium: 5 },
     { name: "복숭아 / 천도복숭아 (1개 250g)", keys: "복숭아 백도 황도 천도복숭아 납작복숭아 과일", serving: "1개 (250g)", kcal: 105, carb: 26, prot: 2, fat: 0.3, satFat: 0, sugar: 21, sodium: 3 },
-    { name: "거봉 / 캠벨 포도 (100g)", keys: "포도 거봉 캠벨포도 과일", serving: "100g", kcal: 62, carb: 16, prot: 0.6, fat: 0.2, satFat: 0, sugar: 14, sodium: 2 },
     { name: "블루베리 (한 줌 100g)", keys: "블루베리 냉동블루베리 과일", serving: "100g", kcal: 57, carb: 14.5, prot: 0.7, fat: 0.3, satFat: 0, sugar: 10, sodium: 1 },
     { name: "키위 / 골드키위 (1개 100g)", keys: "키위 골드키위 그린키위 제스프리 과일", serving: "1개 (100g)", kcal: 60, carb: 14.5, prot: 1.1, fat: 0.5, satFat: 0, sugar: 10, sodium: 3 },
     { name: "배 (반 개 / 200g)", keys: "배 신고배 과일", serving: "200g (반 개)", kcal: 102, carb: 26, prot: 0.8, fat: 0.2, satFat: 0, sugar: 19, sodium: 4 },
     { name: "단감 / 홍시 / 곶감 (1개 180g)", keys: "감 단감 홍시 곶감 과일", serving: "1개 (180g)", kcal: 92, carb: 24, prot: 1, fat: 0.2, satFat: 0, sugar: 18, sodium: 3 },
-    { name: "자두 / 체리 / 망고 (100g)", keys: "자두 체리 망고 애플망고 파인애플 자몽 레몬 과일", serving: "100g", kcal: 60, carb: 15, prot: 0.8, fat: 0.3, satFat: 0, sugar: 13, sodium: 2 },
     { name: "아보카도 (1개 150g)", keys: "아보카도 과일 샐러드", serving: "1개 (150g)", kcal: 240, carb: 12, prot: 3, fat: 22, satFat: 3.2, sugar: 1, sodium: 10 },
-    { name: "오이 / 당근 / 파프리카 (1개 150g)", keys: "오이 당근 파프리카 양배추 브로콜리 샐러드 채소 야채", serving: "150g", kcal: 25, carb: 5.5, prot: 1.2, fat: 0.2, satFat: 0, sugar: 2.5, sodium: 10 },
     { name: "찐 고구마 / 군고구마 (1개 150g)", keys: "고구마 군고구마 밤고구마 호박고구마", serving: "1개 (150g)", kcal: 195, carb: 45, prot: 2.5, fat: 0.3, satFat: 0, sugar: 12, sodium: 25 },
     { name: "찐 감자 / 구운 감자 (1개 150g)", keys: "감자 찐감자 구운감자 알감자", serving: "1개 (150g)", kcal: 115, carb: 26, prot: 3, fat: 0.2, satFat: 0, sugar: 1.5, sodium: 10 },
-    { name: "찰옥수수 / 초당옥수수 (1개 160g)", keys: "옥수수 찰옥수수 초당옥수수", serving: "1개 (160g)", kcal: 175, carb: 38, prot: 5, fat: 1.8, satFat: 0.3, sugar: 6, sodium: 5 },
 
-    // 만두 & 브랜드 냉동식품
     { name: "풀무원 얇은피 꽉찬속 고기만두 (1인분 4개, 160g)", keys: "풀무원 얇은피 만두 꽉찬속 고기만두 얄피만두 냉동만두", serving: "4개 (160g)", kcal: 268, carb: 23, prot: 15.5, fat: 13.5, satFat: 4.5, sugar: 2.5, sodium: 545 },
     { name: "풀무원 얇은피 꽉찬속 고기만두 (1봉지 8개, 320g)", keys: "풀무원 얇은피 만두 꽉찬속 고기만두 얄피만두 한봉지", serving: "1봉지 (320g)", kcal: 535, carb: 46, prot: 31, fat: 27, satFat: 9, sugar: 5, sodium: 1090 },
     { name: "풀무원 얇은피 꽉찬속 김치만두 (1인분 4개, 160g)", keys: "풀무원 얇은피 만두 꽉찬속 김치만두 얄피만두 냉동만두", serving: "4개 (160g)", kcal: 248, carb: 24, prot: 13, fat: 11, satFat: 3.8, sugar: 3, sodium: 620 },
@@ -840,77 +1005,34 @@
     { name: "풀무원 얇은피 꽉찬속 땡초불고기만두 (4개, 160g)", keys: "풀무원 얇은피 만두 땡초만두 불고기만두 얄피만두", serving: "4개 (160g)", kcal: 275, carb: 25, prot: 14, fat: 13, satFat: 4.2, sugar: 4, sodium: 580 },
     { name: "CJ 비비고 왕교자 (1인분 5개, 175g)", keys: "비비고 왕교자 만두 고기만두 군만두 찐만두 cj", serving: "5개 (175g)", kcal: 355, carb: 34, prot: 15, fat: 18, satFat: 6, sugar: 3, sodium: 610 },
     { name: "CJ 비비고 김치왕교자 (5개, 175g)", keys: "비비고 김치왕교자 김치만두 만두 cj", serving: "5개 (175g)", kcal: 320, carb: 33, prot: 15, fat: 14, satFat: 4.8, sugar: 3, sodium: 720 },
-    { name: "CJ 비비고 수교자 / 물만두 (10개, 140g)", keys: "비비고 물만두 수교자 만두", serving: "10개 (140g)", kcal: 260, carb: 26, prot: 11, fat: 12, satFat: 4, sugar: 2, sodium: 480 },
-    { name: "해태 고향만두 / 오뚜기 옛날만두 (150g)", keys: "고향만두 해태 오뚜기만두 만두 냉동만두", serving: "150g", kcal: 310, carb: 32, prot: 12, fat: 15, satFat: 5, sugar: 2, sodium: 530 },
-    { name: "고메 크리스피 핫도그 / 명랑핫도그 (1개 80g)", keys: "핫도그 고메 명랑핫도그 치즈핫도그 냉동핫도그", serving: "1개 (80g)", kcal: 245, carb: 27, prot: 6, fat: 12, satFat: 3.5, sugar: 6, sodium: 380 },
-    { name: "하림 치킨너겟 / 용가리치킨 (100g, 5~6조각)", keys: "치킨너겟 용가리치킨 너겟 하림 텐더 치킨텐더", serving: "100g", kcal: 250, carb: 15, prot: 14, fat: 15, satFat: 3.5, sugar: 1, sodium: 420 },
-    { name: "등심 돈까스 / 치즈 돈까스 (1인분 150g)", keys: "돈까스 돈가스 고메돈까스 풀무원돈까스 등심돈까스 치즈돈까스 경양식", serving: "1인분 (150g)", kcal: 440, carb: 28, prot: 22, fat: 26, satFat: 6.5, sugar: 3, sodium: 520 },
-    { name: "냉동 볶음밥 (새우/김치/닭가슴살 볶음밥 1봉 250g)", keys: "냉동볶음밥 새우볶음밥 김치볶음밥 비비고볶음밥 곰곰볶음밥 쿠팡", serving: "1봉 (250g)", kcal: 420, carb: 70, prot: 12, fat: 9.5, satFat: 2.2, sugar: 4, sodium: 760 },
-
-    // 즉석밥 · 라면 · 면류
     { name: "CJ 햇반 (백미 210g)", keys: "햇반 쌀밥 흰쌀밥 공깃밥 공기밥 즉석밥 cj", serving: "1개 (210g)", kcal: 315, carb: 70, prot: 5, fat: 1.5, satFat: 0, sugar: 0, sodium: 5 },
     { name: "CJ 햇반 작은공기 (130g)", keys: "햇반 작은공기 반공기 소형", serving: "1개 (130g)", kcal: 190, carb: 43, prot: 3, fat: 0.6, satFat: 0, sugar: 0, sodium: 3 },
     { name: "CJ 햇반 흑미밥 / 발아현미밥 / 잡곡밥 (210g)", keys: "햇반 현미밥 잡곡밥 흑미밥 오곡밥 곤약밥", serving: "1개 (210g)", kcal: 305, carb: 67, prot: 6, fat: 1.5, satFat: 0, sugar: 0, sodium: 10 },
     { name: "오뚜기밥 (백미 210g)", keys: "오뚜기밥 오뚜기 즉석밥 흰쌀밥 공기밥", serving: "1개 (210g)", kcal: 310, carb: 69, prot: 5, fat: 1.2, satFat: 0, sugar: 0, sodium: 10 },
-    { name: "오뚜기밥 발아현미밥 / 오곡밥 (210g)", keys: "오뚜기밥 현미밥 잡곡밥 오곡밥", serving: "1개 (210g)", kcal: 300, carb: 66, prot: 6, fat: 1.6, satFat: 0, sugar: 0, sodium: 10 },
     { name: "농심 신라면 소컵 (컵라면 65g)", keys: "신라면 소컵 컵라면 라면 농심", serving: "1개 (65g)", kcal: 300, carb: 47, prot: 5, fat: 10, satFat: 5, sugar: 2, sodium: 1320 },
     { name: "농심 신라면 큰사발면 / 봉지 (114~120g)", keys: "신라면 큰사발 봉지라면 컵라면 라면 농심", serving: "1개 (114g)", kcal: 500, carb: 78, prot: 9, fat: 17, satFat: 9, sugar: 4, sodium: 1620 },
     { name: "오뚜기 진라면 소컵 (65g)", keys: "진라면 소컵 컵라면 라면 오뚜기", serving: "1개 (65g)", kcal: 290, carb: 45, prot: 6, fat: 10, satFat: 5, sugar: 3, sodium: 1180 },
-    { name: "오뚜기 진라면 봉지 / 큰컵 (120g)", keys: "진라면 큰컵 봉지라면 컵라면 라면 오뚜기", serving: "1개 (120g)", kcal: 500, carb: 77, prot: 11, fat: 16, satFat: 8, sugar: 4, sodium: 1780 },
     { name: "농심 육개장 사발면 / 김치사발면 (86g)", keys: "육개장 사발면 김치사발면 컵라면 라면 농심", serving: "1개 (86g)", kcal: 385, carb: 55, prot: 7, fat: 15, satFat: 7, sugar: 3, sodium: 1590 },
     { name: "삼양 불닭볶음면 봉지 / 큰컵 (140g)", keys: "불닭볶음면 까르보불닭 컵라면 라면 삼양", serving: "1개 (140g)", kcal: 530, carb: 85, prot: 12, fat: 16, satFat: 8, sugar: 7, sodium: 1280 },
-    { name: "농심 짜파게티 / 짜장범벅 (1봉 140g)", keys: "짜파게티 짜장라면 짜장범벅 컵라면 라면 농심", serving: "1봉 (140g)", kcal: 610, carb: 96, prot: 11, fat: 20, satFat: 8, sugar: 8, sodium: 1100 },
-    { name: "농심 너구리 / 안성탕면 / 삼양라면 / 열라면 (1봉)", keys: "너구리 안성탕면 삼양라면 열라면 참깨라면 스낵면 왕뚜껑 팔도비빔면 라면", serving: "1봉 (120g)", kcal: 495, carb: 78, prot: 9, fat: 16, satFat: 7, sugar: 4, sodium: 1700 },
     { name: "오뚜기 컵누들 매콤한맛/우동맛 (37.8g)", keys: "컵누들 다이어트라면 컵라면 오뚜기", serving: "1개 (37.8g)", kcal: 120, carb: 27, prot: 2, fat: 0.5, satFat: 0, sugar: 3, sodium: 890 },
 
-    // 닭가슴살 · 육류 · 수산 · 계란 · 프로틴
     { name: "닭가슴살 오리지널 / 훈제 / 수비드 (1팩 100g)", keys: "닭가슴살 하림 아임닭 맛있닭 랭킹닭컴 곰곰 한끼통살 허닭 쿠팡", serving: "1팩 (100g)", kcal: 110, carb: 1.5, prot: 23, fat: 1.5, satFat: 0.4, sugar: 0.5, sodium: 220 },
-    { name: "닭가슴살 소시지 / 스테이크 / 볼 (1팩 100g)", keys: "닭가슴살 소시지 스테이크 닭가슴살볼 핫바", serving: "1팩 (100g)", kcal: 145, carb: 6, prot: 19, fat: 4.5, satFat: 1.2, sugar: 2, sodium: 350 },
     { name: "삶은 계란 / 구운란 / 반숙란 (2개 100g)", keys: "계란 달걀 삶은계란 구운란 반숙란 감동란", serving: "2개 (100g)", kcal: 145, carb: 1.5, prot: 13, fat: 9.5, satFat: 3, sugar: 0.5, sodium: 130 },
-    { name: "계란후라이 / 계란말이 / 스크램블 (2개분)", keys: "계란후라이 달걀후라이 계란말이 스크램블 오믈렛", serving: "2개분", kcal: 195, carb: 1.5, prot: 13, fat: 15, satFat: 4, sugar: 0.5, sodium: 180 },
     { name: "단백질 쉐이크 / 프로틴 음료 (더단백·셀렉스·마이프로틴)", keys: "단백질쉐이크 프로틴 더단백 셀렉스 하이뮨 마이프로틴 신타6 닥터유프로틴", serving: "1회분", kcal: 125, carb: 4, prot: 24, fat: 1.5, satFat: 0.5, sugar: 1, sodium: 150 },
     { name: "돼지고기 삼겹살 구이 (1인분 200g)", keys: "삼겹살 오겹살 대패삼겹살 돼지고기 고기", serving: "1인분 (200g)", kcal: 660, carb: 1, prot: 34, fat: 56, satFat: 20, sugar: 0, sodium: 150 },
-    { name: "돼지고기 목살 / 앞다리살 / 뒷다리살 구이 (200g)", keys: "목살 앞다리살 뒷다리살 항정살 가브리살 돼지고기 고기", serving: "1인분 (200g)", kcal: 480, carb: 1, prot: 40, fat: 34, satFat: 12, sugar: 0, sodium: 160 },
+    { name: "돼지고기 목살 / 앞다리살 구이 (200g)", keys: "목살 앞다리살 뒷다리살 항정살 가브리살 돼지고기 고기", serving: "1인분 (200g)", kcal: 480, carb: 1, prot: 40, fat: 34, satFat: 12, sugar: 0, sodium: 160 },
     { name: "소고기 우둔살 / 부채살 / 안심 구이 (200g)", keys: "소고기 한우 우둔살 부채살 안심 홍두깨살 스테이크 육회", serving: "1인분 (200g)", kcal: 310, carb: 0, prot: 44, fat: 14, satFat: 5, sugar: 0, sodium: 140 },
-    { name: "소고기 등심 / 갈비살 / 차돌박이 (200g)", keys: "소고기 등심 꽃등심 갈비살 차돌박이 소갈비", serving: "1인분 (200g)", kcal: 520, carb: 1, prot: 36, fat: 40, satFat: 15, sugar: 0, sodium: 150 },
-    { name: "훈제오리 / 오리주물럭 (1인분 200g)", keys: "오리고기 훈제오리 오리주물럭", serving: "1인분 (200g)", kcal: 540, carb: 3, prot: 34, fat: 42, satFat: 12, sugar: 2, sodium: 680 },
-    { name: "생연어 회 / 연어 스테이크 / 광어회 (150g)", keys: "연어 연어회 연어샐러드 광어회 우럭회 회 생선", serving: "150g", kcal: 280, carb: 0, prot: 32, fat: 16, satFat: 3.5, sugar: 0, sodium: 90 },
-    { name: "고등어구이 / 삼치구이 / 갈치구이 (1토막 120g)", keys: "고등어 고등어구이 삼치구이 갈치구이 조기구이 생선구이", serving: "1토막 (120g)", kcal: 280, carb: 0, prot: 26, fat: 19, satFat: 5, sugar: 0, sodium: 380 },
-    { name: "동원 참치캔 (라이트스탠다드 1캔 85g)", keys: "참치캔 동원참치 사조참치 고추참치 마일드참치", serving: "1캔 (85g)", kcal: 135, carb: 0, prot: 19, fat: 6.5, satFat: 1, sugar: 0, sodium: 340 },
-    { name: "풀무원 두부 / 연두부 (반 모 150g)", keys: "두부 풀무원두부 연두부 순두부 포두부 두부면 콩", serving: "반 모 (150g)", kcal: 125, carb: 4, prot: 13, fat: 6.5, satFat: 1, sugar: 1, sodium: 15 },
-
-    // 한식 · 분식 · 외식 · 프랜차이즈
-    { name: "김치찌개 / 참치김치찌개 (1인분, 밥 별도)", keys: "김치찌개 돼지김치찌개 참치김치찌개 찌개 한식", serving: "1인분", kcal: 290, carb: 12, prot: 18, fat: 19, satFat: 6, sugar: 3, sodium: 1580 },
-    { name: "된장찌개 / 차돌된장찌개 / 청국장 (1인분, 밥 별도)", keys: "된장찌개 차돌된장찌개 청국장 찌개 한식", serving: "1인분", kcal: 210, carb: 14, prot: 14, fat: 11, satFat: 3, sugar: 2, sodium: 1450 },
-    { name: "순두부찌개 / 부대찌개 (1인분, 밥 별도)", keys: "순두부찌개 부대찌개 찌개 한식", serving: "1인분", kcal: 360, carb: 16, prot: 21, fat: 23, satFat: 7, sugar: 3, sodium: 1650 },
     { name: "제육볶음 / 오삼불고기 / 소불고기 (1인분 200g)", keys: "제육볶음 제육덮밥 불고기 소불고기 돼지불백 한식", serving: "1인분 (200g)", kcal: 470, carb: 18, prot: 31, fat: 30, satFat: 9, sugar: 12, sodium: 1150 },
-    { name: "돼지국밥 / 순대국밥 / 설렁탕 / 곰탕 / 갈비탕 (밥 포함)", keys: "국밥 돼지국밥 순대국밥 내장국밥 뼈해장국 감자탕 설렁탕 갈비탕 곰탕 육개장 삼계탕", serving: "1그릇 (밥포함)", kcal: 740, carb: 72, prot: 38, fat: 31, satFat: 11, sugar: 2, sodium: 1620 },
-    { name: "비빔밥 / 돌솥비빔밥 / 포케 (1인분)", keys: "비빔밥 돌솥비빔밥 육회비빔밥 연어포케 포케 샐러드볼 한식", serving: "1인분", kcal: 580, carb: 82, prot: 24, fat: 16, satFat: 3.5, sugar: 10, sodium: 1050 },
-    { name: "일반 김밥 / 참치김밥 / 키토김밥 (1줄)", keys: "김밥 참치김밥 치즈김밥 돈까스김밥 키토김밥 유부초밥 분식", serving: "1줄 (250g)", kcal: 460, carb: 68, prot: 14, fat: 14, satFat: 3, sugar: 3, sodium: 980 },
-    { name: "떡볶이 / 로제떡볶이 / 엽기떡볶이 (1인분)", keys: "떡볶이 엽떡 신전떡볶이 로제떡볶이 국물떡볶이 분식", serving: "1인분 (250g)", kcal: 480, carb: 92, prot: 11, fat: 8, satFat: 2, sugar: 18, sodium: 1350 },
-    { name: "편의점 삼각김밥 / 도시락 (참치마요/전주비빔)", keys: "삼각김밥 참치마요 전주비빔 스팸김치 편의점도시락 한솥도시락", serving: "1개 (110g)", kcal: 205, carb: 35, prot: 4.5, fat: 5, satFat: 1, sugar: 1.5, sodium: 420 },
-    { name: "후라이드 치킨 / 양념치킨 (반 마리 / 4~5조각)", keys: "치킨 후라이드치킨 양념치킨 교촌치킨 허니콤보 bhc 뿌링클 bbq 황금올리브", serving: "반 마리", kcal: 950, carb: 45, prot: 56, fat: 60, satFat: 15, sugar: 8, sodium: 1380 },
-    { name: "굽네 오븐구이 치킨 / 고추바사삭 (반 마리)", keys: "굽네치킨 오븐치킨 고추바사삭 오리지널 통닭 바베큐치킨", serving: "반 마리", kcal: 680, carb: 18, prot: 58, fat: 41, satFat: 11, sugar: 4, sodium: 1050 },
-    { name: "피자 (페퍼로니/포테이토/불고기 2조각)", keys: "피자 도미노피자 피자헛 포테이토피자 페퍼로니피자 고구마피자", serving: "2조각", kcal: 560, carb: 64, prot: 24, fat: 23, satFat: 10, sugar: 7, sodium: 1120 },
-    { name: "햄버거 단품 (빅맥/와퍼/싸이버거/상하이버거)", keys: "햄버거 맥도날드 빅맥 상하이버거 버거킹 와퍼 맘스터치 싸이버거 롯데리아 서브웨이", serving: "1개 (단품)", kcal: 550, carb: 46, prot: 27, fat: 28, satFat: 9, sugar: 7, sodium: 920 },
-    { name: "서브웨이 샌드위치 (로스트치킨/터키/에그마요 15cm)", keys: "서브웨이 써브웨이 로스트치킨 에그마요 이탈리안비엠티 샌드위치", serving: "15cm (1개)", kcal: 360, carb: 44, prot: 24, fat: 9, satFat: 2.5, sugar: 6, sodium: 720 },
-    { name: "짜장면 / 짬뽕 / 탕수육 / 마라탕 (1인분)", keys: "짜장면 간짜장 짬뽕 탕수육 마라탕 마라샹궈 볶음밥 중식", serving: "1인분", kcal: 720, carb: 105, prot: 25, fat: 22, satFat: 6, sugar: 10, sodium: 1850 },
-    { name: "족발 / 보쌈 / 수육 (고기 1인분 200g)", keys: "족발 보쌈 수육 편육 야식", serving: "1인분 (200g)", kcal: 560, carb: 4, prot: 44, fat: 41, satFat: 14, sugar: 3, sodium: 650 },
-    { name: "초밥 / 모둠스시 (10피스)", keys: "초밥 스시 연어초밥 광어초밥 회전초밥", serving: "10피스", kcal: 520, carb: 82, prot: 26, fat: 9, satFat: 2, sugar: 10, sodium: 950 },
-    { name: "물냉면 / 비빔냉면 / 막국수 / 파스타 (1그릇)", keys: "냉면 물냉면 비빔냉면 막국수 쫄면 콩국수 칼국수 잔치국수 파스타 스파게티", serving: "1그릇", kcal: 560, carb: 96, prot: 18, fat: 11, satFat: 3, sugar: 12, sodium: 1550 },
-
-    // 유제품 · 빵 · 간식 · 카페 음료
+    { name: "돼지국밥 / 순대국밥 / 설렁탕 / 곰탕 (밥 포함)", keys: "국밥 돼지국밥 순대국밥 내장국밥 뼈해장국 감자탕 설렁탕 갈비탕 곰탕", serving: "1그릇 (밥포함)", kcal: 740, carb: 72, prot: 38, fat: 31, satFat: 11, sugar: 2, sodium: 1620 },
+    { name: "일반 김밥 / 참치김밥 (1줄)", keys: "김밥 참치김밥 치즈김밥 돈까스김밥 키토김밥 분식", serving: "1줄 (250g)", kcal: 460, carb: 68, prot: 14, fat: 14, satFat: 3, sugar: 3, sodium: 980 },
+    { name: "후라이드 치킨 / 양념치킨 (반 마리)", keys: "치킨 후라이드치킨 양념치킨 교촌치킨 허니콤보 bhc 뿌링클 bbq", serving: "반 마리", kcal: 950, carb: 45, prot: 56, fat: 60, satFat: 15, sugar: 8, sodium: 1380 },
+    { name: "햄버거 단품 (빅맥/와퍼/싸이버거)", keys: "햄버거 맥도날드 빅맥 상하이버거 버거킹 와퍼 맘스터치 싸이버거 서브웨이", serving: "1개 (단품)", kcal: 550, carb: 46, prot: 27, fat: 28, satFat: 9, sugar: 7, sodium: 920 },
     { name: "그릭요거트 (무가당 플레인 100g)", keys: "그릭요거트 요거트 플레인요거트 유제품", serving: "100g", kcal: 95, carb: 4.5, prot: 10, fat: 4, satFat: 2.5, sugar: 3, sodium: 45 },
-    { name: "비요뜨 / 토핑 요거트 (1개 140g)", keys: "비요뜨 요플레 토핑요거트 요거트", serving: "1개 (140g)", kcal: 205, carb: 30, prot: 5, fat: 7, satFat: 4, sugar: 22, sodium: 75 },
-    { name: "우유 / 저지방우유 / 두유 / 아몬드브리즈 (1팩 200ml)", keys: "우유 서울우유 매일우유 저지방우유 두유 매일두유 베지밀 아몬드브리즈 오트밀크", serving: "1팩 (200ml)", kcal: 110, carb: 8, prot: 7, fat: 5.5, satFat: 2, sugar: 5, sodium: 110 },
-    { name: "식빵 / 통밀식빵 / 베이글 / 크루아상 (1회분)", keys: "식빵 통밀식빵 호밀빵 베이글 모닝빵 크루아상 소금빵 토스트 빵", serving: "80~100g", kcal: 245, carb: 46, prot: 8, fat: 3.5, satFat: 1, sugar: 5, sodium: 380 },
-    { name: "아몬드 / 하루견과 / 땅콩버터 (1회분 25g)", keys: "아몬드 견과류 하루견과 호두 땅콩 캐슈넛 피넛버터 땅콩버터", serving: "25g", kcal: 150, carb: 5, prot: 5.5, fat: 13, satFat: 1, sugar: 1, sodium: 2 },
-    { name: "아이스 아메리카노 / 블랙커피 (1잔)", keys: "아메리카노 아이스아메리카노 아아 커피 스타벅스 메가커피 컴포즈 빽다방", serving: "1잔", kcal: 10, carb: 2, prot: 0.5, fat: 0, satFat: 0, sugar: 0, sodium: 5 },
-    { name: "카페라떼 / 바닐라라떼 / 돌체라떼 (1잔)", keys: "카페라떼 바닐라라떼 연유라떼 돌체라떼 카푸치노 아인슈페너 커피", serving: "1잔 (355ml)", kcal: 210, carb: 22, prot: 8, fat: 9, satFat: 5.5, sugar: 18, sodium: 115 },
-    { name: "제로콜라 / 제로사이다 / 제로음료 (1캔 355ml)", keys: "제로콜라 펩시제로 칠성사이다제로 나랑드사이다 몬스터에너지울트라 탄산수 음료", serving: "1캔 (355ml)", kcal: 0, carb: 0, prot: 0, fat: 0, satFat: 0, sugar: 0, sodium: 25 }
+    { name: "아이스 아메리카노 / 블랙커피 (1잔)", keys: "아메리카노 아이스아메리카노 아아 커피 스타벅스 메가커피 컴포즈", serving: "1잔", kcal: 10, carb: 2, prot: 0.5, fat: 0, satFat: 0, sugar: 0, sodium: 5 },
+    { name: "제로콜라 / 제로사이다 / 제로음료 (1캔 355ml)", keys: "제로콜라 펩시제로 칠성사이다제로 나랑드사이다 탄산수 음료", serving: "1캔 (355ml)", kcal: 0, carb: 0, prot: 0, fat: 0, satFat: 0, sugar: 0, sodium: 25 }
   ];
 
-  // ===== [3] 의학·약학 기반 정밀 영양제 데이터 (타이밍·흡수원리·팩트체크·주의사항) =====
+  // ===== [3] 의학·약학 기반 정밀 영양제 데이터 =====
   const SUPP_META = [
     {
       id: "omega3",
@@ -984,6 +1106,8 @@
       smm: 36.9, bfm: 16.5, pbf: 20.3, bmr: 1764, activity: 1.2, deficit: 500
     },
     darkMode: false,
+    mealPresets: [],
+    workoutRoutines: [],
     logs: {}
   };
 
@@ -993,6 +1117,9 @@
   let selectedFoodBase = null;
   let currentExCat = "ALL";
   let currentCardioTiming = "post_weight";
+  let pyramidSets = [];
+  let restTimerInterval = null;
+  let restRemainingSec = 0;
   let webFoodCache = loadWebCache();
 
   function getTodayStr() {
@@ -1001,10 +1128,16 @@
     return new Date(d.getTime() - offset).toISOString().split("T")[0];
   }
 
+  function getOffsetDateStr(baseDateStr, diffDays) {
+    const d = new Date(baseDateStr);
+    d.setDate(d.getDate() + diffDays);
+    return d.toISOString().split("T")[0];
+  }
+
   function loadState() {
     try {
       const s = localStorage.getItem(STORAGE_KEY);
-      if (s) return JSON.parse(s);
+      if (s) return { ...defaultState, ...JSON.parse(s) };
       for (const k of PREV_KEYS) {
         const old = localStorage.getItem(k);
         if (old) return { ...defaultState, ...JSON.parse(old) };
@@ -1018,18 +1151,15 @@
   }
 
   function loadWebCache() {
-    try {
-      return JSON.parse(localStorage.getItem(WEB_FOOD_CACHE_KEY) || "{}");
-    } catch (e) { return {}; }
+    try { return JSON.parse(localStorage.getItem(WEB_FOOD_CACHE_KEY) || "{}"); }
+    catch (e) { return {}; }
   }
 
   function saveWebCache() {
-    try {
-      localStorage.setItem(WEB_FOOD_CACHE_KEY, JSON.stringify(webFoodCache));
-    } catch (e) {}
+    try { localStorage.setItem(WEB_FOOD_CACHE_KEY, JSON.stringify(webFoodCache)); }
+    catch (e) {}
   }
 
-  // ===== 다크모드 기능 =====
   function applyTheme() {
     const isDark = !!state.darkMode;
     document.body.classList.toggle("dark", isDark);
@@ -1045,11 +1175,18 @@
 
   function ensureDateLog(dateStr) {
     if (!state.logs[dateStr]) {
-      state.logs[dateStr] = { foods: [], exercises: [], supplements: { omega3: 0, arginine: 0, vitc: 0, milkthistle: 0 } };
+      state.logs[dateStr] = {
+        weight: state.profile.weight,
+        waterMl: 0,
+        foods: [],
+        exercises: [],
+        supplements: { omega3: 0, arginine: 0, vitc: 0, milkthistle: 0 }
+      };
     }
-    if (!state.logs[dateStr].supplements) {
-      state.logs[dateStr].supplements = { omega3: 0, arginine: 0, vitc: 0, milkthistle: 0 };
-    }
+    const l = state.logs[dateStr];
+    if (!l.supplements) l.supplements = { omega3: 0, arginine: 0, vitc: 0, milkthistle: 0 };
+    if (typeof l.waterMl !== "number") l.waterMl = 0;
+    if (!l.weight) l.weight = state.profile.weight;
   }
 
   function switchTab(tabId, btnEl) {
@@ -1057,8 +1194,170 @@
     document.getElementById("tab-" + tabId).classList.add("active");
     document.querySelectorAll(".nav-btn").forEach(el => el.classList.remove("active"));
     btnEl.classList.add("active");
+    if (tabId === "report") renderWeeklyReport();
   }
 
+  // ===== [신기능 1] 헬스장 세트 휴식 타이머 (Web Audio API 알람 내장) =====
+  function playTimerAlarm() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.22, 0.44].forEach(delay => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, ctx.currentTime + delay);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.18);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + delay);
+        osc.stop(ctx.currentTime + delay + 0.18);
+      });
+    } catch (e) {}
+  }
+
+  function startRestTimer(seconds) {
+    if (restTimerInterval) clearInterval(restTimerInterval);
+    restRemainingSec = seconds;
+    updateRestTimerUI();
+    restTimerInterval = setInterval(() => {
+      restRemainingSec--;
+      if (restRemainingSec <= 0) {
+        clearInterval(restTimerInterval);
+        restTimerInterval = null;
+        document.getElementById("restTimerDisplay").textContent = "🔔 휴식 끝! 세트 시작!";
+        playTimerAlarm();
+      } else {
+        updateRestTimerUI();
+      }
+    }, 1000);
+  }
+
+  function updateRestTimerUI() {
+    const m = Math.floor(restRemainingSec / 60);
+    const s = restRemainingSec % 60;
+    document.getElementById("restTimerDisplay").textContent = `${m}:${s < 10 ? '0' : ''}${s} 남음`;
+  }
+
+  function stopRestTimer() {
+    if (restTimerInterval) clearInterval(restTimerInterval);
+    restTimerInterval = null;
+    document.getElementById("restTimerDisplay").textContent = "대기중";
+  }
+
+  // ===== [신기능 2] 오늘의 체중 & 수분 섭취 기록 =====
+  function saveDailyWeight() {
+    ensureDateLog(currentDate);
+    const w = parseFloat(document.getElementById("dailyWeightInput").value);
+    if (!isNaN(w) && w > 30 && w < 250) {
+      state.logs[currentDate].weight = w;
+      if (currentDate === getTodayStr()) {
+        state.profile.weight = w;
+      }
+      saveState();
+      render();
+    }
+  }
+
+  function addWater(ml) {
+    ensureDateLog(currentDate);
+    state.logs[currentDate].waterMl = (state.logs[currentDate].waterMl || 0) + ml;
+    saveState();
+    render();
+  }
+
+  function resetWater() {
+    ensureDateLog(currentDate);
+    state.logs[currentDate].waterMl = 0;
+    saveState();
+    render();
+  }
+
+  // ===== [신기능 3] 어제 기록 1초 복사 & 나만의 식단/운동 루틴 저장 =====
+  function copyYesterday(type) {
+    const yStr = getOffsetDateStr(currentDate, -1);
+    const yLog = state.logs[yStr];
+    if (!yLog || !yLog[type] || yLog[type].length === 0) {
+      alert(`어제(${yStr}) 기록된 ${type === 'foods' ? '식단' : '운동'}이 없습니다.`);
+      return;
+    }
+    ensureDateLog(currentDate);
+    const cloned = JSON.parse(JSON.stringify(yLog[type]));
+    state.logs[currentDate][type].push(...cloned);
+    saveState();
+    render();
+    alert(`어제 기록된 ${cloned.length}개 항목을 오늘 날짜로 그대로 불러왔습니다!`);
+  }
+
+  function saveCurrentMealPreset() {
+    ensureDateLog(currentDate);
+    const foods = state.logs[currentDate].foods;
+    if (foods.length === 0) {
+      alert("먼저 오늘 식단에 음식을 1개 이상 추가한 뒤 세트로 저장해 주세요.");
+      return;
+    }
+    const title = prompt("저장할 식단 세트 이름을 입력하세요 (예: 아침 고정식, 벌크업 점심):");
+    if (!title || !title.trim()) return;
+    if (!state.mealPresets) state.mealPresets = [];
+    state.mealPresets.push({
+      name: title.trim(),
+      items: JSON.parse(JSON.stringify(foods))
+    });
+    saveState();
+    render();
+  }
+
+  function applyMealPreset(idx) {
+    const preset = (state.mealPresets || [])[idx];
+    if (!preset) return;
+    ensureDateLog(currentDate);
+    state.logs[currentDate].foods.push(...JSON.parse(JSON.stringify(preset.items)));
+    saveState();
+    render();
+  }
+
+  function deleteMealPreset(idx, ev) {
+    ev.stopPropagation();
+    state.mealPresets.splice(idx, 1);
+    saveState();
+    render();
+  }
+
+  function saveCurrentWorkoutRoutine() {
+    ensureDateLog(currentDate);
+    const exs = state.logs[currentDate].exercises;
+    if (exs.length === 0) {
+      alert("먼저 오늘 운동 목록에 종목을 1개 이상 추가한 뒤 루틴으로 저장해 주세요.");
+      return;
+    }
+    const title = prompt("저장할 운동 루틴 이름을 입력하세요 (예: 가슴·삼두 루틴, 하체 균형 루틴):");
+    if (!title || !title.trim()) return;
+    if (!state.workoutRoutines) state.workoutRoutines = [];
+    state.workoutRoutines.push({
+      name: title.trim(),
+      items: JSON.parse(JSON.stringify(exs))
+    });
+    saveState();
+    render();
+  }
+
+  function applyWorkoutRoutine(idx) {
+    const rt = (state.workoutRoutines || [])[idx];
+    if (!rt) return;
+    ensureDateLog(currentDate);
+    state.logs[currentDate].exercises.push(...JSON.parse(JSON.stringify(rt.items)));
+    saveState();
+    render();
+  }
+
+  function deleteWorkoutRoutine(idx, ev) {
+    ev.stopPropagation();
+    state.workoutRoutines.splice(idx, 1);
+    saveState();
+    render();
+  }
+
+  // ===== [신기능 4] 피라미드 세트 빌더 + 웨이트 역학 계산 =====
   function switchWorkoutMode(mode) {
     const isWeight = mode === "weight";
     document.getElementById("workoutWeightPane").style.display = isWeight ? "block" : "none";
@@ -1069,7 +1368,6 @@
     else calcCardioKcal();
   }
 
-  // ===== 웨이트 종목 검색/필터 및 역학·생리학 칼로리 계산 =====
   function selectExCategory(cat, btnEl) {
     currentExCat = cat;
     document.querySelectorAll("#exCatChips .cat-chip").forEach(b => b.classList.remove("active"));
@@ -1084,7 +1382,6 @@
   function populateWeightExSelect() {
     const q = (document.getElementById("exSearchInput").value || "").trim().toLowerCase().replace(/\s+/g, "");
     const sel = document.getElementById("exPreset");
-
     const filtered = WEIGHT_EXERCISE_DB.filter(ex => {
       const catMatch = currentExCat === "ALL" || ex.cat === currentExCat;
       const nameClean = (ex.name + ex.cat).toLowerCase().replace(/\s+/g, "");
@@ -1104,24 +1401,54 @@
   function onSelectWeightEx() {
     const id = document.getElementById("exPreset").value;
     const ex = WEIGHT_EXERCISE_DB.find(x => x.id === id);
+    pyramidSets = [];
+    renderPyramidBox();
     if (!ex) {
       document.getElementById("exName").value = "";
       document.getElementById("exCalcBreakdown").innerHTML = "운동 이름과 소모 칼로리를 직접 입력해 추가하세요.";
       return;
     }
-
     document.getElementById("exName").value = ex.name.split(" (")[0];
     document.getElementById("exWeightKg").value = ex.defKg;
-
     const lblW = document.getElementById("lblExWeight");
-    if (ex.isBodyweight && ex.defKg === 0) {
-      lblW.textContent = "추가중량(맨몸=0)";
-    } else if (ex.name.includes("양손 합산")) {
-      lblW.textContent = "양손 합산(kg)";
-    } else {
-      lblW.textContent = "중량(kg)";
-    }
+    if (ex.isBodyweight && ex.defKg === 0) lblW.textContent = "추가중량(맨몸=0)";
+    else if (ex.name.includes("양손 합산")) lblW.textContent = "양손 합산(kg)";
+    else lblW.textContent = "중량(kg)";
     calcWeightKcal();
+  }
+
+  function addPyramidSet() {
+    const kg = parseFloat(document.getElementById("exWeightKg").value) || 0;
+    const reps = parseInt(document.getElementById("exReps").value || "0", 10);
+    if (reps <= 0) {
+      alert("횟수를 1회 이상 입력해주세요.");
+      return;
+    }
+    pyramidSets.push({ kg, reps });
+    document.getElementById("exSets").value = pyramidSets.length;
+    renderPyramidBox();
+    calcWeightKcal();
+  }
+
+  function clearPyramidSets() {
+    pyramidSets = [];
+    renderPyramidBox();
+    calcWeightKcal();
+  }
+
+  function renderPyramidBox() {
+    const box = document.getElementById("pyramidBox");
+    if (pyramidSets.length === 0) {
+      box.style.display = "none";
+      return;
+    }
+    box.style.display = "block";
+    box.innerHTML = `<div style="font-size:11px; font-weight:800; color:var(--primary); margin-bottom:4px;">📊 피라미드 세트 구성 (${pyramidSets.length}세트 누적중)</div>` +
+      pyramidSets.map((s, idx) => `
+        <div class="pyramid-row">
+          <span><b>${idx + 1}세트:</b> ${s.kg}kg × ${s.reps}회 (볼륨 ${s.kg * s.reps}kg)</span>
+        </div>
+      `).join("");
   }
 
   function calcWeightKcal() {
@@ -1130,19 +1457,28 @@
     if (!ex) return;
 
     const p = state.profile;
-    const inputKg = parseFloat(document.getElementById("exWeightKg").value) || 0;
-    const reps = parseInt(document.getElementById("exReps").value || "0", 10);
-    const sets = parseInt(document.getElementById("exSets").value || "0", 10);
     const mins = parseFloat(document.getElementById("exMin").value) || 0;
-
-    const totalReps = reps * sets;
     const bwLoad = ex.isBodyweight ? Math.round(p.weight * ex.isBodyweight * 10) / 10 : 0;
-    const effectiveLoadKg = inputKg + bwLoad;
-    const totalVolumeKg = Math.round(effectiveLoadKg * totalReps);
+
+    let totalReps = 0;
+    let totalVolumeKg = 0;
+
+    if (pyramidSets.length > 0) {
+      pyramidSets.forEach(s => {
+        totalReps += s.reps;
+        totalVolumeKg += Math.round((s.kg + bwLoad) * s.reps);
+      });
+    } else {
+      const inputKg = parseFloat(document.getElementById("exWeightKg").value) || 0;
+      const reps = parseInt(document.getElementById("exReps").value || "0", 10);
+      const sets = parseInt(document.getElementById("exSets").value || "0", 10);
+      totalReps = reps * sets;
+      totalVolumeKg = Math.round((inputKg + bwLoad) * totalReps);
+    }
 
     const heightFactor = (p.height || 180) / 175.0;
     const romMeters = ex.rom * heightFactor;
-    const mechanicalKcal = (effectiveLoadKg * 9.81 * romMeters * 1.4 * totalReps) / (4184 * 0.185) * ex.stab;
+    const mechanicalKcal = (totalVolumeKg * 9.81 * romMeters * 1.4) / (4184 * 0.185) * ex.stab;
 
     const smmRatio = p.smm / 32.0;
     const activeMets = Math.max(1.5, ex.mets * ex.stab);
@@ -1156,19 +1492,15 @@
     document.getElementById("exKcal").value = finalKcal;
     document.getElementById("exCalcBreakdown").innerHTML = `
       <b>🔬 내 신체(${p.height}cm · ${p.weight}kg · 골격근 ${p.smm}kg) 정밀 계산:</b><br/>
-      • <b>총 볼륨(Volume):</b> 유효부하 ${effectiveLoadKg}kg × ${reps}회 × ${sets}세트 = <b>${totalVolumeKg.toLocaleString()} kg</b><br/>
-      • <b>거상 역학 소모:</b> <b>${Math.round(mechanicalKcal)} kcal</b> (가동범위 ${(romMeters*100).toFixed(0)}cm · 안정근 계수 ${ex.stab})<br/>
-      • <b>${mins}분 심박·호흡 대사:</b> <b>${Math.round(timeMetabolicKcal)} kcal</b> + <b>골격근 애프터번(EPOC): +${epocKcal} kcal</b><br/>
-      • <b>🔥 최종 소모량: 총 ${finalKcal} kcal</b> (순수 체지방 약 <b>${burnedFatGrams}g</b> 연소 상당)<br/>
+      • <b>총 볼륨(Volume):</b> 총 ${totalReps}회 거상 = <b>${totalVolumeKg.toLocaleString()} kg</b> ${pyramidSets.length > 0 ? `(피라미드 ${pyramidSets.length}세트 합산)` : ""}<br/>
+      • <b>거상 역학 소모:</b> <b>${Math.round(mechanicalKcal)} kcal</b> + <b>${mins}분 호흡·심박 대사: ${Math.round(timeMetabolicKcal)} kcal</b><br/>
+      • <b>골격근 애프터번(EPOC): +${epocKcal} kcal</b> → <b>🔥 총 ${finalKcal} kcal</b> (지방 약 <b>${burnedFatGrams}g</b> 연소 상당)<br/>
       <span style="color:var(--sub); font-size:11px;">💡 ${ex.note}</span>
     `;
   }
 
   function addWeightExercise() {
     const baseName = document.getElementById("exName").value.trim();
-    const inputKg = parseFloat(document.getElementById("exWeightKg").value) || 0;
-    const reps = parseInt(document.getElementById("exReps").value || "0", 10);
-    const sets = parseInt(document.getElementById("exSets").value || "0", 10);
     const mins = parseInt(document.getElementById("exMin").value || "0", 10);
     const kcal = parseInt(document.getElementById("exKcal").value, 10);
 
@@ -1176,12 +1508,23 @@
       alert("운동 이름과 소모 칼로리를 확인해주세요.");
       return;
     }
-    const kgLabel = inputKg > 0 ? `${inputKg}kg · ` : "맨몸 · ";
-    const volLabel = reps > 0 && sets > 0 ? `${kgLabel}${reps}회×${sets}세트 (${mins}분)` : `${mins}분`;
-    const fullName = `[웨이트] ${baseName} (${volLabel})`;
+
+    let detailLabel = "";
+    if (pyramidSets.length > 0) {
+      const summary = pyramidSets.map(s => `${s.kg}kg×${s.reps}`).join("/");
+      detailLabel = `피라미드 ${pyramidSets.length}세트 [${summary}] · ${mins}분`;
+    } else {
+      const inputKg = parseFloat(document.getElementById("exWeightKg").value) || 0;
+      const reps = parseInt(document.getElementById("exReps").value || "0", 10);
+      const sets = parseInt(document.getElementById("exSets").value || "0", 10);
+      const kgLabel = inputKg > 0 ? `${inputKg}kg · ` : "맨몸 · ";
+      detailLabel = reps > 0 && sets > 0 ? `${kgLabel}${reps}회×${sets}세트 · ${mins}분` : `${mins}분`;
+    }
 
     ensureDateLog(currentDate);
-    state.logs[currentDate].exercises.push({ name: fullName, mins, kcal });
+    state.logs[currentDate].exercises.push({ name: `[웨이트] ${baseName} (${detailLabel})`, mins, kcal });
+    pyramidSets = [];
+    renderPyramidBox();
     saveState();
     render();
   }
@@ -1227,7 +1570,6 @@
 
     const speedMmin = speedKmh * (1000.0 / 60.0);
     const gradeFrac = gradePct / 100.0;
-
     let vo2 = 3.5;
     let modeText = "";
 
@@ -1249,7 +1591,6 @@
     }
 
     const baseKcal = (vo2 * p.weight / 1000.0) * 5.0 * mins;
-
     let timingMult = 1.0;
     let fatRatio = 0.50;
     let timingTitle = "[일반 유산소]";
@@ -1303,7 +1644,7 @@
     render();
   }
 
-  // ===== [초고속 엔진] 0.001초 로컬 검색 + Promise.any 병렬 레이싱 웹검색 + 캐시 =====
+  // ===== [초고속 음식 검색] 로컬 + 병렬 레이싱 웹검색 =====
   function normalizeStr(s) {
     return (s || "").toLowerCase().replace(/\s+/g, "").replace(/켓/g, "캣").replace(/가스/g, "까스");
   }
@@ -1344,7 +1685,7 @@
     if (!list || list.length === 0) {
       resBox.innerHTML = `<div style="padding:14px; font-size:12px; color:var(--sub); text-align:center; line-height:1.5;">
         ${isAfterWebSearch
-          ? "웹 DB에서 일치하는 항목을 찾지 못했습니다.<br/>위 <b>[🛒 쿠팡 성분표]</b> 또는 <b>[📗 네이버 검색]</b>을 눌러 바로 확인해 보세요!"
+          ? "웹 DB에서 일치하는 항목을 찾지 못했습니다.<br/>위 <b>[🛒 쿠팡 성분표]</b> 또는 <b>[📗 네이버 검색]</b>을 눌러 확인해 보세요!"
           : "내장 사전 결과 없음 — 우측 파란색 <b>[⚡ 초고속 웹검색]</b>을 누르면 0.5초 내로 찾아옵니다!"}
       </div>`;
       return;
@@ -1369,14 +1710,13 @@
       `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`,
       `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
     ];
-
     const tasks = proxies.map(async (pUrl) => {
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), timeoutMs);
       try {
         const res = await fetch(pUrl, { signal: ctrl.signal });
         clearTimeout(timer);
-        if (!res.ok) throw new Error("status " + res.status);
+        if (!res.ok) throw new Error("err");
         const text = await res.text();
         if (!text || text.length < 200) throw new Error("empty");
         return text;
@@ -1385,7 +1725,6 @@
         throw err;
       }
     });
-
     return Promise.any(tasks);
   }
 
@@ -1397,8 +1736,6 @@
     }
     const cacheKey = normalizeStr(q);
     const localMatches = searchLocalDB(q);
-
-    // 캐시에 있으면 0.001초 즉시 반환
     if (webFoodCache[cacheKey] && webFoodCache[cacheKey].length > 0) {
       renderFoodSearchResults([...localMatches, ...webFoodCache[cacheKey]], true);
       return;
@@ -1449,51 +1786,16 @@
       return items;
     };
 
-    const parseOpenFoodFacts = async () => {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 2000);
-      try {
-        const offUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=5`;
-        const resp = await fetch(offUrl, { signal: ctrl.signal });
-        clearTimeout(timer);
-        const data = await resp.json();
-        const items = [];
-        (data.products || []).forEach(p => {
-          const n = p.nutriments || {};
-          const kcal = Math.round(n["energy-kcal_serving"] || n["energy-kcal_100g"] || 0);
-          if (p.product_name && kcal > 0) {
-            items.push({
-              name: p.product_name_ko || p.product_name,
-              serving: p.serving_size || "100g 기준",
-              kcal,
-              carb: Math.round((n.carbohydrates_serving || n.carbohydrates_100g || 0) * 10) / 10,
-              prot: Math.round((n.proteins_serving || n.proteins_100g || 0) * 10) / 10,
-              fat: Math.round((n.fat_serving || n.fat_100g || 0) * 10) / 10,
-              satFat: 0, sugar: 0, sodium: 0, isWeb: true
-            });
-          }
-        });
-        return items;
-      } catch (e) {
-        clearTimeout(timer);
-        return [];
-      }
-    };
-
-    // 두 엔진을 병렬로 동시에 실행
-    const settled = await Promise.allSettled([parseFatSecret(), parseOpenFoodFacts()]);
+    const settled = await Promise.allSettled([parseFatSecret()]);
     const webResults = [];
     settled.forEach(r => {
-      if (r.status === "fulfilled" && Array.isArray(r.value)) {
-        webResults.push(...r.value);
-      }
+      if (r.status === "fulfilled" && Array.isArray(r.value)) webResults.push(...r.value);
     });
 
     if (webResults.length > 0) {
       webFoodCache[cacheKey] = webResults.slice(0, 12);
       saveWebCache();
     }
-
     btn.textContent = "⚡ 초고속 웹검색";
     renderFoodSearchResults([...localMatches, ...webResults], true);
   }
@@ -1587,13 +1889,14 @@
     const carb = parseInt(document.getElementById("foodCarb").value || "0", 10);
     const prot = parseInt(document.getElementById("foodProt").value || "0", 10);
     const fat = parseInt(document.getElementById("foodFat").value || "0", 10);
+    const sodium = selectedFoodBase ? (selectedFoodBase.sodium || 0) : 0;
 
     if (!name || isNaN(kcal)) {
       alert("음식 이름과 칼로리를 입력해주세요.");
       return;
     }
     ensureDateLog(currentDate);
-    state.logs[currentDate].foods.push({ meal, name, kcal, carb, prot, fat });
+    state.logs[currentDate].foods.push({ meal, name, kcal, carb, prot, fat, sodium });
     saveState();
 
     document.getElementById("foodName").value = "";
@@ -1603,6 +1906,7 @@
     document.getElementById("foodFat").value = "";
     document.getElementById("foodSearchInput").value = "";
     document.getElementById("nutritionLabelBox").style.display = "none";
+    selectedFoodBase = null;
     render();
   }
 
@@ -1640,15 +1944,127 @@
     render();
   }
 
+  // ===== [신기능 5] 주간 7일 리포트 & 데이터 영구 백업/복원 =====
+  function renderWeeklyReport() {
+    const p = state.profile;
+    const baseTdee = Math.round(p.bmr * p.activity);
+    const days = [];
+    let totalDeficit7d = 0;
+    let totalProt7d = 0;
+    let totalExKcal7d = 0;
+
+    for (let i = 6; i >= 0; i--) {
+      const dStr = getOffsetDateStr(currentDate, -i);
+      const l = state.logs[dStr];
+      const eaten = l && l.foods ? l.foods.reduce((s, x) => s + x.kcal, 0) : 0;
+      const prot = l && l.foods ? l.foods.reduce((s, x) => s + (x.prot || 0), 0) : 0;
+      const ex = l && l.exercises ? l.exercises.reduce((s, x) => s + x.kcal, 0) : 0;
+      const burned = baseTdee + ex;
+      const hasData = (eaten > 0 || ex > 0);
+      const net = hasData ? (eaten - burned) : 0;
+      if (hasData) {
+        totalDeficit7d += net;
+        totalProt7d += prot;
+        totalExKcal7d += ex;
+      }
+      days.push({
+        date: dStr.slice(5),
+        weight: l && l.weight ? l.weight : p.weight,
+        eaten, burned, net, hasData
+      });
+    }
+
+    const estFatGrams = totalDeficit7d < 0 ? Math.round(Math.abs(totalDeficit7d) / 7.7) : 0;
+    document.getElementById("weeklyFatLossBadge").textContent = `7일 누적 지방 -${estFatGrams}g 연소`;
+    document.getElementById("weeklySummaryBox").innerHTML = `
+      • <b>최근 7일 누적 칼로리 밸런스:</b> <b>${totalDeficit7d > 0 ? "+" : ""}${totalDeficit7d.toLocaleString()} kcal</b> (순수 체지방 약 <b>${estFatGrams}g</b> 감량 상당)<br/>
+      • <b>최근 7일 총 운동 소모량:</b> <b>-${totalExKcal7d.toLocaleString()} kcal</b> | <b>누적 단백질 섭취:</b> <b>${totalProt7d.toLocaleString()} g</b><br/>
+      • <b>인바디 목표 진행도:</b> 시작 81.0kg → 현재 <b>${p.weight}kg</b> (목표 ${p.targetWeight}kg까지 <b>${Math.max(0, (p.weight - p.targetWeight)).toFixed(1)}kg</b> 남음)
+    `;
+
+    const chartEl = document.getElementById("weeklyChartContainer");
+    chartEl.innerHTML = days.map(d => {
+      const pct = d.hasData ? Math.min(100, Math.round((d.eaten / Math.max(1, d.burned)) * 100)) : 0;
+      const barColor = !d.hasData ? "var(--sub)" : (d.net <= 0 ? "var(--green)" : "var(--danger)");
+      const statusStr = !d.hasData ? "기록없음" : `${d.net > 0 ? '+' : ''}${d.net}kcal`;
+      return `
+        <div class="chart-row">
+          <div><b>${d.date}</b><br/><span style="font-size:10px; color:var(--sub);">${d.weight}kg</span></div>
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:10.5px; margin-bottom:2px;">
+              <span>섭취 ${d.eaten} / 소모 ${d.burned}</span>
+              <span>${pct}%</span>
+            </div>
+            <div class="chart-bar-wrap">
+              <div class="chart-bar-inner" style="width:${pct}%; background:${barColor};"></div>
+            </div>
+          </div>
+          <div style="text-align:right; font-weight:800; color:${barColor};">${statusStr}</div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function exportBackupClipboard() {
+    const jsonStr = JSON.stringify(state);
+    document.getElementById("backupJsonArea").value = jsonStr;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(jsonStr).then(() => {
+        alert("전체 데이터가 클립보드에 복사되었습니다! 아이폰 메모장에 붙여넣어 보관하세요.");
+      }).catch(() => {
+        alert("아래 입력창에 백업 코드가 생성되었습니다. 전체 선택 후 복사하세요.");
+      });
+    }
+  }
+
+  function downloadBackupFile() {
+    const jsonStr = JSON.stringify(state, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `inbody_backup_${currentDate}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function restoreFromTextarea() {
+    const raw = document.getElementById("backupJsonArea").value.trim();
+    if (!raw) {
+      alert("복원할 백업 코드를 먼저 붙여넣어 주세요.");
+      return;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      if (!parsed.profile || !parsed.logs) throw new Error("invalid");
+      state = { ...defaultState, ...parsed };
+      saveState();
+      render();
+      renderWeeklyReport();
+      alert("백업 데이터가 완벽하게 복원되었습니다!");
+    } catch (e) {
+      alert("올바른 백업 코드 형식이 아닙니다.");
+    }
+  }
+
+  function restoreFromFile(ev) {
+    const file = ev.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById("backupJsonArea").value = e.target.result;
+      restoreFromTextarea();
+    };
+    reader.readAsText(file);
+  }
+
   function onDateChange() {
     currentDate = document.getElementById("datePicker").value || getTodayStr();
     render();
   }
 
   function changeDate(days) {
-    const d = new Date(currentDate);
-    d.setDate(d.getDate() + days);
-    currentDate = d.toISOString().split("T")[0];
+    currentDate = getOffsetDateStr(currentDate, days);
     document.getElementById("datePicker").value = currentDate;
     render();
   }
@@ -1673,6 +2089,7 @@
     document.getElementById("chipWeight").textContent = `${p.weight} / ${p.targetWeight}kg`;
     document.getElementById("chipSmm").textContent = `${p.smm} kg`;
     document.getElementById("chipBfm").textContent = `${p.bfm}kg (${p.pbf}%)`;
+    document.getElementById("dailyWeightInput").value = log.weight || p.weight;
 
     const baseTdee = Math.round(p.bmr * p.activity);
     const exKcal = log.exercises.reduce((sum, item) => sum + item.kcal, 0);
@@ -1687,8 +2104,14 @@
     const targetIntake = Math.max(p.bmr, totalBurned - (p.deficit || 500));
 
     const eatenKcal = log.foods.reduce((sum, item) => sum + item.kcal, 0);
+    const eatenCarb = log.foods.reduce((sum, item) => sum + (item.carb || 0), 0);
     const eatenProt = log.foods.reduce((sum, item) => sum + (item.prot || 0), 0);
-    const targetProt = Math.round(p.weight * 1.6);
+    const eatenFat = log.foods.reduce((sum, item) => sum + (item.fat || 0), 0);
+    const eatenSodium = log.foods.reduce((sum, item) => sum + (item.sodium || 0), 0);
+
+    const targetProt = Math.round(p.weight * 1.6); // 130g
+    const targetFat = Math.round(p.weight * 0.65); // 약 53g
+    const targetCarb = Math.max(130, Math.round((targetIntake - (targetProt * 4) - (targetFat * 9)) / 4));
 
     document.getElementById("valBmr").textContent = `${p.bmr.toLocaleString()} kcal`;
     document.getElementById("valTdee").textContent = `${totalBurned.toLocaleString()} kcal`;
@@ -1712,15 +2135,41 @@
     }
     document.getElementById("calPctText").textContent = `${calPct}%`;
 
+    // 탄·단·지 바 업데이트
+    const carbPct = Math.min(100, Math.round((eatenCarb / Math.max(1, targetCarb)) * 100));
     const protPct = Math.min(100, Math.round((eatenProt / Math.max(1, targetProt)) * 100));
-    document.getElementById("protBar").style.width = `${protPct}%`;
-    document.getElementById("protStatusText").textContent = `근손실 방지 단백질: ${eatenProt}g / ${targetProt}g`;
-    document.getElementById("protPctText").textContent = `${protPct}%`;
+    const fatPct = Math.min(100, Math.round((eatenFat / Math.max(1, targetFat)) * 100));
+    document.getElementById("macroCarbText").textContent = `${eatenCarb} / ${targetCarb}g`;
+    document.getElementById("macroProtText").textContent = `${eatenProt} / ${targetProt}g`;
+    document.getElementById("macroFatText").textContent = `${eatenFat} / ${targetFat}g`;
+    document.getElementById("macroCarbBar").style.width = `${carbPct}%`;
+    document.getElementById("macroProtBar").style.width = `${protPct}%`;
+    document.getElementById("macroFatBar").style.width = `${fatPct}%`;
 
-    const suppScores = SUPP_META.map(m => Math.min(1, (supps[m.id] || 0) / m.target));
-    const suppAvgPct = Math.round((suppScores.reduce((a, b) => a + b, 0) / SUPP_META.length) * 100);
-    document.getElementById("suppBar").style.width = `${suppAvgPct}%`;
-    document.getElementById("suppPctText").textContent = `${suppAvgPct}%`;
+    // 수분 & 나트륨 트래커 업데이트 (나트륨 2000mg 초과 시 목표 수분량 상향)
+    const baseWaterTarget = 2800;
+    const extraWaterForSodium = eatenSodium > 2000 ? Math.round((eatenSodium - 2000) * 0.25) : 0;
+    const totalWaterTarget = baseWaterTarget + extraWaterForSodium;
+    const curWater = log.waterMl || 0;
+    const waterPct = Math.min(100, Math.round((curWater / totalWaterTarget) * 100));
+
+    document.getElementById("waterBadge").textContent = `${curWater.toLocaleString()} / ${totalWaterTarget.toLocaleString()} ml`;
+    document.getElementById("waterBar").style.width = `${waterPct}%`;
+    document.getElementById("waterPctText").textContent = `${waterPct}%`;
+    document.getElementById("sodiumStatusText").textContent = eatenSodium > 2000
+      ? `⚠️ 나트륨 과다(${eatenSodium.toLocaleString()}mg): 부종 방지 물 +${extraWaterForSodium}ml 추가 권장`
+      : `오늘 섭취 나트륨: ${eatenSodium.toLocaleString()} mg (세포외수분비 0.368 안정권)`;
+
+    // 식단 세트 & 운동 루틴 칩 렌더링
+    const mealChips = document.getElementById("customMealPresetChips");
+    mealChips.innerHTML = (state.mealPresets || []).map((mp, idx) => `
+      <span class="cat-chip" onclick="applyMealPreset(${idx})">🍱 ${mp.name} <b style="color:var(--danger); margin-left:4px;" onclick="deleteMealPreset(${idx}, event)">×</b></span>
+    `).join("");
+
+    const workoutChips = document.getElementById("customWorkoutRoutineChips");
+    workoutChips.innerHTML = (state.workoutRoutines || []).map(( wr, idx) => `
+      <span class="cat-chip" onclick="applyWorkoutRoutine(${idx})">🔥 ${wr.name} <b style="color:var(--danger); margin-left:4px;" onclick="deleteWorkoutRoutine(${idx}, event)">×</b></span>
+    `).join("");
 
     document.getElementById("foodTabBadge").textContent = `${eatenKcal.toLocaleString()} kcal / 단백질 ${eatenProt}g`;
     document.getElementById("exTabBadge").textContent = `-${exKcal.toLocaleString()} kcal`;
@@ -1728,13 +2177,13 @@
 
     const foodList = document.getElementById("foodList");
     if (log.foods.length === 0) {
-      foodList.innerHTML = `<li class="empty-msg">위 검색창에 '풀무원 얇은피 만두', '샤인머스캣', '사과' 등을 타이핑해 보세요!</li>`;
+      foodList.innerHTML = `<li class="empty-msg">위 검색창에 음식을 입력하거나 [어제 식단 불러오기]를 눌러보세요!</li>`;
     } else {
       foodList.innerHTML = log.foods.map((f, i) => `
         <li class="log-item">
           <div class="log-left">
             <span class="log-title">[${f.meal}] ${f.name}</span>
-            <span class="log-sub">탄수화물 ${f.carb || 0}g · 단백질 ${f.prot || 0}g · 지방 ${f.fat || 0}g</span>
+            <span class="log-sub">탄 ${f.carb || 0}g · 단 ${f.prot || 0}g · 지 ${f.fat || 0}g${f.sodium ? ' · 나트륨 '+f.sodium+'mg' : ''}</span>
           </div>
           <div class="log-right">
             <span class="log-kcal">+${f.kcal} kcal</span>
@@ -1746,7 +2195,7 @@
 
     const exList = document.getElementById("exList");
     if (log.exercises.length === 0) {
-      exList.innerHTML = `<li class="empty-msg">오늘 기록된 운동이 없습니다. 위에서 웨이트나 유산소를 추가해 보세요!</li>`;
+      exList.innerHTML = `<li class="empty-msg">오늘 기록된 운동이 없습니다.</li>`;
     } else {
       exList.innerHTML = log.exercises.map((ex, i) => `
         <li class="log-item">
@@ -1794,8 +2243,8 @@
     const expectedFatLossGrams = netDiff < 0 ? Math.round(Math.abs(netDiff) / 7.7) : 0;
     document.getElementById("dailyInsightBox").innerHTML = `
       • <b>예상 체지방 감량 속도:</b> 오늘 현재 칼로리 밸런스(<b>${netDiff} kcal</b>) 기준 약 <b>${expectedFatLossGrams}g</b>의 체지방이 연소되는 페이스입니다.<br/>
-      • <b>근육 보존 & 단백질:</b> 골격근량(${p.smm}kg) 유지를 위한 단백질 달성률은 <b>${protPct}%</b>(${eatenProt}g/${targetProt}g)입니다.<br/>
-      • <b>영양제 복용 타이밍 요약:</b> <b>L-아르기닌</b>은 운동 30~45분 전 <b>완전 공복</b>에, <b>오메가-3·밀크씨슬·비타민C</b>는 담즙 분비와 위벽 보호를 위해 <b>식사 직후~15분 이내</b>에 드세요!
+      • <b>탄·단·지 & 수분 밸런스:</b> 단백질 달성률 <b>${protPct}%</b>(${eatenProt}g/${targetProt}g), 수분 섭취율 <b>${waterPct}%</b>(${curWater}ml/${totalWaterTarget}ml)입니다.<br/>
+      • <b>영양제 골든타임:</b> <b>L-아르기닌</b>은 운동 30~45분 전 <b>완전 공복</b>에, <b>오메가-3·밀크씨슬·비타민C</b>는 <b>식사 직후~15분 이내</b>에 드세요!
     `;
   }
 
