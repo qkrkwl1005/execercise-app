@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="인바디 매니저" />
-  <title>인바디 프로 매니저 마스터</title>
+  <meta name="apple-mobile-web-app-title" content="인바디 프로" />
+  <link id="appleTouchIconLink" rel="apple-touch-icon" href="" />
+  <link id="favIconLink" rel="icon" type="image/png" href="" />
+  <title>인바디 프로 매니저 V8</title>
   <style>
     :root {
       --bg: #F2F4F8;
@@ -54,7 +56,8 @@
       display: flex; justify-content: space-between; align-items: center;
       padding: 8px 2px; margin-bottom: 6px;
     }
-    .header h1 { font-size: 18px; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
+    .header h1 { font-size: 18px; font-weight: 800; margin: 0; letter-spacing: -0.5px; display: flex; align-items: center; gap: 7px; }
+    .app-logo-mini { width: 26px; height: 26px; border-radius: 7px; vertical-align: middle; }
     .header-actions { display: flex; gap: 5px; }
     .btn-outline {
       background: var(--card); border: 1px solid var(--border); border-radius: 10px;
@@ -63,7 +66,7 @@
     .date-bar {
       display: flex; justify-content: space-between; align-items: center;
       background: var(--card); border-radius: 14px; padding: 7px 12px;
-      margin-bottom: 12px; border: 1px solid var(--border);
+      margin-bottom: 10px; border: 1px solid var(--border);
     }
     .date-bar button {
       background: var(--box); color: var(--text); border: 1px solid var(--border); border-radius: 8px;
@@ -81,14 +84,13 @@
       padding: 8px 12px; margin-bottom: 12px;
     }
     .timer-display {
-      font-size: 15px; font-weight: 900; color: var(--primary); font-variant-numeric: tabular-nums;
+      font-size: 14px; font-weight: 900; color: var(--primary); font-variant-numeric: tabular-nums;
     }
     .timer-btns { display: flex; gap: 5px; }
     .timer-btn {
       background: var(--box); border: 1px solid var(--border); border-radius: 8px;
       padding: 5px 8px; font-size: 11px; font-weight: 700; color: var(--text); cursor: pointer;
     }
-    .timer-btn.active { background: var(--primary); color: #FFF; border-color: var(--primary); }
 
     /* 탭 전환 */
     .tab-pane { display: none; }
@@ -112,6 +114,7 @@
     .badge.purple { background: rgba(124, 58, 237, 0.16); color: var(--purple); }
     .badge.green { background: rgba(16, 185, 129, 0.16); color: var(--green); }
     .badge.cyan { background: rgba(8, 145, 178, 0.16); color: var(--cyan); }
+    .badge.amber { background: rgba(245, 158, 11, 0.18); color: var(--amber); }
 
     /* 인바디 칩 */
     .inbody-chips {
@@ -132,6 +135,16 @@
     .metric-box .m-label { font-size: 11px; color: var(--sub); margin-bottom: 3px; }
     .metric-box .m-val { font-size: 16px; font-weight: 800; }
     .metric-box .m-sub { font-size: 11px; color: var(--sub); margin-top: 2px; }
+
+    /* 주간 칼로리 뱅크 배너 */
+    .bank-banner {
+      background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(37, 99, 235, 0.28);
+      border-radius: 14px; padding: 11px 12px; margin-top: 12px; font-size: 12px; line-height: 1.5;
+    }
+    .bank-banner.debt {
+      background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.4);
+    }
+    .bank-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
 
     /* 프로그레스 바 */
     .progress-wrap { margin-top: 10px; }
@@ -184,7 +197,6 @@
     }
     .btn-green { background: var(--green); }
     .btn-amber { background: #D97706; }
-    .btn-cyan { background: var(--cyan); }
 
     /* 서브 모드 전환 스위치 */
     .sub-tabs {
@@ -220,7 +232,9 @@
       flex: 1; background: var(--box); border: 1px solid var(--border); border-radius: 10px;
       padding: 8px 8px; font-size: 11px; font-weight: 700; color: var(--text); cursor: pointer; text-align: center;
     }
-    .btn-soft:active { background: rgba(37, 99, 235, 0.15); border-color: var(--primary); }
+    .btn-soft.active {
+      background: rgba(37, 99, 235, 0.18); border-color: var(--primary); color: var(--primary);
+    }
 
     /* 실시간 음식 검색창 & 결과 */
     .search-bar-wrap { display: flex; gap: 6px; margin-bottom: 8px; }
@@ -334,11 +348,19 @@
     }
     .empty-msg { text-align: center; color: var(--sub); font-size: 12px; padding: 12px 0; }
 
-    /* 영양제 카드 */
+    /* 영양제 카드 & 시간대별 타임라인 */
     .timeline-box {
       background: var(--box); border: 1px solid var(--border); border-radius: 14px;
-      padding: 12px; margin-bottom: 14px; font-size: 12px; line-height: 1.6;
+      padding: 12px; margin-bottom: 12px; font-size: 12px; line-height: 1.65;
     }
+    .slot-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 8px;
+    }
+    .slot-btn {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px; font-size: 11px; font-weight: 700; color: var(--text); cursor: pointer; text-align: left;
+    }
+    .slot-btn:active { border-color: var(--purple); background: rgba(124, 58, 237, 0.1); }
     .supp-item {
       background: var(--box); border: 1px solid var(--border); border-radius: 14px;
       padding: 12px; margin-bottom: 10px;
@@ -351,6 +373,7 @@
       font-size: 11px; font-weight: 800; background: rgba(16, 185, 129, 0.16); color: var(--green);
     }
     .timing-badge.fasted { background: rgba(245, 158, 11, 0.18); color: var(--amber); }
+    .timing-badge.night { background: rgba(124, 58, 237, 0.18); color: var(--purple); }
     .supp-controls { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
     .supp-controls input { margin-bottom: 0; padding: 6px 8px; font-size: 14px; width: 90px; background: var(--card); }
     .btn-quick {
@@ -403,9 +426,12 @@
 <body>
 
 <div class="container">
-  <!-- 상단 헤더 -->
+  <!-- 상단 헤더 (자동 생성된 고화질 앱 아이콘 미니 프리뷰 포함) -->
   <div class="header">
-    <h1 id="headerTitle">📊 김동욱님의 인바디 매니저</h1>
+    <h1>
+      <img id="headerLogoImg" class="app-logo-mini" alt="icon" />
+      <span id="headerTitle">김동욱님의 인바디 프로</span>
+    </h1>
     <div class="header-actions">
       <button class="btn-outline" id="themeBtn" onclick="toggleDarkMode()">🌙 다크</button>
       <button class="btn-outline" onclick="openModal()">인바디 수정</button>
@@ -419,7 +445,7 @@
     <button onclick="changeDate(1)">›</button>
   </div>
 
-  <!-- 상단 헬스장 세트 휴식 타이머 (알람음 지원) -->
+  <!-- 상단 헬스장 세트 휴식 타이머 -->
   <div class="timer-bar">
     <div>
       <span style="font-size:11px; font-weight:700; color:var(--sub); margin-right:6px;">⏱️ 세트 휴식 타이머</span>
@@ -456,27 +482,38 @@
         </div>
       </div>
 
-      <!-- 오늘 공복 체중 빠른 기록 & 일상 활동량 -->
-      <div class="row-2" style="margin-bottom:4px;">
+      <!-- [신기능 5] 오늘 공복 체중 + 수면 시간 + 컨디션 연동 입력 -->
+      <div class="row-3" style="margin-bottom:2px;">
         <div>
-          <label class="field-label">오늘 공복 체중 기록 (kg)</label>
-          <input type="number" step="0.1" id="dailyWeightInput" placeholder="81.0" onchange="saveDailyWeight()" style="margin-bottom:0;" />
+          <label class="field-label">오늘 공복 체중(kg)</label>
+          <input type="number" step="0.1" id="dailyWeightInput" placeholder="81.0" onchange="saveDailyBio()" style="margin-bottom:4px;" />
         </div>
         <div>
-          <label class="field-label">평소 일상 활동량</label>
-          <select id="activitySelect" onchange="changeActivity()" style="margin-bottom:0;">
-            <option value="1.2">좌식 생활 (운동 별도)</option>
-            <option value="1.35">가벼운 활동 (이동 많음)</option>
-            <option value="1.5">활동적 (육체 활동)</option>
+          <label class="field-label">수면 시간(시간)</label>
+          <input type="number" step="0.5" id="dailySleepInput" placeholder="7.0" onchange="saveDailyBio()" style="margin-bottom:4px;" />
+        </div>
+        <div>
+          <label class="field-label">오늘 컨디션</label>
+          <select id="dailyCondSelect" onchange="saveDailyBio()" style="margin-bottom:4px;">
+            <option value="good">🔥 최상 (회복완벽)</option>
+            <option value="normal" selected>🙂 보통 (정상대사)</option>
+            <option value="tired">😴 피로/수면부족</option>
           </select>
         </div>
       </div>
 
+      <label class="field-label">평소 일상 활동량</label>
+      <select id="activitySelect" onchange="changeActivity()" style="margin-bottom:4px;">
+        <option value="1.2">좌식 생활 (학업·사무 위주 / 운동 별도)</option>
+        <option value="1.35">가벼운 활동 (일상 이동 많음)</option>
+        <option value="1.5">활동적 (육체 활동 많음)</option>
+      </select>
+
       <div class="metrics-grid">
         <div class="metric-box">
-          <div class="m-label">기초대사량 (BMR)</div>
+          <div class="m-label">기초대사량 (실시간 연동)</div>
           <div class="m-val" id="valBmr">1,764 kcal</div>
-          <div class="m-sub">가만히 있어도 소모</div>
+          <div class="m-sub" id="valBmrSub">인바디 81.0kg 기준</div>
         </div>
         <div class="metric-box">
           <div class="m-label">총 소모량 (활동+운동+시너지)</div>
@@ -484,9 +521,9 @@
           <div class="m-sub" id="valTdeeSub">운동 0 + 시너지 0 kcal</div>
         </div>
         <div class="metric-box">
-          <div class="m-label">권장 섭취 목표 (-500)</div>
+          <div class="m-label" id="lblTargetTitle">권장 섭취 목표 (-500)</div>
           <div class="m-val" style="color: var(--green);" id="valTarget">1,764 kcal</div>
-          <div class="m-sub">지방 -5.1kg 감량 기준</div>
+          <div class="m-sub" id="valTargetSub">지방 -5.1kg 감량 기준</div>
         </div>
         <div class="metric-box">
           <div class="m-label">오늘 섭취한 칼로리</div>
@@ -504,6 +541,15 @@
         <div class="progress-bar-bg">
           <div class="progress-bar-fill" id="calBar" style="width: 0%;"></div>
         </div>
+      </div>
+
+      <!-- [신기능 3] 주간 칼로리 뱅크 (회식/치팅데이 자동 만회 계산기) -->
+      <div class="bank-banner" id="calorieBankBanner">
+        <div class="bank-top">
+          <b id="bankTitleText">🏦 주간 칼로리 뱅크 (최근 6일 누적)</b>
+          <button class="btn-outline" id="btnToggleBankAuto" style="padding:3px 8px; font-size:10.5px;" onclick="toggleBankAutoAdjust()">⚖️ 자동 보정 OFF</button>
+        </div>
+        <div id="bankBodyText">최근 6일간 초과 섭취 이력이 없습니다.</div>
       </div>
 
       <!-- 탄·단·지 3대 영양소 정밀 밸런스 -->
@@ -532,15 +578,15 @@
       </div>
     </div>
 
-    <!-- 수분 & 나트륨 관리 카드 (체수분 47.1L / 세포외수분비 0.368 관리) -->
+    <!-- 수분 & 나트륨 관리 카드 (크레아틴·나트륨 연동) -->
     <div class="card">
       <div class="card-title">
-        <span>💧 수분 섭취 & 나트륨(부종) 트래커</span>
+        <span>💧 수분 섭취 & 나트륨·크레아틴 연동</span>
         <span class="badge cyan" id="waterBadge">0 / 2,800 ml</span>
       </div>
       <div class="progress-wrap" style="margin-top:0; margin-bottom:10px;">
         <div class="progress-header">
-          <span id="sodiumStatusText">오늘 섭취 나트륨: 0 mg (적정 2,000mg 이하)</span>
+          <span id="sodiumStatusText">오늘 섭취 나트륨: 0 mg</span>
           <span id="waterPctText">0%</span>
         </div>
         <div class="progress-bar-bg">
@@ -548,7 +594,7 @@
         </div>
       </div>
       <div class="quick-action-bar" style="margin-bottom:0;">
-        <button class="btn-soft" onclick="addWater(250)">+ 250ml (종이컵/한컵)</button>
+        <button class="btn-soft" onclick="addWater(250)">+ 250ml (한 컵)</button>
         <button class="btn-soft" onclick="addWater(500)">+ 500ml (생수 1병)</button>
         <button class="btn-soft" style="flex:0.4; color:var(--danger);" onclick="resetWater()">초기화</button>
       </div>
@@ -556,7 +602,7 @@
 
     <div class="card">
       <div class="card-title">
-        <span>💡 실시간 신체 시너지 분석 리포트</span>
+        <span>💡 수면·컨디션·대사 종합 피드백</span>
       </div>
       <div id="dailyInsightBox" style="font-size: 12.5px; line-height: 1.6;"></div>
     </div>
@@ -570,7 +616,6 @@
         <span class="badge green" id="foodTabBadge">0 kcal</span>
       </div>
 
-      <!-- 어제 식단 복사 & 나만의 식단 세트 버튼 -->
       <div class="quick-action-bar">
         <button class="btn-soft" onclick="copyYesterday('foods')">📋 어제 식단 그대로 불러오기</button>
         <button class="btn-soft" onclick="saveCurrentMealPreset()">⭐ 현재 식단 세트로 저장</button>
@@ -656,7 +701,7 @@
     </div>
   </div>
 
-  <!-- ==================== [탭 3] 정밀 웨이트(피라미드 세트 지원) & 유산소 ==================== -->
+  <!-- ==================== [탭 3] 정밀 웨이트 & 유산소 ==================== -->
   <div id="tab-workout" class="tab-pane">
     <div class="card">
       <div class="card-title">
@@ -664,7 +709,6 @@
         <span class="badge" id="exTabBadge">-0 kcal</span>
       </div>
 
-      <!-- 어제 운동 복사 & 루틴 저장 -->
       <div class="quick-action-bar">
         <button class="btn-soft" onclick="copyYesterday('exercises')">📋 어제 운동 그대로 불러오기</button>
         <button class="btn-soft" onclick="saveCurrentWorkoutRoutine()">⭐ 오늘 운동 루틴으로 저장</button>
@@ -694,6 +738,9 @@
         <label class="field-label">종목 선택 (프리웨이트 / 스미스머신 / 덤벨 / 케이블 구분 계산)</label>
         <select id="exPreset" onchange="onSelectWeightEx()"></select>
 
+        <!-- 직전 기록 & 추정 1RM 표시줄 -->
+        <div id="prevRecordBanner" style="font-size:11.5px; color:var(--primary); font-weight:700; margin: -2px 0 8px 2px;"></div>
+
         <div class="row-4">
           <div>
             <label class="field-label" id="lblExWeight">중량(kg)</label>
@@ -713,7 +760,6 @@
           </div>
         </div>
 
-        <!-- 피라미드 세트(세트별 중량이 다를 때) 누적 버튼 -->
         <div class="quick-action-bar" style="margin-top:-2px;">
           <button class="btn-soft" onclick="addPyramidSet()">➕ 피라미드 세트 추가 (세트별 무게가 다를 때)</button>
           <button class="btn-soft" style="flex:0.35; color:var(--danger);" onclick="clearPyramidSets()">세트 초기화</button>
@@ -796,26 +842,31 @@
     </div>
   </div>
 
-  <!-- ==================== [탭 4] 영양제 복용 타이밍 & 팩트 분석 ==================== -->
+  <!-- ==================== [탭 4] 영양제 10종 골든타임 & 약학·생리학 팩트 ==================== -->
   <div id="tab-supp" class="tab-pane">
     <div class="card">
       <div class="card-title">
-        <span>💊 영양제 골든타임 & 정밀 팩트 분석</span>
+        <span>💊 영양제 10종 골든타임 & 약학 팩트</span>
         <span class="badge purple" id="suppTabBadge">운동 보조 시너지</span>
       </div>
 
+      <!-- 시간대별 원클릭 일괄 체크 타임라인 -->
       <div class="timeline-box">
-        <b>⏰ 하루 시간대별 최적 복용 스케줄 (흡수율 극대화 기준)</b><br/>
-        • <b>아침 식사 직후 (15분 내):</b> 비타민 C 500~1,000mg (위벽 자극 방지·오전 항산화)<br/>
-        • <b>운동 30~45분 전 (완전 공복):</b> L-아르기닌 3,000~5,000mg (단백질과 흡수 경쟁 차단)<br/>
-        • <b>저녁 식사 직후 (15분 내):</b> 오메가-3 + 밀크씨슬 + 비타민 C (담즙산 분비 시 지용성/난용성 성분 동시 용해·흡수 극대화)
+        <b>⏰ 하루 시간대별 원클릭 복용 체크 (누르면 해당 시간 영양제가 일괄 입력됩니다)</b>
+        <div class="slot-grid">
+          <button class="slot-btn" onclick="checkSuppSlot('morning_fasted')">🌅 <b>1. 기상 직후 공복</b><br/><span style="color:var(--sub); font-size:10px;">유산균 1캡슐 + 물 1컵</span></button>
+          <button class="slot-btn" onclick="checkSuppSlot('morning_meal')">☀️ <b>2. 아침/점심 식후 15분</b><br/><span style="color:var(--sub); font-size:10px;">비타민B군 + 비타민C 500mg</span></button>
+          <button class="slot-btn" onclick="checkSuppSlot('pre_workout')">⚡ <b>3. 운동 30~45분전 공복</b><br/><span style="color:var(--sub); font-size:10px;">아르기닌 4,000 + 카르니틴</span></button>
+          <button class="slot-btn" onclick="checkSuppSlot('post_workout_dinner')">🍽️ <b>4. 운동후/저녁 식후즉시</b><br/><span style="color:var(--sub); font-size:10px;">크레아틴+오메가3+비타민D/C+밀크씨슬</span></button>
+        </div>
+        <button class="slot-btn" style="width:100%; margin-top:6px; text-align:center;" onclick="checkSuppSlot('before_sleep')">🌙 <b>5. 취침 30~60분 전:</b> 마그네슘 350mg (근이완·수면·코르티솔 억제)</button>
       </div>
 
       <div id="suppContainer"></div>
     </div>
   </div>
 
-  <!-- ==================== [탭 5] 주간 리포트 & 데이터 영구 백업/복원 ==================== -->
+  <!-- ==================== [탭 5] 주간 리포트 · 앱 아이콘 커스텀 · 백업 ==================== -->
   <div id="tab-report" class="tab-pane">
     <div class="card">
       <div class="card-title">
@@ -826,13 +877,29 @@
       <div id="weeklyChartContainer"></div>
     </div>
 
+    <!-- [신기능 5] 아이폰 전용 고화질 홈 화면 앱 아이콘 생성기 -->
+    <div class="card">
+      <div class="card-title">
+        <span>📱 아이폰 홈 화면 전용 앱 아이콘 설정</span>
+        <span class="badge purple">고해상도 512px</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:10px;">
+        <img id="iconPreviewLarge" style="width:68px; height:68px; border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.2);" alt="App Icon Preview" />
+        <div style="font-size:12px; color:var(--sub); line-height:1.45;">
+          원하는 아이콘 테마를 선택한 뒤 사파리 하단 <b>[공유 ↑] → [홈 화면에 추가]</b>를 누르면 위 고화질 아이콘이 아이폰 바탕화면에 등록됩니다.
+        </div>
+      </div>
+      <div class="row-3">
+        <button class="btn-soft" onclick="changeIconTheme('navy')">🌌 다크 네이비</button>
+        <button class="btn-soft" onclick="changeIconTheme('emerald')">🌿 에메랄드 핏</button>
+        <button class="btn-soft" onclick="changeIconTheme('purple')">⚡ 퍼플 부스터</button>
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-title">
         <span>💾 데이터 영구 백업 & 복원 (증발 방지)</span>
       </div>
-      <p style="font-size:12px; color:var(--sub); margin-top:-4px; line-height:1.45;">
-        아이폰 사파리 캐시 삭제나 기기 변경에 대비해 전체 기록을 파일이나 텍스트로 안전하게 백업하고 복원할 수 있습니다.
-      </p>
       <div class="row-2" style="margin-bottom:8px;">
         <button class="btn-primary" style="margin-top:0;" onclick="exportBackupClipboard()">📋 백업코드 복사하기</button>
         <button class="btn-primary btn-green" style="margin-top:0;" onclick="downloadBackupFile()">📥 백업파일(.json) 저장</button>
@@ -865,11 +932,11 @@
   </button>
   <button class="nav-btn" onclick="switchTab('supp', this)">
     <span class="icon">💊</span>
-    <span>영양제</span>
+    <span>영양제(10종)</span>
   </button>
   <button class="nav-btn" onclick="switchTab('report', this)">
     <span class="icon">📈</span>
-    <span>리포트·백업</span>
+    <span>리포트·아이콘</span>
   </button>
 </nav>
 
@@ -917,8 +984,8 @@
 </div>
 
 <script>
-  const STORAGE_KEY = "INBODY_IOS_APP_V7";
-  const PREV_KEYS = ["INBODY_IOS_APP_V6", "INBODY_IOS_APP_V5", "INBODY_IOS_APP_V4", "INBODY_IOS_APP_V3", "INBODY_IOS_APP_V2", "INBODY_IOS_APP_V1"];
+  const STORAGE_KEY = "INBODY_IOS_APP_V8";
+  const PREV_KEYS = ["INBODY_IOS_APP_V7", "INBODY_IOS_APP_V6", "INBODY_IOS_APP_V5", "INBODY_IOS_APP_V4", "INBODY_IOS_APP_V3", "INBODY_IOS_APP_V2", "INBODY_IOS_APP_V1"];
   const WEB_FOOD_CACHE_KEY = "INBODY_FOOD_WEB_CACHE_V1";
 
   // ===== [1] 웨이트 트레이닝 60+ 전 종목 정밀 역학 데이터베이스 =====
@@ -1032,71 +1099,127 @@
     { name: "제로콜라 / 제로사이다 / 제로음료 (1캔 355ml)", keys: "제로콜라 펩시제로 칠성사이다제로 나랑드사이다 탄산수 음료", serving: "1캔 (355ml)", kcal: 0, carb: 0, prot: 0, fat: 0, satFat: 0, sugar: 0, sodium: 25 }
   ];
 
-  // ===== [3] 의학·약학 기반 정밀 영양제 데이터 =====
+  // ===== [3] 의학·약학 기반 10대 영양제 완벽 데이터베이스 =====
   const SUPP_META = [
     {
-      id: "omega3",
-      name: "오메가-3 (EPA + DHA 합산)",
+      id: "probiotics",
+      name: "① 유산균 (프로바이오틱스)",
+      unit: "억CFU",
+      target: 100,
+      step: 100,
+      timingBadge: "🌅 아침 기상 직후 공복 + 물 1컵(200ml) (비타민C와 간격 둘 것)",
+      badgeType: "fasted",
+      whyTiming: "밤새 분비된 위산을 <b>생수 1컵으로 희석</b>해 복용하면 유익균이 위장에 머무는 시간이 줄어들어 십이지장으로 빠르게 통과합니다. (강산성인 비타민 C와 동시 복용 시 균 사멸 위험이 있으므로 최소 1시간 간격을 두세요.)",
+      factCheck: "고단백 식단(130g/일) 시 대장 내 단백질 부패균이 만드는 암모니아·가스를 억제하고 장내 유익균 증식·배변 활동·장 면역계를 정상 유지합니다.",
+      getEffectText: (amt) => amt > 0 ? `✅ <b>오늘 ${amt}억 CFU 섭취 완료:</b> 고단백 식단 장내 부패균 억제 및 소화 흡수 환경이 최적화되었습니다.` : "미섭취: 아침 기상 직후 물 1컵과 함께 1캡슐(10~100억 CFU) 복용을 권장합니다."
+    },
+    {
+      id: "creatine",
+      name: "② 크레아틴 (모노하이드레이트)",
       unit: "mg",
-      target: 1200,
-      step: 1000,
-      timingBadge: "🍽️ 식사 직후 ~ 식후 15분 이내 (지방 포함 식사 필수 / 공복 비권장)",
-      isFasted: false,
-      whyTiming: "지용성 지방산이므로 식사 중 쓸개에서 분비되는 <b>담즙산(Bile acid)</b>과 췌장 효소(리파아제)가 있어야 유화(Emulsification)되어 소장 흡수율이 공복 대비 최대 3배까지 높아지고 어취(비린내 역류)가 없습니다.",
-      factCheck: "단독으로 체지방을 직접 빼주는 약은 아닙니다(식약처 기능성: 혈중 중성지질·혈행·건조한 눈 개선). 단, 식단·운동 병행 시 지방 산화 유전자(PPAR-α) 발현과 인슐린 민감성을 보조하고, 운동 후 근육 염증(DOMS) 회복을 돕습니다.",
-      getEffectText: (amt, hasEx) => {
-        const pct = Math.min(100, Math.round((amt / 1200) * 100));
-        if (amt === 0) return "오늘 미섭취 상태입니다. 점심 또는 저녁 식사 직후 1,000~2,000mg 복용을 권장합니다.";
-        return `✅ <b>오늘 ${amt}mg 섭취 (${pct}% 달성):</b> 혈행 개선 및 항염 작용 중입니다. ${hasEx ? "오늘 수행한 운동과 결합되어 지방산 대사 및 근육 회복을 보조합니다." : ""}`;
-      }
+      target: 5000,
+      step: 3000,
+      timingBadge: "🏋️ 운동 직후 식사 또는 탄수화물·단백질 섭취 직후 (15분 내)",
+      badgeType: "meal",
+      whyTiming: "골격근 세포막의 크레아틴 수송체(<b>SLC6A8</b>)는 <b>인슐린</b>에 의해 열립니다. 따라서 공복보다 운동 직후 탄수화물·단백질 식사와 함께 복용할 때 근육 저장 효율이 극대화됩니다.",
+      factCheck: "근육 내 인산크레아틴(PCr)을 채워 무산소 웨이트 시 ATP 에너지를 즉각 재합성하고 골격근(36.9kg) 중량·볼륨을 높입니다. (근세포 내 수분을 끌어당기므로 <b>섭취 시 하루 물 목표량이 +500ml 자동 증가</b>합니다.)",
+      getEffectText: (amt, hasEx) => amt > 0 ? `✅ <b>오늘 ${amt}mg 섭취 완료:</b> 근육 내 ATP 재합성 및 세포내수분(29.8L) 보유력이 강화되었습니다. ${hasEx ? "(웨이트 수행능력 부스팅 반영)" : ""}` : "미섭취: 운동 직후 식사/쉐이크와 함께 3,000~5,000mg 복용을 권장합니다."
     },
     {
       id: "arginine",
-      name: "L-아르기닌 (산화질소·혈류 부스터)",
+      name: "③ L-아르기닌 (산화질소·혈류 부스터)",
       unit: "mg",
       target: 4000,
       step: 3000,
-      timingBadge: "⚡ 운동 30~45분 전 완전 공복 (또는 식후 최소 2시간 뒤 단독 섭취)",
-      isFasted: true,
-      whyTiming: "소장 흡수 통로(양이온 아미노산 수송체)를 다른 단백질 아미노산(라이신 등)과 공유합니다. <b>식사 직후나 단백질 쉐이크와 함께 먹으면 흡수 경쟁에서 밀려 효과가 반감</b>되므로 반드시 공복에 물(또는 비타민C)과 드세요.",
-      factCheck: "혈관내피세포에서 산화질소(NO)를 생성해 혈관을 확장시키고 근육 산소·영양 공급(펌핑) 및 암모니아(피로물질) 배출을 돕습니다. (주의: 위염 시 공복 속쓰림/설사 가능, 구순포진·헤르페스 체질은 과량 섭취 주의)",
-      getEffectText: (amt, hasEx) => {
-        const pct = Math.min(100, Math.round((amt / 4000) * 100));
-        if (amt === 0) return "오늘 미섭취 상태입니다. 웨이트 30~45분 전 공복에 3,000~5,000mg 섭취를 권장합니다.";
-        return `✅ <b>오늘 ${amt}mg 섭취 (${pct}% 달성):</b> 산화질소(NO) 생성 및 혈관 확장 상태입니다. ${hasEx ? "운동 수행능력과 볼륨 유지에 시너지를 냈습니다!" : ""}`;
-      }
+      timingBadge: "⚡ 운동 30~45분 전 완전 공복 (식후 최소 2시간 뒤 단독 섭취)",
+      badgeType: "fasted",
+      whyTiming: "소장 흡수 통로(CAT-1)를 일반 단백질 아미노산(라이신 등)과 공유합니다. <b>식사 직후나 단백질 쉐이크와 함께 먹으면 흡수 경쟁에서 밀려 효과가 반감</b>되므로 반드시 공복에 드세요.",
+      factCheck: "산화질소(NO)를 생성해 혈관을 확장시키고 근육 산소·영양 공급(펌핑) 및 암모니아(피로물질) 해독을 돕습니다.",
+      getEffectText: (amt, hasEx) => amt > 0 ? `✅ <b>오늘 ${amt}mg 섭취 완료:</b> 산화질소 혈관 확장 활성화! ${hasEx ? "운동 수행능력 및 대사 시너지가 반영되었습니다." : ""}` : "미섭취: 웨이트 30~45분 전 공복에 3,000~5,000mg 섭취를 권장합니다."
+    },
+    {
+      id: "carnitine",
+      name: "④ L-카르니틴 (지방 미토콘드리아 수송)",
+      unit: "mg",
+      target: 1500,
+      step: 1000,
+      timingBadge: "🔥 운동 30~60분 전 또는 아침/점심 식후",
+      badgeType: "fasted",
+      whyTiming: "복용 후 1~2시간 뒤 혈중 농도가 정점에 도달하므로 운동 전에 복용하거나, 인슐린이 분비되는 식후에 복용하면 근육 내 흡수가 잘 됩니다.",
+      factCheck: "긴사슬 지방산을 미토콘드리아 내부로 실어 나르는 <b>CPT-I 효소 셔틀</b> 역할을 하여 유산소 운동 시 체지방(16.5kg) 연소 효율과 운동 피로 개선을 돕습니다.",
+      getEffectText: (amt, hasEx) => amt > 0 ? `✅ <b>오늘 ${amt}mg 섭취 완료:</b> 미토콘드리아 지방산 수송 셔틀 활성화! ${hasEx ? "(유산소 지방 산화 시너지 반영)" : ""}` : "미섭취: 운동 30~60분 전 1,000~2,000mg 복용을 권장합니다."
+    },
+    {
+      id: "vitb",
+      name: "⑤ 비타민 B군 복합체 (활성형 B-Complex)",
+      unit: "mg",
+      target: 100,
+      step: 100,
+      timingBadge: "☀️ 아침 또는 점심 식사 직후 (15분 내 / 늦은 밤 복용 피하기)",
+      badgeType: "meal",
+      whyTiming: "에너지 대사를 깨우는 조효소이므로 오전에 먹어야 하루 활력이 올라가고 수면을 방해하지 않습니다. 고함량은 빈속에 위장 장애(울렁거림)가 있을 수 있어 식후 즉시 복용합니다.",
+      factCheck: "탄수화물(B1)·단백질(B6)·지방(B2·B5)을 에너지(ATP)로 전환하는 TCA 회로의 필수 조효소로, 기초대사량(1,764kcal) 회전율을 유지합니다.",
+      getEffectText: (amt) => amt > 0 ? `✅ <b>오늘 ${amt}mg 섭취 완료:</b> 탄·단·지 에너지 전환 대사 효소가 정상 가동 중입니다.` : "미섭취: 아침 또는 점심 식후 1정(50~100mg) 복용을 권장합니다."
+    },
+    {
+      id: "omega3",
+      name: "⑥ 오메가-3 (EPA + DHA 합산)",
+      unit: "mg",
+      target: 1200,
+      step: 1000,
+      timingBadge: "🍽️ 점심 또는 저녁 식사 직후 ~ 15분 이내 (공복 절대 비권장)",
+      badgeType: "meal",
+      whyTiming: "지용성 지방산이므로 식사 중 분비되는 <b>담즙산</b>과 리파아제 효소가 있어야 유화되어 소장 흡수율이 공복 대비 최대 3배 높아지고 비린내 역류가 없습니다.",
+      factCheck: "혈중 중성지질·혈행 개선 및 인슐린 민감성을 높이고 지방 산화 유전자(PPAR-α) 발현과 운동 후 근육 염증(DOMS) 회복을 보조합니다.",
+      getEffectText: (amt, hasEx) => amt > 0 ? `✅ <b>오늘 ${amt}mg 섭취 완료:</b> 혈행 개선 및 항염·지방산 대사 보조 중입니다.` : "미섭취: 점심 또는 저녁 식사 직후 1,000~2,000mg 복용을 권장합니다."
+    },
+    {
+      id: "vitd",
+      name: "⑦ 비타민 D3 (콜레칼시페롤)",
+      unit: "IU",
+      target: 2000,
+      step: 2000,
+      timingBadge: "🍽️ 점심 또는 저녁 식사 직후 (오메가-3와 동시 복용 최적)",
+      badgeType: "meal",
+      whyTiming: "지용성 비타민이므로 지방이 포함된 식사 직후나 <b>오메가-3와 함께 복용할 때 담즙산에 의해 흡수율이 30~50% 상승</b>합니다.",
+      factCheck: "칼슘 흡수를 도와 높은 골무기질량(3.73kg)을 유지하고, 골격근 세포 내 비타민 D 수용체(VDR)와 결합해 근력 유지 및 면역·호르몬 합성을 돕습니다.",
+      getEffectText: (amt) => amt > 0 ? `✅ <b>오늘 ${amt}IU 섭취 완료:</b> 골무기질(3.73kg) 및 골격근 수용체(VDR) 기능 유지 중입니다.` : "미섭취: 저녁 식후 오메가-3와 함께 2,000~4,000 IU 복용을 권장합니다."
     },
     {
       id: "vitc",
-      name: "비타민 C (항산화·카르니틴 합성 조효소)",
+      name: "⑧ 비타민 C (항산화·카르니틴 합성 조효소)",
       unit: "mg",
       target: 1000,
       step: 500,
-      timingBadge: "🍽️ 아침·저녁 식사 직후 ~ 15분 이내 (500~1,000mg 분할 복용 권장)",
-      isFasted: false,
-      whyTiming: "산성(pH 2.5)이므로 공복 복용 시 위점막을 자극해 속쓰림을 유발합니다. 또한 1회 1,000mg 초과 섭취 시 소장 수송체(SVCT1)가 포화되어 흡수율이 50% 이하로 떨어지고 소변으로 배출되므로 <b>아침·저녁 식후 나누어 복용</b>하는 것이 가장 좋습니다.",
-      factCheck: "고강도 운동 시 급증하는 활성산소(ROS)로부터 세포를 보호하고, 지방산을 미토콘드리아로 옮기는 <b>L-카르니틴 생합성의 필수 보조인자</b>로 작용합니다. 아르기닌의 산화질소(NO) 파괴를 막아주는 시너지도 있습니다.",
-      getEffectText: (amt) => {
-        const pct = Math.min(100, Math.round((amt / 1000) * 100));
-        if (amt === 0) return "오늘 미섭취 상태입니다. 식사 직후 500~1,000mg씩 나누어 드세요.";
-        return `✅ <b>오늘 ${amt}mg 섭취 (${pct}% 달성):</b> 활성산소 제거, 결합조직 보호 및 카르니틴 합성을 정상 보조하고 있습니다.`;
-      }
+      timingBadge: "🍽️ 아침·저녁 식사 직후 ~ 15분 이내 (500~1,000mg 분할 복용)",
+      badgeType: "meal",
+      whyTiming: "산성(pH 2.5)이라 공복엔 속쓰림을 유발하며, 1회 1,000mg 초과 시 소장 수송체(SVCT1) 포화로 흡수율이 50% 이하로 떨어지므로 아침·저녁 식후 나누어 드세요.",
+      factCheck: "운동 중 급증하는 활성산소(ROS)와 코르티솔을 억제해 골격근 손실을 막고, 체내 L-카르니틴 생합성의 필수 보조인자로 작용합니다.",
+      getEffectText: (amt) => amt > 0 ? `✅ <b>오늘 ${amt}mg 섭취 완료:</b> 활성산소 제거 및 코르티솔 억제·카르니틴 합성 보조 중입니다.` : "미섭취: 아침·저녁 식후 500~1,000mg씩 나누어 드세요."
     },
     {
       id: "milkthistle",
-      name: "밀크씨슬 (실리마린 기준)",
+      name: "⑨ 밀크씨슬 (실리마린 기준)",
       unit: "mg",
       target: 130,
       step: 130,
-      timingBadge: "🍽️ 점심 또는 저녁 식사 직후 ~ 30분 이내 (오메가-3와 동시 복용 최적)",
-      isFasted: false,
-      whyTiming: "핵심 성분인 실리마린(Silymarin)은 물에 잘 녹지 않는 <b>난용성·지용성 성질</b>을 띱니다. 공복보다 식사 직후(특히 오메가-3와 함께) 복용할 때 담즙에 의해 용해도가 높아져 간문맥 흡수율이 올라갑니다.",
-      factCheck: "체지방을 직접 감량하는 성분은 전혀 아닙니다(식약처 기능성: 간 건강에 도움을 줄 수 있음, 실리마린 일일 130mg). 간세포막 안정화 및 글루타치온(항산화 효소) 유지를 통해 고단백 식단(130g/일) 대사 시 간 피로를 덜어줍니다.",
-      getEffectText: (amt) => {
-        const pct = Math.min(100, Math.round((amt / 130) * 100));
-        if (amt === 0) return "오늘 미섭취 상태입니다. 저녁 식후 오메가-3와 함께 실리마린 130mg 복용을 권장합니다.";
-        return `✅ <b>오늘 ${amt}mg 섭취 (${pct}% 달성):</b> 간세포 보호 및 고단백 식단 대사 보조 기준치를 충족했습니다.`;
-      }
+      timingBadge: "🍽️ 저녁 식사 직후 ~ 30분 이내 (오메가-3와 동시 복용 최적)",
+      badgeType: "meal",
+      whyTiming: "실리마린은 물에 잘 안 녹는 난용성·지용성 성질을 띠므로 식사 직후 담즙 분비 시 오메가-3와 함께 복용할 때 간문맥 흡수율이 가장 높습니다.",
+      factCheck: "간세포막 안정화 및 글루타치온(항산화 효소) 유지를 통해 고단백 식단(130g/일) 대사 시 발생하는 간의 암모니아 해독 피로를 덜어줍니다.",
+      getEffectText: (amt) => amt > 0 ? `✅ <b>오늘 ${amt}mg 섭취 완료:</b> 간세포 보호 및 고단백 대사 보조 기준치를 충족했습니다.` : "미섭취: 저녁 식후 실리마린 130mg 복용을 권장합니다."
+    },
+    {
+      id: "magnesium",
+      name: "⑩ 마그네슘 (신경·근육 이완 & 수면)",
+      unit: "mg",
+      target: 350,
+      step: 350,
+      timingBadge: "🌙 저녁 식후 또는 취침 30~60분 전",
+      badgeType: "night",
+      whyTiming: "신경계를 안정시키는 <b>GABA 수용체</b>를 활성화하고 근육의 칼슘 채널을 차단해 이완을 유도하므로 저녁이나 취침 전에 복용해야 수면의 질이 높아집니다.",
+      factCheck: "300종 이상의 대사 효소 보조인자 및 ATP 안정화에 필수적이며, 웨이트 후 근경련·눈떨림 방지 및 수면 중 코르티솔 억제를 돕습니다.",
+      getEffectText: (amt) => amt > 0 ? `✅ <b>오늘 ${amt}mg 섭취 완료:</b> 신경·근육 이완 및 야간 수면 회복 모드가 준비되었습니다.` : "미섭취: 저녁 식후 또는 취침 30~60분 전 300~400mg 복용을 권장합니다."
     }
   ];
 
@@ -1106,6 +1229,8 @@
       smm: 36.9, bfm: 16.5, pbf: 20.3, bmr: 1764, activity: 1.2, deficit: 500
     },
     darkMode: false,
+    bankAutoAdjust: false,
+    iconTheme: "navy",
     mealPresets: [],
     workoutRoutines: [],
     logs: {}
@@ -1160,6 +1285,89 @@
     catch (e) {}
   }
 
+  // ===== [신기능 5] 아이폰 고해상도 512x512 전용 앱 아이콘 자동 생성기 =====
+  function generateAppIcon(themeName) {
+    const theme = themeName || state.iconTheme || "navy";
+    const canvas = document.createElement("canvas");
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext("2d");
+
+    // 1. 배경 그라데이션
+    const grad = ctx.createLinearGradient(0, 0, 512, 512);
+    if (theme === "emerald") {
+      grad.addColorStop(0, "#064E3B");
+      grad.addColorStop(1, "#10B981");
+    } else if (theme === "purple") {
+      grad.addColorStop(0, "#2E1065");
+      grad.addColorStop(1, "#7C3AED");
+    } else {
+      grad.addColorStop(0, "#0F172A");
+      grad.addColorStop(1, "#1D4ED8");
+    }
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 512, 512);
+
+    // 2. 상단 네온 링 장식
+    ctx.strokeStyle = "rgba(255,255,255,0.12)";
+    ctx.lineWidth = 18;
+    ctx.beginPath();
+    ctx.arc(256, 256, 210, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 3. 상단 바벨 그래픽
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(146, 138, 220, 18); // 바벨 샤프트
+    // 좌측 원판
+    ctx.fillRect(102, 102, 26, 90);
+    ctx.fillRect(132, 114, 18, 66);
+    // 우측 원판
+    ctx.fillRect(384, 102, 26, 90);
+    ctx.fillRect(362, 114, 18, 66);
+
+    // 4. 중앙 인바디 펄스 & 상승 그래프 라인
+    ctx.strokeStyle = "#34D399";
+    ctx.lineWidth = 16;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    ctx.moveTo(96, 285);
+    ctx.lineTo(175, 285);
+    ctx.lineTo(215, 220);
+    ctx.lineTo(265, 330);
+    ctx.lineTo(315, 240);
+    ctx.lineTo(360, 270);
+    ctx.lineTo(416, 215);
+    ctx.stroke();
+
+    // 5. 하단 INBODY PRO 텍스트
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "900 58px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("INBODY", 256, 412);
+
+    ctx.fillStyle = "#6EE7B7";
+    ctx.font = "800 32px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText("PRO 79 · MASTER", 256, 456);
+
+    const dataUrl = canvas.toDataURL("image/png");
+    const touchLink = document.getElementById("appleTouchIconLink");
+    const favLink = document.getElementById("favIconLink");
+    const miniImg = document.getElementById("headerLogoImg");
+    const largeImg = document.getElementById("iconPreviewLarge");
+
+    if (touchLink) touchLink.href = dataUrl;
+    if (favLink) favLink.href = dataUrl;
+    if (miniImg) miniImg.src = dataUrl;
+    if (largeImg) largeImg.src = dataUrl;
+  }
+
+  function changeIconTheme(themeName) {
+    state.iconTheme = themeName;
+    saveState();
+    generateAppIcon(themeName);
+  }
+
   function applyTheme() {
     const isDark = !!state.darkMode;
     document.body.classList.toggle("dark", isDark);
@@ -1177,16 +1385,23 @@
     if (!state.logs[dateStr]) {
       state.logs[dateStr] = {
         weight: state.profile.weight,
+        sleepHours: 7.0,
+        condition: "normal",
         waterMl: 0,
         foods: [],
         exercises: [],
-        supplements: { omega3: 0, arginine: 0, vitc: 0, milkthistle: 0 }
+        supplements: {}
       };
     }
     const l = state.logs[dateStr];
-    if (!l.supplements) l.supplements = { omega3: 0, arginine: 0, vitc: 0, milkthistle: 0 };
+    if (!l.supplements) l.supplements = {};
+    SUPP_META.forEach(m => {
+      if (typeof l.supplements[m.id] !== "number") l.supplements[m.id] = 0;
+    });
     if (typeof l.waterMl !== "number") l.waterMl = 0;
     if (!l.weight) l.weight = state.profile.weight;
+    if (typeof l.sleepHours !== "number") l.sleepHours = 7.0;
+    if (!l.condition) l.condition = "normal";
   }
 
   function switchTab(tabId, btnEl) {
@@ -1197,7 +1412,7 @@
     if (tabId === "report") renderWeeklyReport();
   }
 
-  // ===== [신기능 1] 헬스장 세트 휴식 타이머 (Web Audio API 알람 내장) =====
+  // ===== 헬스장 세트 휴식 타이머 =====
   function playTimerAlarm() {
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1245,18 +1460,52 @@
     document.getElementById("restTimerDisplay").textContent = "대기중";
   }
 
-  // ===== [신기능 2] 오늘의 체중 & 수분 섭취 기록 =====
-  function saveDailyWeight() {
+  // ===== [신기능 5] 오늘의 체중 · 수면 시간 · 컨디션 저장 =====
+  function saveDailyBio() {
     ensureDateLog(currentDate);
+    const log = state.logs[currentDate];
     const w = parseFloat(document.getElementById("dailyWeightInput").value);
+    const slp = parseFloat(document.getElementById("dailySleepInput").value);
+    const cond = document.getElementById("dailyCondSelect").value;
+
     if (!isNaN(w) && w > 30 && w < 250) {
-      state.logs[currentDate].weight = w;
-      if (currentDate === getTodayStr()) {
-        state.profile.weight = w;
-      }
-      saveState();
-      render();
+      log.weight = w;
+      if (currentDate === getTodayStr()) state.profile.weight = w;
     }
+    if (!isNaN(slp) && slp >= 0 && slp <= 24) {
+      log.sleepHours = slp;
+    }
+    log.condition = cond;
+    saveState();
+    render();
+  }
+
+  // ===== [신기능 3] 주간 칼로리 뱅크 계산 & 자동 보정 토글 =====
+  function toggleBankAutoAdjust() {
+    state.bankAutoAdjust = !state.bankAutoAdjust;
+    saveState();
+    render();
+  }
+
+  function calcWeeklyCalorieBank() {
+    const p = state.profile;
+    const baseTdee = Math.round(p.bmr * p.activity);
+    let cumulativeDiff = 0; // 양수면 목표 대비 초과 섭취(빚), 음수면 추가 절약(저축)
+    let recordedDays = 0;
+
+    for (let i = 1; i <= 6; i++) {
+      const dStr = getOffsetDateStr(currentDate, -i);
+      const l = state.logs[dStr];
+      if (!l) continue;
+      const eaten = (l.foods || []).reduce((s, x) => s + x.kcal, 0);
+      const ex = (l.exercises || []).reduce((s, x) => s + x.kcal, 0);
+      if (eaten > 0) {
+        recordedDays++;
+        const dayTarget = Math.max(p.bmr, (baseTdee + ex) - (p.deficit || 500));
+        cumulativeDiff += (eaten - dayTarget);
+      }
+    }
+    return { cumulativeDiff, recordedDays };
   }
 
   function addWater(ml) {
@@ -1273,7 +1522,7 @@
     render();
   }
 
-  // ===== [신기능 3] 어제 기록 1초 복사 & 나만의 식단/운동 루틴 저장 =====
+  // ===== 어제 기록 1초 복사 & 프리셋 =====
   function copyYesterday(type) {
     const yStr = getOffsetDateStr(currentDate, -1);
     const yLog = state.logs[yStr];
@@ -1296,13 +1545,10 @@
       alert("먼저 오늘 식단에 음식을 1개 이상 추가한 뒤 세트로 저장해 주세요.");
       return;
     }
-    const title = prompt("저장할 식단 세트 이름을 입력하세요 (예: 아침 고정식, 벌크업 점심):");
+    const title = prompt("저장할 식단 세트 이름을 입력하세요 (예: 아침 고정식):");
     if (!title || !title.trim()) return;
     if (!state.mealPresets) state.mealPresets = [];
-    state.mealPresets.push({
-      name: title.trim(),
-      items: JSON.parse(JSON.stringify(foods))
-    });
+    state.mealPresets.push({ name: title.trim(), items: JSON.parse(JSON.stringify(foods)) });
     saveState();
     render();
   }
@@ -1330,13 +1576,10 @@
       alert("먼저 오늘 운동 목록에 종목을 1개 이상 추가한 뒤 루틴으로 저장해 주세요.");
       return;
     }
-    const title = prompt("저장할 운동 루틴 이름을 입력하세요 (예: 가슴·삼두 루틴, 하체 균형 루틴):");
+    const title = prompt("저장할 운동 루틴 이름을 입력하세요 (예: 가슴·삼두 루틴):");
     if (!title || !title.trim()) return;
     if (!state.workoutRoutines) state.workoutRoutines = [];
-    state.workoutRoutines.push({
-      name: title.trim(),
-      items: JSON.parse(JSON.stringify(exs))
-    });
+    state.workoutRoutines.push({ name: title.trim(), items: JSON.parse(JSON.stringify(exs)) });
     saveState();
     render();
   }
@@ -1357,7 +1600,7 @@
     render();
   }
 
-  // ===== [신기능 4] 피라미드 세트 빌더 + 웨이트 역학 계산 =====
+  // ===== 웨이트 역학 계산 & 직전 기록/1RM 자동 탐색 =====
   function switchWorkoutMode(mode) {
     const isWeight = mode === "weight";
     document.getElementById("workoutWeightPane").style.display = isWeight ? "block" : "none";
@@ -1398,18 +1641,44 @@
     onSelectWeightEx();
   }
 
+  function findLastRecordForExercise(cleanTitle) {
+    const dates = Object.keys(state.logs || {}).sort().reverse();
+    for (const d of dates) {
+      const exs = (state.logs[d] && state.logs[d].exercises) || [];
+      for (let i = exs.length - 1; i >= 0; i--) {
+        if (exs[i].name && exs[i].name.includes(cleanTitle)) {
+          return { date: d, entry: exs[i] };
+        }
+      }
+    }
+    return null;
+  }
+
   function onSelectWeightEx() {
     const id = document.getElementById("exPreset").value;
     const ex = WEIGHT_EXERCISE_DB.find(x => x.id === id);
     pyramidSets = [];
     renderPyramidBox();
+    const banner = document.getElementById("prevRecordBanner");
+
     if (!ex) {
       document.getElementById("exName").value = "";
+      if (banner) banner.textContent = "";
       document.getElementById("exCalcBreakdown").innerHTML = "운동 이름과 소모 칼로리를 직접 입력해 추가하세요.";
       return;
     }
-    document.getElementById("exName").value = ex.name.split(" (")[0];
+
+    const shortName = ex.name.split(" (")[0];
+    document.getElementById("exName").value = shortName;
     document.getElementById("exWeightKg").value = ex.defKg;
+
+    const lastRec = findLastRecordForExercise(shortName);
+    if (lastRec && banner) {
+      banner.textContent = `📌 직전 수행 기록 (${lastRec.date.slice(5)}): ${lastRec.entry.name}`;
+    } else if (banner) {
+      banner.textContent = `💡 첫 기록 종목입니다. 평소 다루는 중량(kg)을 입력해 보세요.`;
+    }
+
     const lblW = document.getElementById("lblExWeight");
     if (ex.isBodyweight && ex.defKg === 0) lblW.textContent = "추가중량(맨몸=0)";
     else if (ex.name.includes("양손 합산")) lblW.textContent = "양손 합산(kg)";
@@ -1462,11 +1731,14 @@
 
     let totalReps = 0;
     let totalVolumeKg = 0;
+    let est1RM = 0;
 
     if (pyramidSets.length > 0) {
       pyramidSets.forEach(s => {
         totalReps += s.reps;
         totalVolumeKg += Math.round((s.kg + bwLoad) * s.reps);
+        const rm = s.kg * (1 + s.reps / 30.0);
+        if (rm > est1RM) est1RM = rm;
       });
     } else {
       const inputKg = parseFloat(document.getElementById("exWeightKg").value) || 0;
@@ -1474,6 +1746,7 @@
       const sets = parseInt(document.getElementById("exSets").value || "0", 10);
       totalReps = reps * sets;
       totalVolumeKg = Math.round((inputKg + bwLoad) * totalReps);
+      est1RM = inputKg > 0 ? inputKg * (1 + reps / 30.0) : 0;
     }
 
     const heightFactor = (p.height || 180) / 175.0;
@@ -1492,9 +1765,9 @@
     document.getElementById("exKcal").value = finalKcal;
     document.getElementById("exCalcBreakdown").innerHTML = `
       <b>🔬 내 신체(${p.height}cm · ${p.weight}kg · 골격근 ${p.smm}kg) 정밀 계산:</b><br/>
-      • <b>총 볼륨(Volume):</b> 총 ${totalReps}회 거상 = <b>${totalVolumeKg.toLocaleString()} kg</b> ${pyramidSets.length > 0 ? `(피라미드 ${pyramidSets.length}세트 합산)` : ""}<br/>
+      • <b>총 볼륨(Volume):</b> 총 ${totalReps}회 거상 = <b>${totalVolumeKg.toLocaleString()} kg</b> ${est1RM > 0 ? `| <b>추정 1RM: ${est1RM.toFixed(1)}kg</b>` : ""}<br/>
       • <b>거상 역학 소모:</b> <b>${Math.round(mechanicalKcal)} kcal</b> + <b>${mins}분 호흡·심박 대사: ${Math.round(timeMetabolicKcal)} kcal</b><br/>
-      • <b>골격근 애프터번(EPOC): +${epocKcal} kcal</b> → <b>🔥 총 ${finalKcal} kcal</b> (지방 약 <b>${burnedFatGrams}g</b> 연소 상당)<br/>
+      • <b>골격근 애프터번(EPOC): +${epocKcal} kcal</b> → <b>🔥 총 ${finalKcal} kcal</b> (지방 약 <b>${burnedFatGrams}g</b> 연소)<br/>
       <span style="color:var(--sub); font-size:11px;">💡 ${ex.note}</span>
     `;
   }
@@ -1503,11 +1776,7 @@
     const baseName = document.getElementById("exName").value.trim();
     const mins = parseInt(document.getElementById("exMin").value || "0", 10);
     const kcal = parseInt(document.getElementById("exKcal").value, 10);
-
-    if (!baseName || isNaN(kcal)) {
-      alert("운동 이름과 소모 칼로리를 확인해주세요.");
-      return;
-    }
+    if (!baseName || isNaN(kcal)) return;
 
     let detailLabel = "";
     if (pyramidSets.length > 0) {
@@ -1529,7 +1798,7 @@
     render();
   }
 
-  // ===== ACSM 유산소 공식 계산 =====
+  // ===== ACSM 유산소 공식 계산 (수면 부족 경고 연동) =====
   function selectCardioTiming(timing, btnEl) {
     currentCardioTiming = timing;
     document.querySelectorAll(".timing-btn").forEach(b => b.classList.remove("active"));
@@ -1562,7 +1831,9 @@
   }
 
   function calcCardioKcal() {
+    ensureDateLog(currentDate);
     const p = state.profile;
+    const log = state.logs[currentDate];
     const machine = document.getElementById("cardioMachine").value;
     const speedKmh = parseFloat(document.getElementById("cardioSpeed").value) || 0;
     const gradePct = parseFloat(document.getElementById("cardioGrade").value) || 0;
@@ -1596,6 +1867,8 @@
     let timingTitle = "[일반 유산소]";
     let timingAdvice = "표준 탄수화물·지방 대사 비율(약 50:50)로 연소됩니다.";
 
+    const isSleepDeprived = (log.sleepHours < 6.0 || log.condition === "tired");
+
     if (currentCardioTiming === "post_weight") {
       timingMult = 1.10;
       fatRatio = speedKmh <= 7.5 ? 0.72 : 0.65;
@@ -1605,8 +1878,10 @@
       timingMult = 1.03;
       fatRatio = speedKmh <= 6.5 ? 0.76 : 0.62;
       timingTitle = "[공복 유산소]";
-      if (speedKmh > 7.5 || mins > 45) {
-        timingAdvice = "⚠️ <b>근손실 주의:</b> 공복에 고강도(7.5km/h 초과) 또는 45분 이상 수행 시 코르티솔 분비로 골격근(36.9kg)이 손실될 수 있습니다! 시속 5.0~6.0km 경사 걷기 30~40분을 권장합니다.";
+      if (isSleepDeprived) {
+        timingAdvice = "🚨 <b>수면부족/피로 감지 경고:</b> 오늘 수면이 부족해 코르티솔(근손실 호르몬)이 높은 상태입니다! 아침 공복 유산소 대신 <b>식후 가벼운 경사걷기</b>로 전환하고 비타민 C·마그네슘을 보충하세요.";
+      } else if (speedKmh > 7.5 || mins > 45) {
+        timingAdvice = "⚠️ <b>근손실 주의:</b> 공복에 고강도(7.5km/h 초과) 또는 45분 이상 수행 시 골격근(36.9kg)이 손실될 수 있습니다! 시속 5.0~6.0km 경사 걷기 30~40분을 권장합니다.";
       } else {
         timingAdvice = "✅ <b>공복 지방 타겟:</b> 인슐린 수치가 최저인 아침 공복 상태라 지방 동원율(76%)이 극대화됩니다.";
       }
@@ -1644,7 +1919,7 @@
     render();
   }
 
-  // ===== [초고속 음식 검색] 로컬 + 병렬 레이싱 웹검색 =====
+  // ===== 초고속 음식 검색 =====
   function normalizeStr(s) {
     return (s || "").toLowerCase().replace(/\s+/g, "").replace(/켓/g, "캣").replace(/가스/g, "까스");
   }
@@ -1730,10 +2005,7 @@
 
   async function searchLiveWebFood() {
     const q = document.getElementById("foodSearchInput").value.trim();
-    if (!q) {
-      alert("검색할 음식이나 브랜드 이름을 입력해 주세요!");
-      return;
-    }
+    if (!q) return;
     const cacheKey = normalizeStr(q);
     const localMatches = searchLocalDB(q);
     if (webFoodCache[cacheKey] && webFoodCache[cacheKey].length > 0) {
@@ -1922,6 +2194,31 @@
     render();
   }
 
+  // ===== 10종 영양제 원클릭 타임라인 & 개별 제어 =====
+  function checkSuppSlot(slot) {
+    ensureDateLog(currentDate);
+    const s = state.logs[currentDate].supplements;
+    if (slot === "morning_fasted") {
+      s.probiotics = 100;
+    } else if (slot === "morning_meal") {
+      s.vitb = 100;
+      s.vitc = Math.max(s.vitc || 0, 500);
+    } else if (slot === "pre_workout") {
+      s.arginine = 4000;
+      s.carnitine = 1500;
+    } else if (slot === "post_workout_dinner") {
+      s.creatine = 5000;
+      s.omega3 = 1200;
+      s.vitd = 2000;
+      s.vitc = 1000;
+      s.milkthistle = 130;
+    } else if (slot === "before_sleep") {
+      s.magnesium = 350;
+    }
+    saveState();
+    render();
+  }
+
   function updateSupp(id, val) {
     ensureDateLog(currentDate);
     state.logs[currentDate].supplements[id] = Math.max(0, parseInt(val || "0", 10));
@@ -1944,7 +2241,7 @@
     render();
   }
 
-  // ===== [신기능 5] 주간 7일 리포트 & 데이터 영구 백업/복원 =====
+  // ===== 주간 7일 리포트 & 백업/복원 =====
   function renderWeeklyReport() {
     const p = state.profile;
     const baseTdee = Math.round(p.bmr * p.activity);
@@ -2030,10 +2327,7 @@
 
   function restoreFromTextarea() {
     const raw = document.getElementById("backupJsonArea").value.trim();
-    if (!raw) {
-      alert("복원할 백업 코드를 먼저 붙여넣어 주세요.");
-      return;
-    }
+    if (!raw) return;
     try {
       const parsed = JSON.parse(raw);
       if (!parsed.profile || !parsed.logs) throw new Error("invalid");
@@ -2085,23 +2379,73 @@
     calcWeightKcal();
     calcCardioKcal();
 
-    document.getElementById("headerTitle").textContent = `📊 ${p.name}님의 인바디 매니저`;
+    document.getElementById("headerTitle").textContent = `${p.name}님의 인바디 프로`;
     document.getElementById("chipWeight").textContent = `${p.weight} / ${p.targetWeight}kg`;
     document.getElementById("chipSmm").textContent = `${p.smm} kg`;
     document.getElementById("chipBfm").textContent = `${p.bfm}kg (${p.pbf}%)`;
     document.getElementById("dailyWeightInput").value = log.weight || p.weight;
+    document.getElementById("dailySleepInput").value = log.sleepHours !== undefined ? log.sleepHours : 7.0;
+    document.getElementById("dailyCondSelect").value = log.condition || "normal";
 
-    const baseTdee = Math.round(p.bmr * p.activity);
+    // 체중 변화에 따른 실시간 기초대사량 미세 연동 (인바디 81.0kg=1764kcal 기준 체중 1kg 변동당 약 13kcal 대사 적응 반영)
+    const curDayWeight = log.weight || p.weight;
+    const dynamicBmr = Math.round(p.bmr + (curDayWeight - 81.0) * 13);
+
+    // 수면·컨디션에 따른 일상 NEAT 효율 반영 (수면 6시간 미만 또는 피로 시 일상 활동 소모 약 4% 저하)
+    const condFactor = (log.sleepHours < 6.0 || log.condition === "tired") ? 0.96 : (log.condition === "good" ? 1.02 : 1.0);
+    const baseTdee = Math.round(dynamicBmr * p.activity * condFactor);
     const exKcal = log.exercises.reduce((sum, item) => sum + item.kcal, 0);
 
+    // 10종 영양제 + 운동 결합 시너지 계산
     let suppSynergyKcal = 0;
     if (exKcal > 0) {
-      if ((supps.arginine || 0) >= 2000) suppSynergyKcal += Math.round(exKcal * 0.05);
-      if ((supps.omega3 || 0) >= 1000) suppSynergyKcal += Math.round(exKcal * 0.04);
+      if ((supps.arginine || 0) >= 2000) suppSynergyKcal += Math.round(exKcal * 0.04);
+      if ((supps.creatine || 0) >= 3000) suppSynergyKcal += Math.round(exKcal * 0.04);
+      if ((supps.carnitine || 0) >= 1000) suppSynergyKcal += Math.round(exKcal * 0.03);
+      if ((supps.omega3 || 0) >= 1000) suppSynergyKcal += Math.round(exKcal * 0.02);
     }
 
     const totalBurned = baseTdee + exKcal + suppSynergyKcal;
-    const targetIntake = Math.max(p.bmr, totalBurned - (p.deficit || 500));
+    let baseTargetIntake = Math.max(dynamicBmr, totalBurned - (p.deficit || 500));
+
+    // [신기능 3] 주간 칼로리 뱅크 계산 및 3일 분배 만회 플랜
+    const bank = calcWeeklyCalorieBank();
+    const bankBanner = document.getElementById("calorieBankBanner");
+    const btnBankAuto = document.getElementById("btnToggleBankAuto");
+    btnBankAuto.textContent = state.bankAutoAdjust ? "⚖️ 자동 보정 ON" : "⚖️ 자동 보정 OFF";
+    btnBankAuto.style.background = state.bankAutoAdjust ? "var(--primary)" : "var(--card)";
+    btnBankAuto.style.color = state.bankAutoAdjust ? "#FFF" : "var(--text)";
+
+    let bankDailyAdjustment = 0;
+    if (bank.cumulativeDiff > 50) {
+      bankBanner.classList.add("debt");
+      bankDailyAdjustment = Math.min(350, Math.round(bank.cumulativeDiff / 3)); // 하루 최대 350kcal까지만 안전 차감
+      // 내 체중(81kg) 기준 인클라인 경사걷기(5km/h, 경사 8%) 분당 약 9.2kcal 소모
+      const inclineWalkMinsPerDay = Math.round(bankDailyAdjustment / 9.2);
+      document.getElementById("bankBodyText").innerHTML = `
+        최근 6일간 목표 대비 <b>+${bank.cumulativeDiff.toLocaleString()} kcal 초과 섭취(회식/치팅)</b>가 있습니다.<br/>
+        • <b>만회 플랜 A (식단):</b> 향후 3일간 하루 목표를 <b>-${bankDailyAdjustment} kcal씩</b> 낮추면 100% 만회!<br/>
+        • <b>만회 플랜 B (유산소):</b> 향후 3일간 <b>인클라인 경사걷기(5km/h·경사8%) 하루 ${inclineWalkMinsPerDay}분씩</b>만 추가하세요!
+      `;
+    } else if (bank.cumulativeDiff < -50) {
+      bankBanner.classList.remove("debt");
+      document.getElementById("bankBodyText").innerHTML = `
+        🎉 최근 6일간 목표보다 <b>${Math.abs(bank.cumulativeDiff).toLocaleString()} kcal를 추가로 더 감량(저축)</b>하셨습니다! 아주 완벽한 컷팅 페이스입니다.
+      `;
+    } else {
+      bankBanner.classList.remove("debt");
+      document.getElementById("bankBodyText").innerHTML = `
+        최근 6일간 초과 섭취 부채가 없습니다. 오늘 권장 목표만 지키시면 됩니다!
+      `;
+    }
+
+    const targetIntake = (state.bankAutoAdjust && bankDailyAdjustment > 0)
+      ? Math.max(dynamicBmr - 150, baseTargetIntake - bankDailyAdjustment)
+      : baseTargetIntake;
+
+    document.getElementById("lblTargetTitle").textContent = (state.bankAutoAdjust && bankDailyAdjustment > 0)
+      ? `권장 목표 (뱅크 -${bankDailyAdjustment} 보정됨)`
+      : `권장 섭취 목표 (-500)`;
 
     const eatenKcal = log.foods.reduce((sum, item) => sum + item.kcal, 0);
     const eatenCarb = log.foods.reduce((sum, item) => sum + (item.carb || 0), 0);
@@ -2109,11 +2453,12 @@
     const eatenFat = log.foods.reduce((sum, item) => sum + (item.fat || 0), 0);
     const eatenSodium = log.foods.reduce((sum, item) => sum + (item.sodium || 0), 0);
 
-    const targetProt = Math.round(p.weight * 1.6); // 130g
-    const targetFat = Math.round(p.weight * 0.65); // 약 53g
-    const targetCarb = Math.max(130, Math.round((targetIntake - (targetProt * 4) - (targetFat * 9)) / 4));
+    const targetProt = Math.round(curDayWeight * 1.6);
+    const targetFat = Math.round(curDayWeight * 0.65);
+    const targetCarb = Math.max(120, Math.round((targetIntake - (targetProt * 4) - (targetFat * 9)) / 4));
 
-    document.getElementById("valBmr").textContent = `${p.bmr.toLocaleString()} kcal`;
+    document.getElementById("valBmr").textContent = `${dynamicBmr.toLocaleString()} kcal`;
+    document.getElementById("valBmrSub").textContent = `체중 ${curDayWeight}kg 실시간 연동`;
     document.getElementById("valTdee").textContent = `${totalBurned.toLocaleString()} kcal`;
     document.getElementById("valTdeeSub").textContent = `운동 ${exKcal} + 영양제시너지 ${suppSynergyKcal} kcal`;
     document.getElementById("valTarget").textContent = `${targetIntake.toLocaleString()} kcal`;
@@ -2135,7 +2480,6 @@
     }
     document.getElementById("calPctText").textContent = `${calPct}%`;
 
-    // 탄·단·지 바 업데이트
     const carbPct = Math.min(100, Math.round((eatenCarb / Math.max(1, targetCarb)) * 100));
     const protPct = Math.min(100, Math.round((eatenProt / Math.max(1, targetProt)) * 100));
     const fatPct = Math.min(100, Math.round((eatenFat / Math.max(1, targetFat)) * 100));
@@ -2146,28 +2490,26 @@
     document.getElementById("macroProtBar").style.width = `${protPct}%`;
     document.getElementById("macroFatBar").style.width = `${fatPct}%`;
 
-    // 수분 & 나트륨 트래커 업데이트 (나트륨 2000mg 초과 시 목표 수분량 상향)
+    // 수분 섭취량 (크레아틴 복용 시 +500ml, 나트륨 2000mg 초과 시 추가 수분 반영)
     const baseWaterTarget = 2800;
-    const extraWaterForSodium = eatenSodium > 2000 ? Math.round((eatenSodium - 2000) * 0.25) : 0;
-    const totalWaterTarget = baseWaterTarget + extraWaterForSodium;
+    const extraWaterCreatine = (supps.creatine || 0) > 0 ? 500 : 0;
+    const extraWaterSodium = eatenSodium > 2000 ? Math.round((eatenSodium - 2000) * 0.25) : 0;
+    const totalWaterTarget = baseWaterTarget + extraWaterCreatine + extraWaterSodium;
     const curWater = log.waterMl || 0;
     const waterPct = Math.min(100, Math.round((curWater / totalWaterTarget) * 100));
 
     document.getElementById("waterBadge").textContent = `${curWater.toLocaleString()} / ${totalWaterTarget.toLocaleString()} ml`;
     document.getElementById("waterBar").style.width = `${waterPct}%`;
     document.getElementById("waterPctText").textContent = `${waterPct}%`;
-    document.getElementById("sodiumStatusText").textContent = eatenSodium > 2000
-      ? `⚠️ 나트륨 과다(${eatenSodium.toLocaleString()}mg): 부종 방지 물 +${extraWaterForSodium}ml 추가 권장`
-      : `오늘 섭취 나트륨: ${eatenSodium.toLocaleString()} mg (세포외수분비 0.368 안정권)`;
+    document.getElementById("sodiumStatusText").textContent = `나트륨 ${eatenSodium.toLocaleString()}mg ${extraWaterCreatine > 0 ? '· 크레아틴 수분 +500ml 반영됨' : ''}`;
 
-    // 식단 세트 & 운동 루틴 칩 렌더링
     const mealChips = document.getElementById("customMealPresetChips");
     mealChips.innerHTML = (state.mealPresets || []).map((mp, idx) => `
       <span class="cat-chip" onclick="applyMealPreset(${idx})">🍱 ${mp.name} <b style="color:var(--danger); margin-left:4px;" onclick="deleteMealPreset(${idx}, event)">×</b></span>
     `).join("");
 
     const workoutChips = document.getElementById("customWorkoutRoutineChips");
-    workoutChips.innerHTML = (state.workoutRoutines || []).map(( wr, idx) => `
+    workoutChips.innerHTML = (state.workoutRoutines || []).map((wr, idx) => `
       <span class="cat-chip" onclick="applyWorkoutRoutine(${idx})">🔥 ${wr.name} <b style="color:var(--danger); margin-left:4px;" onclick="deleteWorkoutRoutine(${idx}, event)">×</b></span>
     `).join("");
 
@@ -2223,7 +2565,7 @@
             <span class="supp-target">권장 ${m.target}${m.unit} (${pct}%)</span>
           </div>
           <div>
-            <span class="timing-badge ${m.isFasted ? 'fasted' : ''}">${m.timingBadge}</span>
+            <span class="timing-badge ${m.badgeType}">${m.timingBadge}</span>
           </div>
           <div class="supp-controls">
             <input type="number" value="${amt}" inputmode="numeric" onchange="updateSupp('${m.id}', this.value)" />
@@ -2232,8 +2574,8 @@
             <button class="btn-del" onclick="resetSupp('${m.id}')">초기화</button>
           </div>
           <div class="supp-effect">
-            <b>🔬 왜 이 타이밍인가? (흡수 원리):</b> ${m.whyTiming}<br/>
-            <b>📋 팩트 체크 (실제 효능·주의점):</b> ${m.factCheck}<br/>
+            <b>🔬 약학적 흡수 원리:</b> ${m.whyTiming}<br/>
+            <b>📋 팩트 체크:</b> ${m.factCheck}<br/>
             <span style="display:block; margin-top:4px; color:var(--primary);">${m.getEffectText(amt, hasEx)}</span>
           </div>
         </div>
@@ -2241,10 +2583,14 @@
     }).join("");
 
     const expectedFatLossGrams = netDiff < 0 ? Math.round(Math.abs(netDiff) / 7.7) : 0;
+    const sleepMsg = (log.sleepHours < 6.0 || log.condition === "tired")
+      ? `⚠️ <b>수면·컨디션 주의 (${log.sleepHours}시간):</b> 코르티솔 상승으로 근손실 위험이 있으니 오늘 유산소는 공복 대신 식후 경사걷기로 진행하시고 취침 전 <b>마그네슘</b>을 꼭 챙기세요.`
+      : `✅ <b>수면·회복 양호 (${log.sleepHours}시간):</b> 호르몬 및 인슐린 민감성이 정상 상태라 웨이트 볼륨과 지방 연소 효율이 극대화됩니다.`;
+
     document.getElementById("dailyInsightBox").innerHTML = `
+      • ${sleepMsg}<br/>
       • <b>예상 체지방 감량 속도:</b> 오늘 현재 칼로리 밸런스(<b>${netDiff} kcal</b>) 기준 약 <b>${expectedFatLossGrams}g</b>의 체지방이 연소되는 페이스입니다.<br/>
-      • <b>탄·단·지 & 수분 밸런스:</b> 단백질 달성률 <b>${protPct}%</b>(${eatenProt}g/${targetProt}g), 수분 섭취율 <b>${waterPct}%</b>(${curWater}ml/${totalWaterTarget}ml)입니다.<br/>
-      • <b>영양제 골든타임:</b> <b>L-아르기닌</b>은 운동 30~45분 전 <b>완전 공복</b>에, <b>오메가-3·밀크씨슬·비타민C</b>는 <b>식사 직후~15분 이내</b>에 드세요!
+      • <b>영양제 10종 핵심 요약:</b> <b>기상 직후 공복</b>엔 유산균+물1컵, <b>운동 30분 전 공복</b>엔 아르기닌+카르니틴, <b>식사 직후</b>엔 크레아틴·오메가3·비타민B/C/D·밀크씨슬, <b>취침 전</b>엔 마그네슘을 드세요!
     `;
   }
 
@@ -2280,6 +2626,7 @@
 
   document.getElementById("datePicker").value = currentDate;
   document.getElementById("activitySelect").value = String(state.profile.activity);
+  generateAppIcon(state.iconTheme);
   populateWeightExSelect();
   render();
 </script>
