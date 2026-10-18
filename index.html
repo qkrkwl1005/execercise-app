@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-title" content="인바디 프로" />
   <link id="appleTouchIconLink" rel="apple-touch-icon" href="" />
   <link id="favIconLink" rel="icon" type="image/png" href="" />
-  <title>인바디 프로 매니저 V9</title>
+  <title>인바디 프로 매니저 V9.1</title>
   <style>
     :root {
       --bg: #F2F4F8;
@@ -245,7 +245,7 @@
     }
     .smart-parse-hint {
       display: none; font-size: 11.5px; font-weight: 700; color: var(--primary);
-      background: rgba(37, 99, 235, 0.1); border-radius: 8px; padding: 5px 9px; margin-bottom: 8px;
+      background: rgba(37, 99, 235, 0.1); border-radius: 8px; padding: 6px 10px; margin-bottom: 8px; line-height: 1.4;
     }
     .portal-btns {
       display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px;
@@ -255,9 +255,14 @@
       padding: 7px 4px; font-size: 11px; font-weight: 700; color: var(--text); cursor: pointer;
     }
     .search-results {
-      max-height: 290px; overflow-y: auto; border: 1px solid var(--border);
+      max-height: 310px; overflow-y: auto; border: 1px solid var(--border);
       border-radius: 12px; background: var(--card); margin-bottom: 12px; display: none;
       box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    }
+    .search-status-banner {
+      padding: 8px 12px; font-size: 11.5px; font-weight: 700;
+      background: rgba(37, 99, 235, 0.08); color: var(--primary);
+      border-bottom: 1px solid var(--border);
     }
     .search-item {
       padding: 10px 12px; border-bottom: 1px solid var(--border); cursor: pointer;
@@ -632,9 +637,9 @@
       </div>
       <div class="cat-chips" id="customMealPresetChips"></div>
 
-      <label class="field-label">"목살 김치찌개 1인분", "짜장면1개", "간짜장1개", "짬봉한개"처럼 편하게 치세요!</label>
+      <label class="field-label">"사조대림 오븐구이 불고기", "더단백 바나나", "한마음 정육식당 삼겹살"처럼 편하게 치세요!</label>
       <div class="search-bar-wrap">
-        <input type="text" id="foodSearchInput" placeholder="예: 목살 김치찌개 1인분, 짜장면1개, 간짜장1개, 짬봉한개..." oninput="onFoodSearchInput()" onkeydown="if(event.key==='Enter') searchLiveWebFood()" />
+        <input type="text" id="foodSearchInput" placeholder="음식·브랜드·식당 메뉴 입력 (예: 사조대림 어묵, 더단백 바나나...)" oninput="onFoodSearchInput()" onkeydown="if(event.key==='Enter') searchLiveWebFood()" />
         <button class="btn-search" id="btnWebSearch" onclick="searchLiveWebFood()">🌐 실시간 웹검색</button>
       </div>
 
@@ -643,12 +648,12 @@
 
       <!-- 자주 찾는 빠른 예시 칩 -->
       <div class="cat-chips" style="margin-bottom:8px;">
+        <button class="cat-chip" onclick="quickSearchExample('사조대림 오븐구이 불고기')">🍢 사조대림 오븐구이</button>
+        <button class="cat-chip" onclick="quickSearchExample('더단백 프로틴 바나나')">🍌 더단백 바나나</button>
+        <button class="cat-chip" onclick="quickSearchExample('한마음 정육식당 삼겹살 1인분')">🥩 정육식당 삼겹살</button>
         <button class="cat-chip" onclick="quickSearchExample('목살 김치찌개 1인분')">🍲 목살 김치찌개 1인분</button>
         <button class="cat-chip" onclick="quickSearchExample('짜장면1개')">🍜 짜장면1개</button>
         <button class="cat-chip" onclick="quickSearchExample('간짜장1개')">🥢 간짜장1개</button>
-        <button class="cat-chip" onclick="quickSearchExample('짬봉한개')">🌶️ 짬봉한개</button>
-        <button class="cat-chip" onclick="quickSearchExample('돈까스 1인분')">🍛 돈까스 1인분</button>
-        <button class="cat-chip" onclick="quickSearchExample('제육볶음 1인분')">🥩 제육볶음 1인분</button>
         <button class="cat-chip" onclick="quickSearchExample('닭가슴살 1팩')">🍗 닭가슴살 1팩</button>
       </div>
 
@@ -1007,7 +1012,7 @@
 <script>
   const STORAGE_KEY = "INBODY_IOS_APP_V9";
   const PREV_KEYS = ["INBODY_IOS_APP_V8", "INBODY_IOS_APP_V7", "INBODY_IOS_APP_V6", "INBODY_IOS_APP_V5", "INBODY_IOS_APP_V4", "INBODY_IOS_APP_V3", "INBODY_IOS_APP_V2", "INBODY_IOS_APP_V1"];
-  const WEB_FOOD_CACHE_KEY = "INBODY_FOOD_WEB_CACHE_V2";
+  const WEB_FOOD_CACHE_KEY = "INBODY_FOOD_WEB_CACHE_V3";
 
   // ===== [1] 웨이트 트레이닝 60+ 전 종목 정밀 역학 데이터베이스 =====
   const WEIGHT_EXERCISE_DB = [
@@ -1062,15 +1067,41 @@
     { id: "burpee", cat: "맨몸/복근", name: "버피테스트 (전신 고강도)", defKg: 0, rom: 0.85, mets: 7.5, stab: 1.25, epoc: 0.20, isBodyweight: 0.85, note: "전신 유·무산소 결합 최고 강도 칼로리 폭격 운동" }
   ];
 
-  // ===== [2] 대폭 확장된 한국 외식·중식·한식·분식·브랜드·과일 통합 DB =====
+  // ===== [2] 대폭 확장된 한국 외식·정육식당·편의점·브랜드·프로틴 통합 DB =====
   const KOREAN_FOOD_DB = [
-    // --- 찌개 · 국 · 탕류 (목살 김치찌개 등) ---
+    // --- 정육식당 · 고기구이 (한마음 정육식당 등) ---
+    { name: "한마음 정육식당 돼지모둠 구이 (삼겹·목살·항정 1인분 200g)", keys: "한마음정육식당 정육식당 돼지한판 돼지모둠 삼겹살 목살 항정살 가브리살 고기구이", serving: "1인분 (200g)", kcal: 560, carb: 1, prot: 37, fat: 44, satFat: 15, sugar: 0, sodium: 160 },
+    { name: "한마음 정육식당 소모둠 구이 (등심·갈비살·부채살 1인분 200g)", keys: "한마음정육식당 정육식당 소한판 소모둠 소갈비살 등심 부채살 우삼겹 차돌박이 소고기구이", serving: "1인분 (200g)", kcal: 440, carb: 1, prot: 40, fat: 30, satFat: 11, sugar: 0, sodium: 150 },
+    { name: "정육식당 삼겹살 구이 (1인분 200g)", keys: "한마음정육식당 정육식당 삼겹살 오겹살 대패삼겹살 냉동삼겹살 돼지고기 고기", serving: "1인분 (200g)", kcal: 660, carb: 1, prot: 34, fat: 56, satFat: 20, sugar: 0, sodium: 150 },
+    { name: "정육식당 돼지목살 / 앞다리살 구이 (1인분 200g)", keys: "한마음정육식당 정육식당 목살 돼지목살 앞다리살 뒷다리살 갈매기살 돼지고기 고기", serving: "1인분 (200g)", kcal: 480, carb: 1, prot: 40, fat: 34, satFat: 12, sugar: 0, sodium: 160 },
+    { name: "돈마호크 / 토마호크 스테이크 구이 (1인분 250g)", keys: "돈마호크 토마호크 돼지갈비 프렌치랙 스테이크 목살 등심 구이", serving: "1인분 (250g)", kcal: 590, carb: 2, prot: 48, fat: 42, satFat: 15, sugar: 1, sodium: 320 },
+    { name: "양념 돼지갈비 / 왕갈비 구이 (1인분 250g)", keys: "돼지갈비 양념갈비 명륜진사갈비 한마음정육식당 갈비구이", serving: "1인분 (250g)", kcal: 620, carb: 22, prot: 42, fat: 40, satFat: 14, sugar: 16, sodium: 890 },
+    { name: "소고기 우둔살 / 부채살 / 안심 / 등심 구이 (200g)", keys: "소고기 한우 우둔살 부채살 안심 등심 갈비살 살치살 스테이크 육회", serving: "1인분 (200g)", kcal: 340, carb: 0, prot: 44, fat: 17, satFat: 6, sugar: 0, sodium: 140 },
+
+    // --- 사조대림 · 한성 · CJ · 편의점 어묵 / 맛살 / 소시지 / 간편식 ---
+    { name: "사조대림 오븐구이 불고기맛 바 / 어묵바 (1개 70~80g)", keys: "사조대림 오븐구이 불고기 오븐구이불고기 핫바 어묵바 소시지바 간식 편의점", serving: "1개 (75g)", kcal: 125, carb: 10, prot: 9, fat: 5.5, satFat: 1.5, sugar: 4, sodium: 490 },
+    { name: "사조대림 화끈어묵 / 매운 어묵바 / 불닭어묵 (1개 90g)", keys: "사조대림 화끈어묵 매운어묵 빨간어묵 어묵바 핫바 꼬치어묵 어묵 오뎅", serving: "1개 (90g)", kcal: 135, carb: 16, prot: 10, fat: 3.2, satFat: 0.6, sugar: 5, sodium: 680 },
+    { name: "사조대림 부산어묵 / 국탕용 사각어묵 (100g, 약 2~3장)", keys: "사조대림 대림선 부산어묵 사각어묵 종합어묵 어묵볶음 어묵탕 오뎅", serving: "100g", kcal: 145, carb: 18, prot: 11, fat: 3, satFat: 0.5, sugar: 3, sodium: 720 },
+    { name: "사조대림 크래미 / 스노우크랩킹 / 맛살 (1팩 90g)", keys: "사조대림 크래미 맛살 게맛살 스노우크랩킹 한성크래미 다이어트간식", serving: "1팩 (90g)", kcal: 95, carb: 12, prot: 10, fat: 0.8, satFat: 0.1, sugar: 6, sodium: 540 },
+    { name: "사조대림 / 의성마늘 프랑크 소시지 · 핫바 (1개 80g)", keys: "사조대림 소시지 프랑크소시지 의성마늘프랑크 천하장사 빅팜 핫바 편의점", serving: "1개 (80g)", kcal: 215, carb: 5, prot: 11, fat: 17, satFat: 6, sugar: 2, sodium: 590 },
+    { name: "사조대림 숯불구이 / 오븐구이 닭가슴살 바 (1개 80g)", keys: "사조대림 오븐구이 닭가슴살바 단백질바 닭가슴살소시지 핫바", serving: "1개 (80g)", kcal: 115, carb: 4, prot: 18, fat: 2.5, satFat: 0.7, sugar: 2, sodium: 380 },
+
+    // --- 프로틴 음료 · 단백질 바 · 쉐이크 (더단백, 닥터유, 셀렉스, 하이뮨 등) ---
+    { name: "빙그레 더단백 드링크 바나나 / 초코 / 커피 / 밀크티 (1팩 250ml)", keys: "더단백 더단백바나나 더단백초코 더단백커피 프로틴바나나 프로틴음료 단백질쉐이크 빙그레 돈마호크프로틴바나나", serving: "1팩 (250ml)", kcal: 105, carb: 5, prot: 20, fat: 0.6, satFat: 0.4, sugar: 0.5, sodium: 230 },
+    { name: "오리온 닥터유 프로 단백질드링크 바나나 / 초코 (1병 250ml)", keys: "닥터유 닥터유프로 닥터유프로틴 바나나 초코 프로틴바나나 프로틴음료 단백질음료", serving: "1병 (250ml)", kcal: 150, carb: 10, prot: 24, fat: 2, satFat: 1.2, sugar: 1.5, sodium: 180 },
+    { name: "매일 셀렉스 프로핏 복숭아 / 아메리카노 / 초코 / 바나나 (1팩)", keys: "셀렉스 셀렉스프로핏 프로틴음료 프로틴바나나 단백질쉐이크 매일유업", serving: "1팩 (250~330ml)", kcal: 100, carb: 4, prot: 20, fat: 0, satFat: 0, sugar: 0, sodium: 130 },
+    { name: "일동후디스 하이뮨 프로틴 밸런스 액티브 (1팩 250ml)", keys: "하이뮨 하이뮨액티브 프로틴음료 바나나 초코 커피 단백질음료", serving: "1팩 (250ml)", kcal: 125, carb: 6, prot: 20, fat: 2, satFat: 1, sugar: 1, sodium: 200 },
+    { name: "랩노쉬 프로틴 드링크 바나나 / 라떼 / 카카오 (1병 350ml)", keys: "랩노쉬 랩노쉬프로틴 프로틴바나나 단백질음료 편의점프로틴", serving: "1병 (350ml)", kcal: 165, carb: 11, prot: 27, fat: 1.8, satFat: 1, sugar: 2, sodium: 190 },
+    { name: "단백질 바 / 프로틴 바 (닥터유·더단백·커클랜드 1개 50~60g)", keys: "프로틴바 단백질바 닥터유단백질바 더단백바 퀘스트바 커클랜드프로틴바 바나나", serving: "1개 (55g)", kcal: 215, carb: 21, prot: 15, fat: 8, satFat: 3.5, sugar: 5, sodium: 160 },
+    { name: "단백질 쉐이크 파우더 (WPI/WPC 1스쿱 + 물/아몬드브리즈)", keys: "단백질쉐이크 프로틴 마이프로틴 신타6 옵티멈 골드스탠다드 머슬팜 포대유청", serving: "1스쿱 (30~35g)", kcal: 125, carb: 3, prot: 24, fat: 1.5, satFat: 0.5, sugar: 1, sodium: 140 },
+
+    // --- 찌개 · 국 · 탕류 ---
     { name: "목살 김치찌개 (1인분 / 돼지목살 듬뿍)", keys: "목살김치찌개 돼지목살김치찌개 김치찌개 고기김치찌개 한식 찌개", serving: "1인분 (450g)", kcal: 460, carb: 13, prot: 34, fat: 30, satFat: 10, sugar: 4, sodium: 1450 },
     { name: "돼지고기 김치찌개 (일반 1인분)", keys: "돼지고기김치찌개 김치찌개 삼겹살김치찌개 앞다리살김치찌개 찌개", serving: "1인분 (400g)", kcal: 420, carb: 12, prot: 25, fat: 30, satFat: 11, sugar: 4, sodium: 1480 },
     { name: "참치 김치찌개 (1인분)", keys: "참치김치찌개 김치찌개 찌개", serving: "1인분 (400g)", kcal: 330, carb: 13, prot: 24, fat: 20, satFat: 4, sugar: 4, sodium: 1390 },
     { name: "스팸 / 부대 김치찌개 (1인분)", keys: "스팸김치찌개 부대찌개 햄김치찌개 김치찌개", serving: "1인분 (450g)", kcal: 540, carb: 24, prot: 22, fat: 39, satFat: 14, sugar: 5, sodium: 1750 },
-    { name: "된장찌개 (두부·야채 일반 1인분)", keys: "된장찌개 우렁된장찌개 두부된장찌개 백반 찌개", serving: "1인분 (350g)", kcal: 195, carb: 14, prot: 13, fat: 9, satFat: 2, sugar: 3, sodium: 1320 },
-    { name: "차돌박이 된장찌개 (1인분)", keys: "차돌된장찌개 차돌박이된장찌개 고기된장찌개 된장찌개", serving: "1인분 (400g)", kcal: 360, carb: 14, prot: 22, fat: 24, satFat: 9, sugar: 3, sodium: 1450 },
+    { name: "된장찌개 (두부·야채 일반 1인분)", keys: "된장찌개 우렁된장찌개 두부된장찌개 고깃집된장찌개 백반 찌개", serving: "1인분 (350g)", kcal: 195, carb: 14, prot: 13, fat: 9, satFat: 2, sugar: 3, sodium: 1320 },
+    { name: "차돌박이 된장찌개 (1인분)", keys: "차돌된장찌개 차돌박이된장찌개 고기된장찌개 정육식당된장찌개 된장찌개", serving: "1인분 (400g)", kcal: 360, carb: 14, prot: 22, fat: 24, satFat: 9, sugar: 3, sodium: 1450 },
     { name: "순두부찌개 (해물/고기 계란 포함 1인분)", keys: "순두부찌개 해물순두부 고기순두부 짬뽕순두부 찌개", serving: "1인분 (400g)", kcal: 295, carb: 13, prot: 20, fat: 18, satFat: 4, sugar: 2, sodium: 1380 },
     { name: "청국장찌개 (1인분)", keys: "청국장 청국장찌개 찌개", serving: "1인분 (350g)", kcal: 250, carb: 15, prot: 21, fat: 12, satFat: 2, sugar: 2, sodium: 1180 },
     { name: "돼지국밥 / 순대국밥 (밥 포함 1그릇)", keys: "국밥 돼지국밥 순대국밥 내장국밥 수육국밥", serving: "1그릇 (밥포함)", kcal: 740, carb: 72, prot: 38, fat: 31, satFat: 11, sugar: 2, sodium: 1620 },
@@ -1079,7 +1110,7 @@
     { name: "갈비탕 (소갈비 1그릇)", keys: "갈비탕 왕갈비탕 소갈비탕", serving: "1그릇 (600g)", kcal: 560, carb: 14, prot: 42, fat: 36, satFat: 13, sugar: 2, sodium: 1340 },
     { name: "삼계탕 / 반계탕 (1인분)", keys: "삼계탕 반계탕 백숙 닭한마리", serving: "1그릇", kcal: 910, carb: 48, prot: 68, fat: 48, satFat: 14, sugar: 2, sodium: 1250 },
     { name: "육개장 / 소고기국밥 (1인분)", keys: "육개장 칼국수 소고기국밥 소고기무국", serving: "1그릇 (500g)", kcal: 380, carb: 18, prot: 28, fat: 22, satFat: 7, sugar: 3, sodium: 1680 },
-    { name: "소고기 미역국 / 계란국 / 콩나물국 (1그릇)", keys: "미역국 소고기미역국 계란국 콩나물국 북엇국 황태해장국", serving: "1그릇 (350g)", kcal: 145, carb: 6, prot: 14, fat: 7, satFat: 2, sugar: 1, sodium: 850 },
+    { name: "소고기 미역국 / 계란국 / 콩나물국 (1그릇)", keys: "미역국 소고기미역국 계란국 콩나물국 북엇국 황태해장국 어묵탕", serving: "1그릇 (350g)", kcal: 145, carb: 6, prot: 14, fat: 7, satFat: 2, sugar: 1, sodium: 850 },
 
     // --- 중식 (짜장면, 간짜장, 짬뽕, 탕수육, 마라탕 등) ---
     { name: "짜장면 (일반 1그릇)", keys: "짜장면 자장면 옛날짜장 유니짜장 중국집 중식 면", serving: "1그릇 (650g)", kcal: 790, carb: 128, prot: 22, fat: 21, satFat: 6, sugar: 14, sodium: 1780 },
@@ -1093,12 +1124,9 @@
     { name: "중식 볶음밥 / 새우볶음밥 (짜장소스 포함 1인분)", keys: "볶음밥 중국집볶음밥 새우볶음밥 계란볶음밥 삼선볶음밥", serving: "1인분 (450g)", kcal: 770, carb: 108, prot: 21, fat: 28, satFat: 6, sugar: 6, sodium: 1380 },
     { name: "마라탕 (소고기·채소·두부 위주 1인분)", keys: "마라탕 마라샹궈 훠궈 중식", serving: "1인분 (600g)", kcal: 640, carb: 48, prot: 28, fat: 38, satFat: 12, sugar: 6, sodium: 2150 },
 
-    // --- 한식 · 고기구이 · 덮밥 · 백반 ---
-    { name: "제육볶음 / 돼지불백 (1인분 200g)", keys: "제육볶음 제육덮밥 오삼불고기 돼지불백 불고기 한식", serving: "1인분 (200g)", kcal: 470, carb: 18, prot: 31, fat: 30, satFat: 9, sugar: 12, sodium: 1150 },
+    // --- 한식 · 덮밥 · 백반 ---
+    { name: "제육볶음 / 돼지불백 (1인분 200g)", keys: "제육볶음 오삼불고기 돼지불백 간장불고기 불고기 한식", serving: "1인분 (200g)", kcal: 470, carb: 18, prot: 31, fat: 30, satFat: 9, sugar: 12, sodium: 1150 },
     { name: "제육덮밥 / 불고기덮밥 (밥 포함 1그릇)", keys: "제육덮밥 소불고기덮밥 오징어덮밥 덮밥", serving: "1그릇 (450g)", kcal: 760, carb: 88, prot: 36, fat: 29, satFat: 8, sugar: 13, sodium: 1320 },
-    { name: "돼지고기 목살 / 앞다리살 구이 (1인분 200g)", keys: "목살 돼지목살 앞다리살 뒷다리살 항정살 가브리살 갈매기살 돼지고기 고기", serving: "1인분 (200g)", kcal: 480, carb: 1, prot: 40, fat: 34, satFat: 12, sugar: 0, sodium: 160 },
-    { name: "돼지고기 삼겹살 구이 (1인분 200g)", keys: "삼겹살 오겹살 대패삼겹살 냉동삼겹살 돼지고기 고기", serving: "1인분 (200g)", kcal: 660, carb: 1, prot: 34, fat: 56, satFat: 20, sugar: 0, sodium: 150 },
-    { name: "소고기 우둔살 / 부채살 / 안심 / 등심 구이 (200g)", keys: "소고기 한우 우둔살 부채살 안심 등심 갈비살 차돌박이 스테이크 육회", serving: "1인분 (200g)", kcal: 340, carb: 0, prot: 44, fat: 17, satFat: 6, sugar: 0, sodium: 140 },
     { name: "보쌈 / 수육 (살코기·삼겹 1인분 200g)", keys: "보쌈 수육 마늘보쌈 굴보쌈 편육 돼지고기", serving: "1인분 (200g)", kcal: 540, carb: 4, prot: 42, fat: 38, satFat: 13, sugar: 3, sodium: 480 },
     { name: "족발 / 불족발 (1인분 250g)", keys: "족발 불족발 냉채족발 미니족발 야식", serving: "1인분 (250g)", kcal: 590, carb: 8, prot: 48, fat: 40, satFat: 13, sugar: 5, sodium: 720 },
     { name: "비빔밥 / 돌솥비빔밥 / 육회비빔밥 (1그릇)", keys: "비빔밥 전주비빔밥 돌솥비빔밥 육회비빔밥 꼬막비빔밥 참치비빔밥", serving: "1그릇 (450g)", kcal: 610, carb: 88, prot: 22, fat: 18, satFat: 4, sugar: 9, sodium: 1080 },
@@ -1111,9 +1139,9 @@
     // --- 돈까스 · 분식 · 면류 ---
     { name: "등심 돈까스 / 경양식 돈까스 (1인분)", keys: "돈까스 돈가스 등심돈까스 안심돈까스 왕돈까스 일식돈까스 카츠", serving: "1인분 (밥·소스포함)", kcal: 780, carb: 74, prot: 34, fat: 38, satFat: 11, sugar: 10, sodium: 1120 },
     { name: "치즈 돈까스 / 고구마치즈 돈까스 (1인분)", keys: "치즈돈까스 치즈돈가스 고구마치즈돈까스 치즈카츠 돈까스", serving: "1인분", kcal: 860, carb: 76, prot: 39, fat: 44, satFat: 16, sugar: 12, sodium: 1250 },
-    { name: "물냉면 / 비빔냉면 / 막국수 (1그릇)", keys: "냉면 물냉면 비빔냉면 회냉면 막국수 밀면 쫄면", serving: "1그릇 (600g)", kcal: 540, carb: 102, prot: 16, fat: 7, satFat: 2, sugar: 14, sodium: 1580 },
+    { name: "물냉면 / 비빔냉면 / 막국수 (1그릇)", keys: "냉면 물냉면 비빔냉면 회냉면 막국수 밀면 쫄면 고깃집냉면", serving: "1그릇 (600g)", kcal: 540, carb: 102, prot: 16, fat: 7, satFat: 2, sugar: 14, sodium: 1580 },
     { name: "바지락 칼국수 / 잔치국수 / 우동 (1그릇)", keys: "칼국수 바지락칼국수 닭칼국수 잔치국수 비빔국수 어묵우동 쌀국수", serving: "1그릇 (650g)", kcal: 560, carb: 105, prot: 20, fat: 6, satFat: 1.5, sugar: 4, sodium: 1750 },
-    { name: "일반 김밥 / 야채김밥 (1줄)", keys: "김밥 야채김밥 일반김밥 꼬마김밥 분식", serving: "1줄 (250g)", kcal: 440, carb: 68, prot: 12, fat: 12, satFat: 2.5, sugar: 3, sodium: 920 },
+    { name: "일반 김밥 / 야채김밥 / 삼각김밥 (1줄)", keys: "김밥 야채김밥 일반김밥 꼬마김밥 삼각김밥 편의점김밥 분식", serving: "1줄 (250g)", kcal: 440, carb: 68, prot: 12, fat: 12, satFat: 2.5, sugar: 3, sodium: 920 },
     { name: "참치김밥 / 치즈김밥 / 돈까스김밥 (1줄)", keys: "참치김밥 치즈김밥 돈까스김밥 불고기김밥 소고기김밥 키토김밥", serving: "1줄 (280g)", kcal: 520, carb: 69, prot: 18, fat: 18, satFat: 4, sugar: 3, sodium: 1050 },
     { name: "떡볶이 / 국물떡볶이 (1인분)", keys: "떡볶이 국물떡볶이 엽기떡볶이 엽떡 신전떡볶이 로제떡볶이 라볶이 분식", serving: "1인분 (300g)", kcal: 510, carb: 96, prot: 12, fat: 8, satFat: 2, sugar: 18, sodium: 1350 },
     { name: "순대 (찰순대 및 내장 포함 1인분)", keys: "순대 찰순대 병천순대 순대볶음 분식", serving: "1인분 (250g)", kcal: 420, carb: 58, prot: 18, fat: 12, satFat: 4, sugar: 1, sodium: 680 },
@@ -1122,7 +1150,7 @@
     { name: "풀무원 얇은피 꽉찬속 고기만두 (1인분 4개, 160g)", keys: "풀무원 얇은피 만두 꽉찬속 고기만두 얄피만두 냉동만두 군만두 찐만두", serving: "4개 (160g)", kcal: 268, carb: 23, prot: 15.5, fat: 13.5, satFat: 4.5, sugar: 2.5, sodium: 545 },
     { name: "풀무원 얇은피 꽉찬속 고기만두 (1봉지 8개, 320g)", keys: "풀무원 얇은피 만두 꽉찬속 고기만두 얄피만두 한봉지", serving: "1봉지 (320g)", kcal: 535, carb: 46, prot: 31, fat: 27, satFat: 9, sugar: 5, sodium: 1090 },
     { name: "풀무원 얇은피 꽉찬속 김치만두 (1인분 4개, 160g)", keys: "풀무원 얇은피 만두 꽉찬속 김치만두 얄피만두 냉동만두", serving: "4개 (160g)", kcal: 248, carb: 24, prot: 13, fat: 11, satFat: 3.8, sugar: 3, sodium: 620 },
-    { name: "풀무원 얇은피 꽉찬속 땡초불고기만두 (4개, 160g)", keys: "풀무원 얇은피 만두 땡초만두 불고기만두 얄피만두", serving: "4개 (160g)", kcal: 275, carb: 25, prot: 14, fat: 13, satFat: 4.2, sugar: 4, sodium: 580 },
+    { name: "풀무원 얇은피 꽉찬속 땡초불고기만두 (4개, 160g)", keys: "풀무원 얇은피 만두 땡초만두 땡초불고기만두 얄피만두", serving: "4개 (160g)", kcal: 275, carb: 25, prot: 14, fat: 13, satFat: 4.2, sugar: 4, sodium: 580 },
     { name: "CJ 비비고 왕교자 (1인분 5개, 175g)", keys: "비비고 왕교자 만두 고기만두 군만두 찐만두 물만두 cj", serving: "5개 (175g)", kcal: 355, carb: 34, prot: 15, fat: 18, satFat: 6, sugar: 3, sodium: 610 },
     { name: "CJ 비비고 김치왕교자 (5개, 175g)", keys: "비비고 김치왕교자 김치만두 만두 cj", serving: "5개 (175g)", kcal: 320, carb: 33, prot: 15, fat: 14, satFat: 4.8, sugar: 3, sodium: 720 },
     { name: "CJ 햇반 / 흰쌀밥 공깃밥 (1공기 210g)", keys: "햇반 쌀밥 흰쌀밥 공깃밥 공기밥 즉석밥 밥 한공기 cj 오뚜기밥", serving: "1공기 (210g)", kcal: 315, carb: 70, prot: 5, fat: 1.5, satFat: 0, sugar: 0, sodium: 5 },
@@ -1133,15 +1161,14 @@
     { name: "짜파게티 / 불닭볶음면 / 비빔면 (1개)", keys: "짜파게티 짜슐랭 불닭볶음면 까르보불닭 팔도비빔면 배홍동 볶음라면 라면", serving: "1개 (140g)", kcal: 560, carb: 85, prot: 11, fat: 19, satFat: 8, sugar: 8, sodium: 1180 },
     { name: "오뚜기 컵누들 (매콤한맛/우동맛 1개)", keys: "컵누들 로제컵누들 마라탕컵누들 다이어트라면", serving: "1개 (38g)", kcal: 120, carb: 27, prot: 2, fat: 0.5, satFat: 0, sugar: 3, sodium: 890 },
 
-    // --- 다이어트 · 단백질 · 치킨 · 버거 · 서브웨이 ---
+    // --- 다이어트 · 닭가슴살 · 치킨 · 버거 · 서브웨이 ---
     { name: "닭가슴살 오리지널 / 훈제 / 수비드 (1팩 100g)", keys: "닭가슴살 하림 아임닭 맛있닭 랭킹닭컴 곰곰 한끼통살 허닭 닭안심", serving: "1팩 (100g)", kcal: 110, carb: 1.5, prot: 23, fat: 1.5, satFat: 0.4, sugar: 0.5, sodium: 220 },
-    { name: "닭가슴살 소시지 / 스테이크 / 볼 (1팩 100g)", keys: "닭가슴살소시지 닭가슴살스테이크 닭가슴살볼 닭가슴살만두", serving: "1팩 (100g)", kcal: 145, carb: 6, prot: 20, fat: 4.5, satFat: 1.2, sugar: 2, sodium: 380 },
+    { name: "닭가슴살 소시지 / 스테이크 / 볼 / 오븐구이 (1팩 100g)", keys: "닭가슴살소시지 닭가슴살스테이크 닭가슴살볼 닭가슴살만두 오븐구이닭가슴살", serving: "1팩 (100g)", kcal: 145, carb: 6, prot: 20, fat: 4.5, satFat: 1.2, sugar: 2, sodium: 380 },
     { name: "삶은 계란 / 구운란 / 반숙란 (1개 50g)", keys: "계란 달걀 삶은계란 구운란 반숙란 감동란 맥반석계란", serving: "1개 (50g)", kcal: 73, carb: 0.7, prot: 6.5, fat: 4.8, satFat: 1.5, sugar: 0.2, sodium: 65 },
     { name: "계란후라이 / 스크램블에그 / 계란말이 (2개 분량)", keys: "계란후라이 달걀후라이 스크램블에그 계란말이 계란찜 오믈렛", serving: "2개 분량", kcal: 185, carb: 2, prot: 13, fat: 14, satFat: 3.5, sugar: 1, sodium: 260 },
     { name: "두부 / 모두부 / 연두부 (반 모 150g)", keys: "두부 모두부 부침두부 연두부 순두부 두부김치", serving: "반 모 (150g)", kcal: 126, carb: 4, prot: 13, fat: 6.5, satFat: 1, sugar: 1, sodium: 15 },
-    { name: "단백질 쉐이크 / 프로틴 음료 (더단백·셀렉스·마이프로틴)", keys: "단백질쉐이크 프로틴 더단백 셀렉스 하이뮨 마이프로틴 신타6 닥터유프로틴 단백질음료", serving: "1회분", kcal: 125, carb: 4, prot: 24, fat: 1.5, satFat: 0.5, sugar: 1, sodium: 150 },
     { name: "서브웨이 로스트치킨 / 로티세리 / 터키 (15cm)", keys: "서브웨이 써브웨이 로스트치킨 로티세리치킨 터키 베지 이탈리안bmt 에그마요 스테이크앤치즈 샌드위치", serving: "15cm (1개)", kcal: 320, carb: 41, prot: 26, fat: 5, satFat: 1.5, sugar: 5, sodium: 610 },
-    { name: "굽네치킨 오리지널 / 고추바사삭 (반 마리)", keys: "굽네치킨 고추바사삭 오리지널 구운치킨 로스트치킨 치킨", serving: "반 마리", kcal: 540, carb: 12, prot: 58, fat: 28, satFat: 8, sugar: 4, sodium: 920 },
+    { name: "굽네치킨 오리지널 / 고추바사삭 (반 마리)", keys: "굽네치킨 고추바사삭 오리지널 구운치킨 로스트치킨 통닭 치킨", serving: "반 마리", kcal: 540, carb: 12, prot: 58, fat: 28, satFat: 8, sugar: 4, sodium: 920 },
     { name: "후라이드 치킨 / 양념치킨 (반 마리)", keys: "치킨 후라이드치킨 양념치킨 교촌치킨 허니콤보 bhc 뿌링클 bbq 황금올리브 닭강정", serving: "반 마리", kcal: 950, carb: 45, prot: 56, fat: 60, satFat: 15, sugar: 8, sodium: 1380 },
     { name: "햄버거 단품 (빅맥/상하이버거/와퍼/싸이버거)", keys: "햄버거 맥도날드 빅맥 상하이버거 쿼터파운더 버거킹 와퍼 맘스터치 싸이버거 롯데리아 불고기버거", serving: "1개 (단품)", kcal: 550, carb: 46, prot: 27, fat: 28, satFat: 9, sugar: 7, sodium: 920 },
     { name: "피자 (페퍼로니/포테이토/콤비네이션 1조각)", keys: "피자 페퍼로니피자 포테이토피자 고구마피자 치즈피자 도미노피자 피자헛", serving: "1조각 (110g)", kcal: 295, carb: 34, prot: 13, fat: 12, satFat: 5, sugar: 4, sodium: 580 },
@@ -1150,7 +1177,7 @@
     { name: "샤인머스캣 / 샤인머스켓 (100g, 약 10~12알)", keys: "샤인머스캣 샤인머스켓 포도 청포도 거봉 과일", serving: "100g (약 10알)", kcal: 68, carb: 17.5, prot: 0.6, fat: 0.2, satFat: 0, sugar: 15, sodium: 2 },
     { name: "사과 (중간 크기 1개 200g)", keys: "사과 부사 홍로 아오리 감홍 과일", serving: "1개 (200g)", kcal: 114, carb: 30, prot: 0.5, fat: 0.3, satFat: 0, sugar: 22, sodium: 2 },
     { name: "방울토마토 / 대추방울토마토 (10알, 150g)", keys: "방울토마토 대추방울토마토 스테비아토마토 완숙토마토 토마토 과일 채소", serving: "10알 (150g)", kcal: 24, carb: 5.2, prot: 1.3, fat: 0.2, satFat: 0, sugar: 3.5, sodium: 8 },
-    { name: "바나나 (중간 1개 110g)", keys: "바나나 과일", serving: "1개 (110g)", kcal: 98, carb: 25, prot: 1.2, fat: 0.3, satFat: 0, sugar: 14, sodium: 1 },
+    { name: "바나나 (중간 1개 110g)", keys: "바나나 생바나나 과일", serving: "1개 (110g)", kcal: 98, carb: 25, prot: 1.2, fat: 0.3, satFat: 0, sugar: 14, sodium: 1 },
     { name: "딸기 (10알, 약 150g)", keys: "딸기 설향 금실 과일", serving: "10알 (150g)", kcal: 54, carb: 12.5, prot: 1.2, fat: 0.4, satFat: 0, sugar: 8, sodium: 2 },
     { name: "귤 / 감귤 (1개 80g)", keys: "귤 감귤 오렌지 천혜향 한라봉 레드향 자몽 과일", serving: "1개 (80g)", kcal: 32, carb: 8, prot: 0.5, fat: 0.1, satFat: 0, sugar: 6.5, sodium: 1 },
     { name: "수박 / 참외 / 멜론 / 복숭아 / 배 (1인분 200g)", keys: "수박 참외 메론 멜론 복숭아 백도 황도 천도복숭아 배 단감 홍시 키위 블루베리 과일", serving: "1인분 (200g)", kcal: 78, carb: 19, prot: 1.2, fat: 0.3, satFat: 0, sugar: 15, sodium: 3 },
@@ -1158,7 +1185,7 @@
     { name: "찐 감자 / 구운 감자 (1개 150g)", keys: "감자 찐감자 구운감자 알감자 웨지감자", serving: "1개 (150g)", kcal: 115, carb: 26, prot: 3, fat: 0.2, satFat: 0, sugar: 1.5, sodium: 10 },
     { name: "그릭요거트 (무가당 플레인 100g)", keys: "그릭요거트 요거트 플레인요거트 비요뜨 유제품 우유 두유", serving: "100g", kcal: 95, carb: 4.5, prot: 10, fat: 4, satFat: 2.5, sugar: 3, sodium: 45 },
     { name: "아이스 아메리카노 / 블랙커피 (1잔)", keys: "아메리카노 아이스아메리카노 아아 커피 스타벅스 메가커피 컴포즈", serving: "1잔", kcal: 10, carb: 2, prot: 0.5, fat: 0, satFat: 0, sugar: 0, sodium: 5 },
-    { name: "카페라떼 / 두유라떼 (무가당 1잔)", keys: "카페라떼 라떼 카푸치노 플랫화이트 바닐라라떼 커피", serving: "1잔 (355ml)", kcal: 150, carb: 13, prot: 9, fat: 7, satFat: 4.5, sugar: 11, sodium: 115 },
+    { name: "카페라떼 / 두유라떼 / 바나나라떼 (1잔)", keys: "카페라떼 라떼 카푸치노 플랫화이트 바닐라라떼 바나나우유 커피", serving: "1잔 (355ml)", kcal: 150, carb: 13, prot: 9, fat: 7, satFat: 4.5, sugar: 11, sodium: 115 },
     { name: "제로콜라 / 제로사이다 / 제로음료 (1캔 355ml)", keys: "제로콜라 펩시제로 칠성사이다제로 나랑드사이다 탄산수 음료", serving: "1캔 (355ml)", kcal: 0, carb: 0, prot: 0, fat: 0, satFat: 0, sugar: 0, sodium: 25 }
   ];
 
@@ -1976,30 +2003,26 @@
     render();
   }
 
-  // ===== [V9 핵심] 한국어 자연어·수량·오타 자동 파서 & 스마트 검색 엔진 =====
+  // ===== [V9.1 핵심 수정] 한국어 자연어·수량·오타 파서 & 고정밀 검색 엔진 =====
   function fixKoreanFoodTypos(str) {
     return (str || "")
       .replace(/짬봉/g, "짬뽕")
-      .replace(/짜장/g, "짜장")
       .replace(/자장면/g, "짜장면")
       .replace(/간자장/g, "간짜장")
       .replace(/샤인머스켓/g, "샤인머스캣")
       .replace(/돈가스/g, "돈까스")
       .replace(/얄피/g, "얇은피")
       .replace(/떡복이/g, "떡볶이")
-      .replace(/계란/g, "계란")
       .replace(/달걀/g, "계란")
+      .replace(/오뎅/g, "어묵")
       .replace(/써브웨이/g, "서브웨이");
   }
 
-  // "목살 김치찌개 1인분", "짜장면1개", "간짜장1개", "짬봉한개", "사과 반개" 등을 분석해
-  // 순수 음식명(coreQuery)과 배수(mult), 수량 라벨(unitLabel)로 자동 분리
   function parseSmartKoreanFoodQuery(rawInput) {
     let text = fixKoreanFoodTypos((rawInput || "").trim());
     let mult = 1.0;
     let unitLabel = "";
 
-    // 1. 한글 수량 표현 매칭 (반개, 반인분, 반공기, 한개, 한그릇, 두개, 세개, 곱빼기 등)
     const korRules = [
       { regex: /(?:곱빼기|곱배기|특대|대짜)/g, m: 1.4, label: "곱빼기(1.4배)" },
       { regex: /(?:반\s*개|반\s*인분|반\s*그릇|반\s*공기|반\s*팩|절반)/g, m: 0.5, label: "0.5배(반 개/반 인분)" },
@@ -2017,13 +2040,11 @@
       }
     }
 
-    // 2. 숫자 + 단위 표현 매칭 (1인분, 1개, 2개, 1.5인분, 1그릇, 1공기, 1팩, 1봉지, 1줄, 1잔 등)
     const numUnitMatch = text.match(/(\d+(?:\.\d+)?)\s*(인분|개|그릇|공기|팩|봉지|봉|줄|조각|접시|캔|잔|병|알|모)\b/);
     if (numUnitMatch) {
       const val = parseFloat(numUnitMatch[1]);
       const unit = numUnitMatch[2];
       if (!isNaN(val) && val > 0 && val <= 10) {
-        // 알/조각 등 기본 단위가 큰 경우는 그대로 두고, 인분/개/그릇/공기/팩/줄 등은 배수로 반영
         if (["인분", "개", "그릇", "공기", "팩", "봉지", "봉", "줄", "잔", "캔", "병"].includes(unit)) {
           mult = val;
           unitLabel = `${val}${unit}`;
@@ -2040,27 +2061,24 @@
     return fixKoreanFoodTypos(s || "").toLowerCase().replace(/[^가-힣a-z0-9]/g, "");
   }
 
-  // 글자 2음절(바이그램) 유사도 점수 계산 — 띄어쓰기 없이 붙여 쓰거나 순서가 달라도 정확히 매칭!
-  function getBigramOverlapScore(qNorm, targetNorm) {
-    if (!qNorm || !targetNorm) return 0;
-    if (qNorm.length < 2) return targetNorm.includes(qNorm) ? 30 : 0;
-    let hits = 0;
-    const total = qNorm.length - 1;
-    for (let i = 0; i < total; i++) {
-      const bg = qNorm.slice(i, i + 2);
-      if (targetNorm.includes(bg)) hits++;
-    }
-    return Math.round((hits / total) * 70);
-  }
-
-  // 내장 DB에 정확히 일치하는 조합이 없을 때 작동하는 재료 조합 스마트 추정기
+  // 전 카테고리 스마트 영양 추정기 (내장 DB에 정확히 일치하는 브랜드명이 없을 때 작동)
   function buildSmartEstimatedFood(coreQuery) {
     const q = normalizeStr(coreQuery);
     if (!q || q.length < 2) return null;
 
-    // 대표 메뉴 베이스 + 토핑/주재료 조합 규칙
     let base = null;
-    if (q.includes("김치찌개") || q.includes("김치찜")) {
+
+    if (q.includes("프로틴") || q.includes("단백질") || q.includes("더단백") || q.includes("셀렉스") || q.includes("닥터유") || q.includes("하이뮨")) {
+      if (q.includes("바") && !q.includes("바나나")) {
+        base = { title: coreQuery, serving: "1개 (55g 기준)", kcal: 210, carb: 20, prot: 15, fat: 8, satFat: 3.5, sugar: 5, sodium: 160 };
+      } else {
+        base = { title: coreQuery, serving: "1팩/1병 (250ml 기준)", kcal: 120, carb: 6, prot: 21, fat: 1.2, satFat: 0.6, sugar: 1, sodium: 190 };
+      }
+    } else if (q.includes("어묵") || q.includes("핫바") || q.includes("오븐구이") || q.includes("맛살") || q.includes("크래미")) {
+      base = { title: coreQuery, serving: "1개/1회분 (80g 기준)", kcal: 130, carb: 13, prot: 10, fat: 4.0, satFat: 1.0, sugar: 4, sodium: 560 };
+    } else if (q.includes("정육식당") || q.includes("한판") || q.includes("고기집") || q.includes("고깃집") || q.includes("삼겹") || q.includes("목살") || q.includes("갈비") || q.includes("돈마호크")) {
+      base = { title: coreQuery, serving: "1인분 (200g 구이 기준)", kcal: 540, carb: 2, prot: 38, fat: 42, satFat: 15, sugar: 1, sodium: 220 };
+    } else if (q.includes("김치찌개") || q.includes("김치찜")) {
       base = { title: coreQuery, serving: "1인분 (조합추정)", kcal: 410, carb: 13, prot: 24, fat: 28, satFat: 9, sugar: 4, sodium: 1450 };
       if (q.includes("목살") || q.includes("앞다리")) { base.kcal = 460; base.prot = 34; base.fat = 30; }
       else if (q.includes("삼겹") || q.includes("차돌") || q.includes("우삼겹")) { base.kcal = 530; base.prot = 28; base.fat = 40; }
@@ -2074,10 +2092,18 @@
     } else if (q.includes("짬뽕")) {
       base = { title: coreQuery, serving: "1그릇 (조합추정)", kcal: 710, carb: 102, prot: 29, fat: 19, satFat: 5, sugar: 6, sodium: 2350 };
       if (q.includes("차돌") || q.includes("고기")) { base.kcal = 840; base.prot = 36; base.fat = 31; }
-    } else if (q.includes("볶음밥") || q.includes("덮밥")) {
+    } else if (q.includes("볶음밥") || q.includes("덮밥") || q.includes("도시락")) {
       base = { title: coreQuery, serving: "1인분 (조합추정)", kcal: 680, carb: 88, prot: 24, fat: 24, satFat: 6, sugar: 7, sodium: 1250 };
-    } else if (q.includes("찌개") || q.includes("전골") || q.includes("국밥")) {
+    } else if (q.includes("찌개") || q.includes("전골") || q.includes("국밥") || q.includes("해장국") || q.includes("탕")) {
       base = { title: coreQuery, serving: "1인분 (조합추정)", kcal: 490, carb: 32, prot: 30, fat: 26, satFat: 8, sugar: 4, sodium: 1550 };
+    } else if (q.includes("불고기") || q.includes("제육") || q.includes("주물럭")) {
+      base = { title: coreQuery, serving: "1인분 (200g 기준)", kcal: 450, carb: 16, prot: 32, fat: 28, satFat: 8, sugar: 10, sodium: 980 };
+    } else if (q.includes("소시지") || q.includes("후랑크") || q.includes("스팸") || q.includes("베이컨")) {
+      base = { title: coreQuery, serving: "1회분 (80g 기준)", kcal: 210, carb: 4, prot: 11, fat: 17, satFat: 6, sugar: 2, sodium: 580 };
+    } else if (q.includes("샐러드") || q.includes("포케")) {
+      base = { title: coreQuery, serving: "1보울 (조합추정)", kcal: 380, carb: 35, prot: 24, fat: 15, satFat: 3, sugar: 6, sodium: 520 };
+    } else if (q.includes("샌드위치") || q.includes("토스트") || q.includes("베이글") || q.includes("빵")) {
+      base = { title: coreQuery, serving: "1개 (조합추정)", kcal: 360, carb: 48, prot: 14, fat: 12, satFat: 4, sugar: 8, sodium: 540 };
     }
 
     if (!base) return null;
@@ -2085,7 +2111,7 @@
     if (q.includes("사리") || q.includes("라면")) { base.kcal += 280; base.carb += 52; base.prot += 5; base.fat += 6; }
 
     return {
-      name: `${base.title} (스마트 영양 추정)`,
+      name: `${base.title} (스마트 맞춤 추정)`,
       serving: base.serving,
       kcal: base.kcal,
       carb: base.carb,
@@ -2101,38 +2127,46 @@
   function searchLocalDB(coreQuery) {
     const qClean = normalizeStr(coreQuery);
     if (!qClean) return [];
-    const tokens = coreQuery.trim().toLowerCase().split(/\s+/).map(t => normalizeStr(t)).filter(Boolean);
+    const tokens = coreQuery.trim().toLowerCase().split(/\s+/).map(t => normalizeStr(t)).filter(t => t.length >= 1);
     const scored = [];
 
     for (const item of KOREAN_FOOD_DB) {
       const titleNorm = normalizeStr(item.name);
-      const haystack = normalizeStr(item.name + " " + (item.keys || ""));
+      const keysNorm = normalizeStr(item.keys || "");
+      const haystack = titleNorm + " " + keysNorm;
       let score = 0;
 
-      // 1. 제목 또는 키워드에 전체 쿼리 포함 시 최우선 점수
-      if (titleNorm.includes(qClean)) score += 160;
-      else if (haystack.includes(qClean)) score += 110;
+      // 1. 전체 검색어 연속 포함 시 최우선 점수
+      if (titleNorm.includes(qClean)) score += 220;
+      else if (haystack.includes(qClean)) score += 170;
 
-      // 2. 단어 토큰별 매칭 점수 ("목살" + "김치찌개" 등)
+      // 2. 단어 토큰별 일치율 계산 (다단어 입력 시 한 단어만 우연히 겹친 오매칭 차단)
       let matchedTokens = 0;
       for (const tk of tokens) {
-        if (titleNorm.includes(tk)) { score += 55; matchedTokens++; }
-        else if (haystack.includes(tk)) { score += 35; matchedTokens++; }
+        if (tk.length < 2 && tokens.length > 1) continue;
+        if (titleNorm.includes(tk)) { score += 50; matchedTokens++; }
+        else if (keysNorm.includes(tk)) { score += 40; matchedTokens++; }
       }
-      if (tokens.length > 1 && matchedTokens === tokens.length) score += 90;
 
-      // 3. 붙여썼거나 부분 일치할 때 바이그램 유사도 점수
-      const bgScore = getBigramOverlapScore(qClean, haystack);
-      if (bgScore >= 50) score += bgScore;
+      const ratio = tokens.length > 0 ? (matchedTokens / tokens.length) : 0;
+      if (tokens.length >= 2) {
+        if (matchedTokens === tokens.length) {
+          score += 120; // 모든 단어가 다 포함된 경우 큰 가산점
+        } else if (matchedTokens === 1 && score < 170) {
+          // 2~3단어를 입력했는데 단 1단어만 일치한 경우(예: "사조대림 오븐구이 불고기"에서 "불고기"만 일치) 점수 대폭 감점
+          score = Math.round(score * 0.45);
+        }
+      }
 
-      if (score >= 45) scored.push({ item, score });
+      if (score >= 45) scored.push({ item, score, matchedTokens });
     }
 
     scored.sort((a, b) => b.score - a.score);
-    const results = scored.slice(0, 15).map(s => s.item);
+    const results = scored.slice(0, 12).map(s => s.item);
 
-    // 만약 복합 메뉴(예: "우삼겹 김치찌개")처럼 상위 정확 매칭이 부족하면 스마트 조합 추정기 결과도 함께 제공
-    if (results.length === 0 || (scored[0] && scored[0].score < 120)) {
+    // 최상위 결과가 전체 토큰을 다 포함하지 못했거나 결과가 부족할 때 스마트 조합 추정기를 최상단에 배치
+    const topHasAllTokens = scored.length > 0 && (scored[0].score >= 160 || scored[0].matchedTokens === tokens.length);
+    if (!topHasAllTokens) {
       const est = buildSmartEstimatedFood(coreQuery);
       if (est) results.unshift(est);
     }
@@ -2161,32 +2195,33 @@
 
     if (parsed.unitLabel || parsed.coreQuery !== raw) {
       hintBox.style.display = "block";
-      hintBox.innerHTML = `🔍 스마트 인식: <b>'${parsed.coreQuery}'</b> ${parsed.unitLabel ? `× <b>${parsed.unitLabel} (${parsed.mult}배 자동 적용)</b>` : "(오타/단어 자동 보정됨)"}`;
+      hintBox.innerHTML = `🔍 스마트 인식: <b>'${parsed.coreQuery}'</b> ${parsed.unitLabel ? `× <b>${parsed.unitLabel} (${parsed.mult}배 자동 적용)</b>` : "(단어 자동 보정됨)"}`;
     } else {
       hintBox.style.display = "none";
     }
 
     const localMatches = searchLocalDB(parsed.coreQuery);
     const cachedWeb = webFoodCache[normalizeStr(parsed.coreQuery)] || [];
-    renderFoodSearchResults([...localMatches, ...cachedWeb], false, currentParsedMult);
+    renderFoodSearchResults([...cachedWeb, ...localMatches], "", currentParsedMult);
   }
 
-  function renderFoodSearchResults(list, isAfterWebSearch, mult = 1.0) {
+  function renderFoodSearchResults(list, statusBannerHtml = "", mult = 1.0) {
     currentSearchMatches = list;
     const resBox = document.getElementById("foodSearchResults");
     resBox.style.display = "block";
 
+    const bannerBlock = statusBannerHtml ? `<div class="search-status-banner">${statusBannerHtml}</div>` : "";
+
     if (!list || list.length === 0) {
-      resBox.innerHTML = `<div style="padding:14px; font-size:12px; color:var(--sub); text-align:center; line-height:1.5;">
-        ${isAfterWebSearch
-          ? "웹 DB에서 일치하는 항목을 찾지 못했습니다.<br/>위 <b>[🛒 쿠팡 성분표]</b> 또는 <b>[📗 네이버 검색]</b>을 눌러 확인해 보세요!"
-          : "내장 사전 결과 없음 — 우측 파란색 <b>[🌐 실시간 웹검색]</b>을 누르면 외부 식품 DB에서 찾아옵니다!"}
+      resBox.innerHTML = bannerBlock + `<div style="padding:14px; font-size:12px; color:var(--sub); text-align:center; line-height:1.5;">
+        일치하는 내장/웹 항목이 없습니다.<br/>
+        우측 <b>[🌐 실시간 웹검색]</b>을 누르거나 위 <b>[📗 네이버 검색]</b> · <b>[📋 텍스트 자동인식]</b>을 이용해 보세요!
       </div>`;
       return;
     }
 
     const mLabel = mult !== 1.0 ? ` <b style="color:var(--primary);">(${mult}배 적용)</b>` : "";
-    resBox.innerHTML = list.map((item, idx) => {
+    resBox.innerHTML = bannerBlock + list.map((item, idx) => {
       const dispKcal = Math.round(item.kcal * mult);
       const dispCarb = Math.round((item.carb || 0) * mult * 10) / 10;
       const dispProt = Math.round((item.prot || 0) * mult * 10) / 10;
@@ -2212,38 +2247,33 @@
     }).join("");
   }
 
-  // ===== [V9 핵심] 3중 검증 실시간 웹 검색 엔진 (프록시 가짜 응답 차단 + 다중 소스) =====
-  async function fetchFatSecretVerified(cleanQuery) {
-    const fsUrl = `https://www.fatsecret.kr/%EC%B9%BC%EB%A1%9C%EB%A6%AC-%EC%98%81%EC%96%91%EC%86%8C/search?q=${encodeURIComponent(cleanQuery)}`;
-    const proxyConfigs = [
-      { url: `https://api.allorigins.win/get?url=${encodeURIComponent(fsUrl)}`, isJsonWrap: true },
-      { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(fsUrl)}`, isJsonWrap: false },
-      { url: `https://corsproxy.io/?${encodeURIComponent(fsUrl)}`, isJsonWrap: false }
-    ];
+  // ===== [V9.1 핵심 수정] 다중 파이프라인 실시간 웹 검색 (Jina Reader + AllOrigins Raw + 정규식 추출) =====
+  function parseFatSecretHtmlOrText(rawText) {
+    if (!rawText) return [];
+    const items = [];
 
-    const parseHtmlToItems = (html) => {
-      if (!html || !html.includes("searchResult")) return [];
-      const doc = new DOMParser().parseFromString(html, "text/html");
-      const rows = doc.querySelectorAll("table.generic.searchResult tr");
-      const items = [];
+    // 1. HTML DOM 파싱 시도
+    if (rawText.includes("searchResult") || rawText.includes("<table")) {
+      const doc = new DOMParser().parseFromString(rawText, "text/html");
+      const rows = doc.querySelectorAll("table.generic.searchResult tr, .searchResult tr");
       rows.forEach(tr => {
         const titleEl = tr.querySelector("a.prominent");
         const brandEl = tr.querySelector("a.brand");
-        const infoEl = tr.querySelector("div.smallText.greyText.greyLink");
+        const infoEl = tr.querySelector("div.smallText, .smallText");
         if (titleEl && infoEl) {
           const title = titleEl.textContent.trim();
           const brand = brandEl ? `[${brandEl.textContent.trim()}] ` : "";
           const infoText = infoEl.textContent.replace(/\s+/g, " ");
           const servingMatch = infoText.match(/^([^-]+)-\s*칼로리/);
-          const kcalMatch = infoText.match(/칼로리:\s*([\d.]+)\s*kcal/i);
-          const fatMatch = infoText.match(/지방:\s*([\d.]+)\s*g/i);
-          const carbMatch = infoText.match(/탄수화물:\s*([\d.]+)\s*g/i);
-          const protMatch = infoText.match(/단백질:\s*([\d.]+)\s*g/i);
+          const kcalMatch = infoText.match(/칼로리:\s*([\d,.]+)\s*kcal/i);
+          const fatMatch = infoText.match(/지방:\s*([\d,.]+)\s*g/i);
+          const carbMatch = infoText.match(/탄수화물:\s*([\d,.]+)\s*g/i);
+          const protMatch = infoText.match(/단백질:\s*([\d,.]+)\s*g/i);
           if (kcalMatch) {
             items.push({
               name: `${brand}${title}`,
               serving: servingMatch ? servingMatch[1].trim() : "1회 제공량",
-              kcal: Math.round(parseFloat(kcalMatch[1])),
+              kcal: Math.round(parseFloat(kcalMatch[1].replace(/,/g, ""))),
               carb: carbMatch ? Math.round(parseFloat(carbMatch[1]) * 10) / 10 : 0,
               prot: protMatch ? Math.round(parseFloat(protMatch[1]) * 10) / 10 : 0,
               fat: fatMatch ? Math.round(parseFloat(fatMatch[1]) * 10) / 10 : 0,
@@ -2252,76 +2282,86 @@
           }
         }
       });
-      return items;
-    };
+      if (items.length > 0) return items;
+    }
 
-    // 각 프록시가 실제 음식 파싱 결과가 1개 이상 나왔을 때만 성공으로 인정!
-    const tasks = proxyConfigs.map(async (cfg) => {
+    // 2. Jina Reader 등 마크다운/텍스트 응답 정규식 파싱
+    const lines = rawText.split(/\n+/);
+    let lastTitle = "";
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      const linkMatch = line.match(/\[([^\]]+)\]\(https?:\/\/www\.fatsecret\.kr\/[^)]+\)/);
+      if (linkMatch && !linkMatch[1].includes("칼로리") && linkMatch[1].length >= 2) {
+        lastTitle = linkMatch[1].trim();
+      }
+      if (line.includes("칼로리:") && line.includes("kcal")) {
+        const kcalM = line.match(/칼로리:\s*([\d,.]+)\s*kcal/i);
+        const fatM = line.match(/지방:\s*([\d,.]+)\s*g/i);
+        const carbM = line.match(/탄수화물:\s*([\d,.]+)\s*g/i);
+        const protM = line.match(/단백질:\s*([\d,.]+)\s*g/i);
+        const servM = line.match(/([^|\n-]+)-\s*칼로리:/);
+        if (kcalM && lastTitle) {
+          items.push({
+            name: lastTitle,
+            serving: servM ? servM[1].trim() : "1회분",
+            kcal: Math.round(parseFloat(kcalM[1].replace(/,/g, ""))),
+            carb: carbM ? Math.round(parseFloat(carbM[1]) * 10) / 10 : 0,
+            prot: protM ? Math.round(parseFloat(protM[1]) * 10) / 10 : 0,
+            fat: fatM ? Math.round(parseFloat(fatM[1]) * 10) / 10 : 0,
+            satFat: 0, sugar: 0, sodium: 0, isWeb: true
+          });
+          lastTitle = "";
+        }
+      }
+    }
+    return items;
+  }
+
+  async function fetchFatSecretSingleQuery(queryText) {
+    const fsUrl = `https://www.fatsecret.kr/%EC%B9%BC%EB%A1%9C%EB%A6%AC-%EC%98%81%EC%96%91%EC%86%8C/search?q=${encodeURIComponent(queryText)}`;
+    const endpoints = [
+      { url: `https://r.jina.ai/${fsUrl}`, type: "text" },
+      { url: `https://api.allorigins.win/raw?url=${encodeURIComponent(fsUrl)}`, type: "text" },
+      { url: `https://api.allorigins.win/get?url=${encodeURIComponent(fsUrl)}`, type: "json" },
+      { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(fsUrl)}`, type: "text" }
+    ];
+
+    const tasks = endpoints.map(async (ep) => {
       const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 3500);
+      const timer = setTimeout(() => ctrl.abort(), 7000);
       try {
-        const res = await fetch(cfg.url, { signal: ctrl.signal });
+        const res = await fetch(ep.url, { signal: ctrl.signal });
         clearTimeout(timer);
         if (!res.ok) throw new Error("http_err");
-        let html = "";
-        if (cfg.isJsonWrap) {
+        let raw = "";
+        if (ep.type === "json") {
           const data = await res.json();
-          html = data.contents || "";
+          raw = data.contents || "";
         } else {
-          html = await res.text();
+          raw = await res.text();
         }
-        const parsedItems = parseHtmlToItems(html);
-        if (parsedItems.length === 0) throw new Error("no_items");
-        return parsedItems;
+        const parsed = parseFatSecretHtmlOrText(raw);
+        if (!parsed || parsed.length === 0) throw new Error("empty_parse");
+        return parsed;
       } catch (e) {
         clearTimeout(timer);
         throw e;
       }
     });
 
-    return Promise.any(tasks);
-  }
-
-  // OpenFoodFacts 글로벌·한국 오픈 API (프록시 없이 직접 CORS 통신 가능)
-  async function fetchOpenFoodFactsDirect(cleanQuery) {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 3200);
     try {
-      const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(cleanQuery)}&search_simple=1&action=process&json=1&page_size=8`;
-      const res = await fetch(url, { signal: ctrl.signal });
-      clearTimeout(timer);
-      if (!res.ok) return [];
-      const data = await res.json();
-      const products = data.products || [];
-      const items = [];
-      products.forEach(p => {
-        const name = (p.product_name_ko || p.product_name || "").trim();
-        const nut = p.nutriments || {};
-        const kcal = Math.round(nut["energy-kcal_serving"] || nut["energy-kcal_100g"] || 0);
-        if (name && kcal > 0) {
-          items.push({
-            name: p.brands ? `[${p.brands.split(",")[0]}] ${name}` : name,
-            serving: p.serving_size || "100g/1회분",
-            kcal,
-            carb: Math.round((nut.carbohydrates_serving || nut.carbohydrates_100g || 0) * 10) / 10,
-            prot: Math.round((nut.proteins_serving || nut.proteins_100g || 0) * 10) / 10,
-            fat: Math.round((nut.fat_serving || nut.fat_100g || 0) * 10) / 10,
-            satFat: 0, sugar: 0,
-            sodium: Math.round((nut.sodium_serving || nut.sodium_100g || 0) * 1000),
-            isWeb: true
-          });
-        }
-      });
-      return items;
+      return await Promise.any(tasks);
     } catch (e) {
-      clearTimeout(timer);
       return [];
     }
   }
 
   async function searchLiveWebFood() {
     const raw = document.getElementById("foodSearchInput").value.trim();
-    if (!raw) return;
+    if (!raw) {
+      alert("검색할 음식 이름을 먼저 입력해 주세요.");
+      return;
+    }
 
     const parsed = parseSmartKoreanFoodQuery(raw);
     const cleanQuery = parsed.coreQuery;
@@ -2331,40 +2371,69 @@
     const localMatches = searchLocalDB(cleanQuery);
 
     if (webFoodCache[cacheKey] && webFoodCache[cacheKey].length > 0) {
-      renderFoodSearchResults([...localMatches, ...webFoodCache[cacheKey]], true, currentParsedMult);
+      renderFoodSearchResults(
+        [...webFoodCache[cacheKey], ...localMatches],
+        `✅ 캐시된 실시간 웹 검색 결과 (${webFoodCache[cacheKey].length}건) + 내장 DB`,
+        currentParsedMult
+      );
       return;
     }
 
     const btn = document.getElementById("btnWebSearch");
-    btn.textContent = "🌐 검색중...";
-    const resBox = document.getElementById("foodSearchResults");
-    resBox.style.display = "block";
+    btn.textContent = "⏳ 웹검색중...";
+    btn.disabled = true;
 
-    if (localMatches.length === 0) {
-      resBox.innerHTML = `<div style="padding:12px; font-size:12px; color:var(--primary); font-weight:700; text-align:center;">
-        🌐 '${cleanQuery}' 실시간 외부 영양성분 DB 검색 중...
-      </div>`;
+    renderFoodSearchResults(
+      localMatches,
+      `🌐 <b>'${cleanQuery}'</b> 외부 영양성분 데이터베이스 실시간 검색 중... (최대 5~7초 소요)`,
+      currentParsedMult
+    );
+
+    // 전체 검색어로 먼저 찾고, 어절이 여러 개인 경우("사조대림 오븐구이 불고기") 핵심 어절 조합으로도 병렬 검색
+    const tokens = cleanQuery.split(/\s+/).filter(Boolean);
+    const queryCandidates = [cleanQuery];
+    if (tokens.length >= 2) {
+      queryCandidates.push(tokens.slice(-2).join(" ")); // 뒤 2단어 (예: "오븐구이 불고기", "프로틴 바나나")
+      queryCandidates.push(tokens[0] + " " + tokens[tokens.length - 1]); // 첫 단어 + 끝 단어 (예: "사조대림 불고기")
     }
+    const uniqueQueries = [...new Set(queryCandidates)];
 
-    const settled = await Promise.allSettled([
-      fetchFatSecretVerified(cleanQuery),
-      fetchOpenFoodFactsDirect(cleanQuery)
-    ]);
+    const settled = await Promise.allSettled(
+      uniqueQueries.map(q => fetchFatSecretSingleQuery(q))
+    );
 
     const webResults = [];
+    const seenNames = new Set();
     settled.forEach(r => {
       if (r.status === "fulfilled" && Array.isArray(r.value)) {
-        webResults.push(...r.value);
+        r.value.forEach(item => {
+          const k = normalizeStr(item.name) + "_" + item.kcal;
+          if (!seenNames.has(k)) {
+            seenNames.add(k);
+            webResults.push(item);
+          }
+        });
       }
     });
 
-    if (webResults.length > 0) {
-      webFoodCache[cacheKey] = webResults.slice(0, 14);
-      saveWebCache();
-    }
-
     btn.textContent = "🌐 실시간 웹검색";
-    renderFoodSearchResults([...localMatches, ...webResults], true, currentParsedMult);
+    btn.disabled = false;
+
+    if (webResults.length > 0) {
+      webFoodCache[cacheKey] = webResults.slice(0, 15);
+      saveWebCache();
+      renderFoodSearchResults(
+        [...webResults.slice(0, 15), ...localMatches],
+        `✅ 실시간 웹 검색 완료: 외부 식품 DB에서 <b>${webResults.length}건</b>을 새로 찾았습니다!`,
+        currentParsedMult
+      );
+    } else {
+      renderFoodSearchResults(
+        localMatches,
+        `⚠️ 외부 웹 DB에 '${cleanQuery}' 정확 일치 항목이 없어 <b>스마트 맞춤 추정치 및 내장 DB</b>를 표시합니다. (정확한 포장지 표기는 위 <b>[📗 네이버 검색]</b>을 눌러 확인하세요)`,
+        currentParsedMult
+      );
+    }
   }
 
   function selectSearchedFood(idx) {
@@ -2385,7 +2454,6 @@
     document.getElementById("foodSearchResults").style.display = "none";
   }
 
-  // 검색 결과 리스트에서 [+바로추가] 버튼을 누르면 즉시 오늘의 식단에 들어가는 원탭 기능
   function instantAddSearchedFood(idx, ev) {
     ev.stopPropagation();
     const item = currentSearchMatches[idx];
@@ -2455,8 +2523,8 @@
     const url = platform === "coupang"
       ? `https://m.coupang.com/nm/search?q=${encodeURIComponent(q)}`
       : platform === "naver"
-      ? `https://m.search.naver.com/search.naver?query=${encodeURIComponent(q + " 칼로리 영양성분표")}`
-      : `https://www.google.com/search?q=${encodeURIComponent(q + " 칼로리 영양성분표")}`;
+      ? `https://m.search.naver.com/search.naver?query=${encodeURIComponent(q + " 칼로리 영양성분")}`
+      : `https://www.google.com/search?q=${encodeURIComponent(q + " 칼로리 영양성분")}`;
     window.open(url, "_blank");
   }
 
