@@ -895,12 +895,11 @@ function addCardioExercise() {
   saveState(); render();
 }
 
-// ===== [핵심 수정] 자연어·수량 파서, 영양성분 검증기 & 정밀 검색 엔진 =====
+// ===== 자연어·수량 파서, 영양성분 검증기 & 정밀 검색 엔진 =====
 const TYPO_MAP = [["짬봉","짬뽕"],["자장면","짜장면"],["간자장","간짜장"],["샤인머스켓","샤인머스캣"],["돈가스","돈까스"],["얄피","얇은피"],["떡복이","떡볶이"],["달걀","계란"],["오뎅","어묵"],["써브웨이","서브웨이"]];
 function fixKoreanFoodTypos(s) { return TYPO_MAP.reduce((acc,[k,v])=>acc.replace(new RegExp(k,"g"),v), s||""); }
 function normalizeStr(s) { return fixKoreanFoodTypos(s).toLowerCase().replace(/[^가-힣a-z0-9]/g, ""); }
 
-// 탄단지 합산 열량과 표시 열량 간 오차 검증 및 자동 보정
 function validateNutritionItem(it) {
   const c = Math.max(0, parseFloat(it.carb) || 0);
   const p = Math.max(0, parseFloat(it.prot) || 0);
@@ -1194,3 +1193,401 @@ async function searchLiveWebFood() {
     renderFoodSearchResults(local, `⚠️ 외부 웹 응답이 지연되어 <b>내장 공식 DB 및 맞춤 추정치</b>를 표시합니다. 쿠팡/네이버 상품은 아래 버튼으로 복사하거나 캡처해 넣으세요!`, activeMult);
   }
 }
+
+// ===== 사진/캡처 업로드 자동 판독 =====
+function openAiKeyModal() {
+  $("geminiKeyInput").value = state.geminiApiKey || "";
+  $("aiKeyModal").style.display = "flex";
+}
+function saveAiKey() {
+  state.geminiApiKey = $("geminiKeyInput").value.trim();
+  saveState();
+  $("aiKeyModal").style.display = "none";
+  alert(state.geminiApiKey ? "Gemini AI 비전 키가 저장되었습니다." : "AI 키가 해제되었습니다.");
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+async function analyzePhotoWithGemini(dataUrl) {
+  const key = state.geminiApiKey;
+  if (!key) return null;
+  const base64Data = dataUrl.split(",")[1];
+  const mimeType = dataUrl.substring(dataUrl.indexOf(":") + 1, dataUrl.indexOf(";"));
+  const prompt = `이 이미지(영양성분표, 쿠팡/네이버 상품 캡처, 또는 실제 음식 사진)를 분석해서 1회 섭취량 기준 영양성분을 아래 JSON 형식으로만 반환해. 다른 설명은 쓰지 마.
+{"name":"음식/상품명","serving":"1회 제공량(예: 1개 250ml)","kcal":숫자,"carb":숫자,"prot":숫자,"fat":숫자,"satFat":숫자,"sugar":숫자,"sodium":숫자}`;
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mimeType, data: base64Data } }] }] })
+  });
+  if (!res.ok) throw new Error("gemini_err");
+  const json = await res.json();
+  const txt = json.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  const m = txt.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error("no_json");
+  return validateNutritionItem(JSON.parse(m[0]));
+}
+
+async function loadTesseract() {
+  if (window.Tesseract) return window.Tesseract;
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+    s.onload = () => resolve(window.Tesseract);
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+function extractNutritionFromRawText(rawText, fallbackName = "") {
+  const text = (rawText || "").replace(/\r/g, " ");
+  const numAfter = (kwRegex) => {
+    const m = text.match(kwRegex);
+    return m ? parseFloat(m[1].replace(/,/g, "")) : 0;
+  };
+  let kcal = numAfter(/([\d,]+(?:\.\d+)?)\s*(?:kcal|킬로칼로리|칼로리)/i) || numAfter(/(?:열량|칼로리)\s*[:\s]*([\d,]+(?:\.\d+)?)/i);
+  const carb = numAfter(/탄\s*수\s*화\s*물\s*(?:[^\d\n]{0,12}?)([\d,]+(?:\.\d+)?)\s*g/i) || numAfter(/탄\s*수\s*화\s*물\s*[:\s]*([\d,]+(?:\.\d+)?)/i);
+  const prot = numAfter(/단\s*백\s*질\s*(?:[^\d\n]{0,12}?)([\d,]+(?:\.\d+)?)\s*g/i) || numAfter(/단\s*백\s*질\s*[:\s]*([\d,]+(?:\.\d+)?)/i);
+  const fat = numAfter(/(?:^|[^포화트랜스])지\s*방\s*(?:[^\d\n]{0,12}?)([\d,]+(?:\.\d+)?)\s*g/i) || numAfter(/지\s*방\s*[:\s]*([\d,]+(?:\.\d+)?)/i);
+  const satFat = numAfter(/포\s*화\s*지\s*방\s*(?:[^\d\n]{0,12}?)([\d,]+(?:\.\d+)?)/i);
+  const sugar = numAfter(/당\s*류\s*(?:[^\d\n]{0,12}?)([\d,]+(?:\.\d+)?)/i);
+  const sodium = numAfter(/나\s*트\s*륨\s*(?:[^\d\n]{0,12}?)([\d,]+(?:\.\d+)?)\s*mg/i) || numAfter(/나\s*트\s*륨\s*[:\s]*([\d,]+(?:\.\d+)?)/i);
+  const servM = text.match(/(?:총\s*내용량|1회\s*제공량|내용량)\s*[:\s]*([\d,.]+\s*(?:g|ml|G|ML))/i) || text.match(/(\d+\s*(?:g|ml))\s*당/i);
+
+  if (!kcal && (carb || prot || fat)) kcal = Math.round(carb * 4 + prot * 4 + fat * 9);
+
+  let cleanTitle = fallbackName;
+  if (!cleanTitle) {
+    const firstLine = text.split(/\n+/)[0].replace(/(?:영양정보|영양성분|쿠팡|네이버|칼로리|[\d,.]+kcal).*/gi, "").trim();
+    if (firstLine.length >= 2 && firstLine.length <= 35) cleanTitle = firstLine;
+  }
+
+  const hasMacros = kcal > 0 || carb > 0 || prot > 0 || fat > 0;
+  if (hasMacros) {
+    return validateNutritionItem({
+      name: cleanTitle || "스캔/복사한 식품",
+      serving: servM ? servM[1] : "스캔 기준량",
+      kcal, carb, prot, fat, satFat, sugar, sodium
+    });
+  }
+  return null;
+}
+
+async function handleFoodPhoto(ev) {
+  const file = ev.target.files?.[0];
+  if (!file) return;
+  const statusBox = $("ocrStatusBox");
+  statusBox.style.display = "block";
+  const fileBaseName = file.name.replace(/\.[^.]+$/, "").replace(/[_-]/g, " ");
+
+  try {
+    const dataUrl = await fileToBase64(file);
+    if (state.geminiApiKey) {
+      statusBox.innerHTML = `🤖 <b>AI 비전이 사진을 정밀 판독 중입니다...</b>`;
+      try {
+        const aiItem = await analyzePhotoWithGemini(dataUrl);
+        if (aiItem && aiItem.kcal > 0) {
+          selectedFoodBase = aiItem;
+          activeMult = 1.0;
+          applyFoodToForm(1.0);
+          statusBox.innerHTML = `✅ <b>AI 사진 판독 완료:</b> <b>${aiItem.name}</b> (${aiItem.kcal}kcal · 탄${aiItem.carb}g · 단${aiItem.prot}g · 지${aiItem.fat}g)`;
+          ev.target.value = "";
+          return;
+        }
+      } catch (err) {}
+    }
+    statusBox.innerHTML = `📸 <b>사진 속 영양성분표/상품명을 스캔 중입니다...</b>`;
+    const Tesseract = await loadTesseract();
+    const { data: { text } } = await Tesseract.recognize(dataUrl, "kor+eng");
+    const extracted = extractNutritionFromRawText(text, $("foodSearchInput").value.trim());
+    if (extracted) {
+      selectedFoodBase = extracted;
+      activeMult = 1.0;
+      applyFoodToForm(1.0);
+      statusBox.innerHTML = `✅ <b>사진 성분표 스캔 완료:</b> <b>${extracted.name}</b> (${extracted.kcal}kcal · 탄${extracted.carb}g · 단${extracted.prot}g · 지${extracted.fat}g)`;
+    } else {
+      const ocrWords = text.replace(/[^가-힣a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+      const queryCandidate = ocrWords.slice(0, 25) || fileBaseName;
+      const matches = searchLocalDB(queryCandidate);
+      if (matches.length > 0) {
+        selectedFoodBase = { ...matches[0] };
+        activeMult = 1.0;
+        applyFoodToForm(1.0);
+        statusBox.innerHTML = `✅ <b>사진 속 상품명 인식 완료:</b> <b>'${matches[0].name}'</b> 항목으로 자동 선택되었습니다!`;
+      } else {
+        statusBox.innerHTML = `⚠️ 사진에서 영양성분 숫자를 찾지 못했습니다.`;
+      }
+    }
+  } catch (e) {
+    statusBox.innerHTML = `⚠️ 이미지 분석 중 오류가 발생했습니다.`;
+  }
+  ev.target.value = "";
+}
+
+// ===== 쿠팡·네이버 복사글 적용 =====
+async function importFromClipboard() {
+  let clipText = "";
+  try {
+    if (navigator.clipboard && navigator.clipboard.readText) {
+      clipText = (await navigator.clipboard.readText() || "").trim();
+    }
+  } catch (e) {}
+  if (!clipText) {
+    clipText = prompt("쿠팡이나 네이버에서 복사한 상품명 또는 영양성분 텍스트를 여기에 붙여넣으세요:") || "";
+  }
+  if (!clipText.trim()) return;
+  $("pasteRawInput").value = clipText;
+  parsePastedNutrition(true);
+}
+
+function selectSearchedFood(idx) {
+  const item = currentSearchMatches[idx]; if (!item) return;
+  selectedFoodBase = validateNutritionItem(item);
+  setPortionMultiplier(activeMult || 1.0);
+  $("foodSearchResults").style.display = "none";
+}
+
+function instantAddSearchedFood(idx, ev) {
+  ev.stopPropagation();
+  const it = currentSearchMatches[idx]; if (!it) return;
+  const m = activeMult || 1.0;
+  ensureDateLog(currentDate);
+  state.logs[currentDate].foods.push({ meal:$("mealType").value, name:it.name+(m===1?"":` (${m}배)`), kcal:Math.round(it.kcal*m), carb:Math.round((it.carb||0)*m), prot:Math.round((it.prot||0)*m), fat:Math.round((it.fat||0)*m), sodium:Math.round((it.sodium||0)*m) });
+  saveState(); $("foodSearchInput").value = ""; $("foodSearchResults").style.display = $("smartParseHint").style.display = "none"; activeMult = 1.0; render();
+}
+
+function setPortionMultiplier(m) {
+  activeMult = m;
+  $$(".portion-btn").forEach(b => b.classList.toggle("active", parseFloat(b.dataset.mult) === m));
+  if (selectedFoodBase) applyFoodToForm(m);
+}
+
+function applyFoodToForm(m) {
+  if (!selectedFoodBase) return;
+  const it = selectedFoodBase, k = Math.round(it.kcal*m), c = Math.round((it.carb||0)*m*10)/10, p = Math.round((it.prot||0)*m*10)/10, f = Math.round((it.fat||0)*m*10)/10;
+  $("foodName").value = it.name + (m === 1 ? "" : ` (${m}배)`);
+  $("foodKcal").value = k; $("foodCarb").value = Math.round(c); $("foodProt").value = Math.round(p); $("foodFat").value = Math.round(f);
+  $("nutritionLabelBox").style.display = "block";
+  $("nfTitle").textContent = `📋 ${it.name}`; $("nfServing").textContent = `${it.serving||"1회 제공량"} × ${m}배`;
+  $("nfKcal").textContent = `${k} kcal`; $("nfCarb").textContent = `${c} g`; $("nfProt").textContent = `${p} g`;
+  $("nfFat").textContent = `${f}g (포화 ${Math.round((it.satFat||0)*m*10)/10}g)`; $("nfSugar").textContent = `${Math.round((it.sugar||0)*m*10)/10} g`; $("nfSodium").textContent = `${Math.round((it.sodium||0)*m)} mg`;
+}
+
+function openExternalSearch(pf) {
+  const q = parseSmartKoreanFoodQuery($("foodSearchInput").value.trim() || "더단백 바나나").coreQuery;
+  const urls = { coupang:`https://m.coupang.com/nm/search?q=${encodeURIComponent(q)}`, naver:`https://m.search.naver.com/search.naver?query=${encodeURIComponent(q+" 영양성분 칼로리")}`, google:`https://www.google.com/search?q=${encodeURIComponent(q+" 영양성분 칼로리")}` };
+  const statusBox = $("ocrStatusBox");
+  statusBox.style.display = "block";
+  statusBox.innerHTML = `💡 <b>쿠팡/네이버 연동 안내:</b> 열린 창에서 원하는 상품명이나 성분표를 <b>복사</b>한 뒤 돌아와 위 <b>[📥 쿠팡·네이버 복사글 적용]</b>을 누르거나, 화면을 <b>캡처</b>해 <b>[📷 사진/캡처로 자동판독]</b>에 넣으면 즉시 선택됩니다!`;
+  window.open(urls[pf], "_blank");
+}
+
+function togglePasteScanner() { const b = $("pasteScannerBox"); b.style.display = b.style.display === "block" ? "none" : "block"; }
+
+function parsePastedNutrition(fromClipBtn = false) {
+  const raw = $("pasteRawInput").value.trim();
+  if (!raw) return;
+  const statusBox = $("ocrStatusBox");
+  const extracted = extractNutritionFromRawText(raw, $("foodSearchInput").value.trim());
+  if (extracted) {
+    selectedFoodBase = extracted;
+    setPortionMultiplier(1.0);
+    $("pasteScannerBox").style.display = "none";
+    statusBox.style.display = "block";
+    statusBox.innerHTML = `✅ <b>복사한 영양성분 적용 완료:</b> <b>${extracted.name}</b> (${extracted.kcal}kcal · 탄${extracted.carb}g · 단${extracted.prot}g · 지${extracted.fat}g)`;
+    return;
+  }
+  const cleanedProductTitle = raw
+    .replace(/\[[^\]]*\]/g, " ")
+    .replace(/(?:쿠팡|네이버|로켓배송|무료배송|특가|할인|https?:\/\/\S+)/gi, " ")
+    .replace(/\s+/g, " ").trim();
+  $("foodSearchInput").value = cleanedProductTitle;
+  const parsed = parseSmartKoreanFoodQuery(cleanedProductTitle);
+  activeMult = parsed.mult || 1.0;
+  const matches = searchLocalDB(parsed.coreQuery);
+  if (matches.length > 0) {
+    selectedFoodBase = validateNutritionItem(matches[0]);
+    setPortionMultiplier(activeMult);
+    statusBox.style.display = "block";
+    statusBox.innerHTML = `✅ <b>복사한 상품 자동 선택 완료:</b> <b>'${matches[0].name}'</b> 성분이 아래에 적용되었습니다!`;
+  }
+  $("pasteScannerBox").style.display = "none";
+  searchLiveWebFood();
+}
+
+function addFood() {
+  const name = $("foodName").value.trim(), kcal = parseInt($("foodKcal").value, 10);
+  if (!name || isNaN(kcal)) return alert("음식 이름과 칼로리를 입력해주세요.");
+  ensureDateLog(currentDate);
+  state.logs[currentDate].foods.push({ meal:$("mealType").value, name, kcal, carb:parseInt($("foodCarb").value||"0",10), prot:parseInt($("foodProt").value||"0",10), fat:parseInt($("foodFat").value||"0",10), sodium:selectedFoodBase?Math.round((selectedFoodBase.sodium||0)*(activeMult||1)):0 });
+  saveState();
+  ["foodName","foodKcal","foodCarb","foodProt","foodFat","foodSearchInput"].forEach(id => $(id).value = "");
+  $("nutritionLabelBox").style.display = $("smartParseHint").style.display = $("ocrStatusBox").style.display = "none";
+  selectedFoodBase = null; activeMult = 1.0; render();
+}
+function removeLogItem(type, idx) { state.logs[currentDate][type].splice(idx, 1); saveState(); render(); }
+
+function checkSuppSlot(slot) {
+  ensureDateLog(currentDate);
+  const s = state.logs[currentDate].supplements;
+  if (slot === "morning_fasted") s.probiotics = 100;
+  else if (slot === "morning_meal") { s.vitb = 100; s.vitc = Math.max(s.vitc || 0, 500); }
+  else if (slot === "pre_workout") { s.arginine = 4000; s.carnitine = 1500; }
+  else if (slot === "post_workout_dinner") { s.creatine = 5000; s.omega3 = 1200; s.vitd = 2000; s.vitc = 1000; s.milkthistle = 130; }
+  else if (slot === "before_sleep") s.magnesium = 350;
+  saveState(); render();
+}
+function updateSupp(id, val, isAdd = false) {
+  ensureDateLog(currentDate);
+  const cur = state.logs[currentDate].supplements[id] || 0;
+  state.logs[currentDate].supplements[id] = isAdd ? cur + val : Math.max(0, parseInt(val || "0", 10));
+  saveState(); render();
+}
+
+function renderWeeklyReport() {
+  const p = state.profile, baseTdee = Math.round(p.bmr * p.activity), days = [];
+  let totalDef = 0, totalProt = 0, totalEx = 0;
+  for (let i = 6; i >= 0; i--) {
+    const dStr = getOffsetDateStr(currentDate, -i), l = state.logs[dStr];
+    const eaten = l?.foods ? l.foods.reduce((s, x) => s + x.kcal, 0) : 0, prot = l?.foods ? l.foods.reduce((s, x) => s + (x.prot||0), 0) : 0, ex = l?.exercises ? l.exercises.reduce((s, x) => s + x.kcal, 0) : 0;
+    const burned = baseTdee + ex, has = eaten > 0 || ex > 0, net = has ? eaten - burned : 0;
+    if (has) { totalDef += net; totalProt += prot; totalEx += ex; }
+    days.push({ date:dStr.slice(5), weight:l?.weight||p.weight, eaten, burned, net, has });
+  }
+  const fatG = totalDef < 0 ? Math.round(Math.abs(totalDef) / 7.7) : 0;
+  $("weeklyFatLossBadge").textContent = `7일 누적 지방 -${fatG}g 연소`;
+  $("weeklySummaryBox").innerHTML = `• <b>최근 7일 누적 칼로리 밸런스:</b> <b>${totalDef>0?"+":""}${totalDef.toLocaleString()} kcal</b> (순수 체지방 약 <b>${fatG}g</b> 감량 상당)<br/>• <b>최근 7일 총 운동 소모량:</b> <b>-${totalEx.toLocaleString()} kcal</b> | <b>누적 단백질 섭취:</b> <b>${totalProt.toLocaleString()} g</b><br/>• <b>인바디 목표 진행도:</b> 시작 81.0kg → 현재 <b>${p.weight}kg</b> (목표 ${p.targetWeight}kg까지 <b>${Math.max(0,p.weight-p.targetWeight).toFixed(1)}kg</b> 남음)`;
+  $("weeklyChartContainer").innerHTML = days.map(d => {
+    const pct = d.has ? Math.min(100, Math.round((d.eaten / Math.max(1, d.burned)) * 100)) : 0, col = !d.has ? "var(--sub)" : d.net <= 0 ? "var(--green)" : "var(--danger)";
+    return `<div class="chart-row"><div><b>${d.date}</b><br/><span style="font-size:10px;color:var(--sub);">${d.weight}kg</span></div><div><div style="display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:2px;"><span>섭취 ${d.eaten} / 소모 ${d.burned}</span><span>${pct}%</span></div><div class="chart-bar-wrap"><div class="chart-bar-inner" style="width:${pct}%;background:${col};"></div></div></div><div style="text-align:right;font-weight:800;color:${col};">${!d.has?"기록없음":`${d.net>0?'+':''}${d.net}kcal`}</div></div>`;
+  }).join("");
+}
+
+function exportBackupClipboard() {
+  const s = JSON.stringify(state); $("backupJsonArea").value = s;
+  navigator.clipboard?.writeText(s).then(() => alert("전체 데이터가 클립보드에 복사되었습니다!")).catch(() => alert("아래 입력창에 백업 코드가 생성되었습니다."));
+}
+function downloadBackupFile() {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], { type: "application/json" }));
+  a.download = `inbody_backup_${currentDate}.json`; a.click();
+}
+function restoreFromTextarea() {
+  try {
+    const parsed = JSON.parse($("backupJsonArea").value.trim());
+    if (!parsed.profile || !parsed.logs) throw 0;
+    state = { ...defaultState, ...parsed }; saveState(); render(); renderWeeklyReport(); alert("백업 데이터가 완벽하게 복원되었습니다!");
+  } catch (e) { alert("올바른 백업 코드 형식이 아닙니다."); }
+}
+function restoreFromFile(ev) {
+  const f = ev.target.files[0]; if (!f) return;
+  const r = new FileReader(); r.onload = e => { $("backupJsonArea").value = e.target.result; restoreFromTextarea(); }; r.readAsText(f);
+}
+
+function onDateChange() { currentDate = $("datePicker").value || getTodayStr(); render(); }
+function changeDate(d) { currentDate = getOffsetDateStr(currentDate, d); $("datePicker").value = currentDate; render(); }
+function changeActivity() { state.profile.activity = parseFloat($("activitySelect").value); saveState(); render(); }
+
+function render() {
+  applyTheme(); ensureDateLog(currentDate);
+  const p = state.profile, log = state.logs[currentDate], supps = log.supplements;
+  calcWeightKcal(); calcCardioKcal();
+
+  $("headerTitle").textContent = `${p.name}님의 인바디 프로`;
+  $("chipWeight").textContent = `${p.weight} / ${p.targetWeight}kg`;
+  $("chipSmm").textContent = `${p.smm} kg`;
+  $("chipBfm").textContent = `${p.bfm}kg (${p.pbf}%)`;
+  $("dailyWeightInput").value = log.weight || p.weight;
+  $("dailySleepInput").value = log.sleepHours ?? 7.0;
+  $("dailyCondSelect").value = log.condition || "normal";
+
+  const curW = log.weight || p.weight, dynBmr = Math.round(p.bmr + (curW - 81.0) * 13);
+  const condF = (log.sleepHours < 6 || log.condition === "tired") ? 0.96 : log.condition === "good" ? 1.02 : 1.0;
+  const baseTdee = Math.round(dynBmr * p.activity * condF), exKcal = log.exercises.reduce((s, x) => s + x.kcal, 0);
+  const synKcal = exKcal > 0 ? Math.round(exKcal * (((supps.arginine||0)>=2000?.04:0) + ((supps.creatine||0)>=3000?.04:0) + ((supps.carnitine||0)>=1000?.03:0) + ((supps.omega3||0)>=1000?.02:0))) : 0;
+  const totalBurned = baseTdee + exKcal + synKcal, baseTarget = Math.max(dynBmr, totalBurned - (p.deficit || 500));
+
+  const bank = calcWeeklyCalorieBank(), banner = $("calorieBankBanner"), btnAuto = $("btnToggleBankAuto");
+  btnAuto.textContent = `⚖️ 자동 보정 ${state.bankAutoAdjust ? "ON" : "OFF"}`;
+  btnAuto.style.background = state.bankAutoAdjust ? "var(--primary)" : "var(--card)";
+  btnAuto.style.color = state.bankAutoAdjust ? "#FFF" : "var(--text)";
+
+  let bankAdj = 0;
+  if (bank.cumulativeDiff > 50) {
+    banner.classList.add("debt"); bankAdj = Math.min(350, Math.round(bank.cumulativeDiff / 3));
+    $("bankBodyText").innerHTML = `최근 6일간 목표 대비 <b>+${bank.cumulativeDiff.toLocaleString()} kcal 초과 섭취</b>가 있습니다.<br/>• <b>만회 플랜 A (식단):</b> 향후 3일간 하루 목표를 <b>-${bankAdj} kcal씩</b> 낮추면 100% 만회!<br/>• <b>만회 플랜 B (유산소):</b> 향후 3일간 <b>인클라인 경사걷기(5km/h·경사8%) 하루 ${Math.round(bankAdj/9.2)}분씩</b>만 추가하세요!`;
+  } else {
+    banner.classList.remove("debt");
+    $("bankBodyText").innerHTML = bank.cumulativeDiff < -50 ? `🎉 최근 6일간 목표보다 <b>${Math.abs(bank.cumulativeDiff).toLocaleString()} kcal를 추가로 더 감량(저축)</b>하셨습니다!` : `최근 6일간 초과 섭취 부채가 없습니다. 오늘 권장 목표만 지키시면 됩니다!`;
+  }
+
+  const targetIntake = (state.bankAutoAdjust && bankAdj > 0) ? Math.max(dynBmr - 150, baseTarget - bankAdj) : baseTarget;
+  $("lblTargetTitle").textContent = (state.bankAutoAdjust && bankAdj > 0) ? `권장 목표 (뱅크 -${bankAdj} 보정됨)` : `권장 섭취 목표 (-500)`;
+
+  const eatenKcal = log.foods.reduce((s, x) => s + x.kcal, 0), eatenCarb = log.foods.reduce((s, x) => s + (x.carb||0), 0);
+  const eatenProt = log.foods.reduce((s, x) => s + (x.prot||0), 0), eatenFat = log.foods.reduce((s, x) => s + (x.fat||0), 0), eatenSodium = log.foods.reduce((s, x) => s + (x.sodium||0), 0);
+  const tProt = Math.round(curW * 1.6), tFat = Math.round(curW * 0.65), tCarb = Math.max(120, Math.round((targetIntake - tProt*4 - tFat*9) / 4));
+
+  $("valBmr").textContent = `${dynBmr.toLocaleString()} kcal`; $("valBmrSub").textContent = `체중 ${curW}kg 실시간 연동`;
+  $("valTdee").textContent = `${totalBurned.toLocaleString()} kcal`; $("valTdeeSub").textContent = `운동 ${exKcal} + 영양제시너지 ${synKcal} kcal`;
+  $("valTarget").textContent = `${targetIntake.toLocaleString()} kcal`; $("valEaten").textContent = `${eatenKcal.toLocaleString()} kcal`;
+  const netDiff = eatenKcal - totalBurned;
+  $("valNetSub").textContent = `총 소모 대비: ${netDiff > 0 ? "+" : ""}${netDiff.toLocaleString()} kcal`;
+
+  const remain = targetIntake - eatenKcal, calPct = Math.min(100, Math.round((eatenKcal / Math.max(1, targetIntake)) * 100));
+  $("calBar").style.width = `${calPct}%`; $("calBar").classList.toggle("danger", remain < 0);
+  $("calStatusText").textContent = remain >= 0 ? `남은 섭취 가능: ${remain.toLocaleString()} kcal` : `권장 목표 초과: +${Math.abs(remain).toLocaleString()} kcal`;
+  $("calPctText").textContent = `${calPct}%`;
+
+  [["Carb",eatenCarb,tCarb],["Prot",eatenProt,tProt],["Fat",eatenFat,tFat]].forEach(([k,e,t]) => {
+    $(`macro${k}Text`).textContent = `${e} / ${t}g`; $(`macro${k}Bar`).style.width = `${Math.min(100, Math.round((e/Math.max(1,t))*100))}%`;
+  });
+
+  const exWatC = (supps.creatine || 0) > 0 ? 500 : 0, exWatS = eatenSodium > 2000 ? Math.round((eatenSodium - 2000) * 0.25) : 0;
+  const totWat = 2800 + exWatC + exWatS, curWat = log.waterMl || 0, watPct = Math.min(100, Math.round((curWat / totWat) * 100));
+  $("waterBadge").textContent = `${curWat.toLocaleString()} / ${totWat.toLocaleString()} ml`;
+  $("waterBar").style.width = $("waterPctText").textContent = `${watPct}%`;
+  $("sodiumStatusText").textContent = `나트륨 ${eatenSodium.toLocaleString()}mg ${exWatC ? '· 크레아틴 수분 +500ml 반영됨' : ''}`;
+
+  $("customMealPresetChips").innerHTML = (state.mealPresets||[]).map((mp,i) => `<span class="cat-chip" onclick="managePreset('apply','foods',${i})">🍱 ${mp.name} <b style="color:var(--danger);margin-left:4px;" onclick="managePreset('del','foods',${i},event)">×</b></span>`).join("");
+  $("customWorkoutRoutineChips").innerHTML = (state.workoutRoutines||[]).map((wr,i) => `<span class="cat-chip" onclick="managePreset('apply','exercises',${i})">🔥 ${wr.name} <b style="color:var(--danger);margin-left:4px;" onclick="managePreset('del','exercises',${i},event)">×</b></span>`).join("");
+
+  $("foodTabBadge").textContent = `${eatenKcal.toLocaleString()} kcal / 단백질 ${eatenProt}g`;
+  $("exTabBadge").textContent = `-${exKcal.toLocaleString()} kcal`;
+  $("suppTabBadge").textContent = `운동 시너지 +${synKcal} kcal`;
+
+  $("foodList").innerHTML = log.foods.length ? log.foods.map((f, i) => `<li class="log-item"><div class="log-left"><span class="log-title">[${f.meal}] ${f.name}</span><span class="log-sub">탄 ${f.carb||0}g · 단 ${f.prot||0}g · 지 ${f.fat||0}g${f.sodium?' · 나트륨 '+f.sodium+'mg':''}</span></div><div class="log-right"><span class="log-kcal">+${f.kcal} kcal</span><button class="btn-del" onclick="removeLogItem('foods',${i})">삭제</button></div></li>`).join("") : `<li class="empty-msg">위 검색창에 음식을 입력하거나 사진/복사글 버튼을 눌러보세요!</li>`;
+  $("exList").innerHTML = log.exercises.length ? log.exercises.map((ex, i) => `<li class="log-item"><div class="log-left"><span class="log-title">${ex.name}</span><span class="log-sub">수행 시간: ${ex.mins}분</span></div><div class="log-right"><span class="log-kcal" style="color:var(--primary);">-${ex.kcal} kcal</span><button class="btn-del" onclick="removeLogItem('exercises',${i})">삭제</button></div></li>`).join("") : `<li class="empty-msg">오늘 기록된 운동이 없습니다.</li>`;
+
+  $("suppContainer").innerHTML = SUPP_META.map(m => {
+    const amt = supps[m.id] || 0;
+    return `<div class="supp-item"><div class="supp-top"><span class="supp-name">${m.name}</span><span class="supp-target">권장 ${m.target}${m.unit} (${Math.min(100,Math.round((amt/m.target)*100))}%)</span></div><div><span class="timing-badge ${m.badgeType}">${m.timingBadge}</span></div><div class="supp-controls"><input type="number" value="${amt}" inputmode="numeric" onchange="updateSupp('${m.id}',this.value)" /><span style="font-size:13px;font-weight:600;">${m.unit}</span><button class="btn-quick" onclick="updateSupp('${m.id}',${m.step},true)">+${m.step}${m.unit}</button><button class="btn-del" onclick="updateSupp('${m.id}',0)">초기화</button></div><div class="supp-effect"><b>🔬 약학적 흡수 원리:</b> ${m.whyTiming}<br/><b>📋 팩트 체크:</b> ${m.factCheck}<br/><span style="display:block;margin-top:4px;color:var(--primary);">${m.getEffectText(amt, exKcal>0)}</span></div></div>`;
+  }).join("");
+
+  const slpMsg = (log.sleepHours < 6 || log.condition === "tired") ? `⚠️ <b>수면·컨디션 주의 (${log.sleepHours}시간):</b> 코르티솔 상승으로 근손실 위험이 있으니 오늘 유산소는 공복 대신 식후 경사걷기로 진행하시고 취침 전 <b>마그네슘</b>을 꼭 챙기세요.` : `✅ <b>수면·회복 양호 (${log.sleepHours}시간):</b> 호르몬 및 인슐린 민감성이 정상 상태라 웨이트 볼륨과 지방 연소 효율이 극대화됩니다.`;
+  $("dailyInsightBox").innerHTML = `• ${slpMsg}<br/>• <b>예상 체지방 감량 속도:</b> 오늘 현재 칼로리 밸런스(<b>${netDiff} kcal</b>) 기준 약 <b>${netDiff<0?Math.round(Math.abs(netDiff)/7.7):0}g</b>의 체지방이 연소되는 페이스입니다.<br/>• <b>영양제 10종 핵심 요약:</b> <b>기상 직후 공복</b>엔 유산균+물1컵, <b>운동 30분 전 공복</b>엔 아르기닌+카르니틴, <b>식사 직후</b>엔 크레아틴·오메가3·비타민B/C/D·밀크씨슬, <b>취침 전</b>엔 마그네슘을 드세요!`;
+}
+
+const MODAL_MAP = [["pName","name"],["pWeight","weight"],["pTargetWeight","targetWeight"],["pSmm","smm"],["pBfm","bfm"],["pPbf","pbf"],["pBmr","bmr"]];
+function openModal() { MODAL_MAP.forEach(([id, k]) => $(id).value = state.profile[k]);$("profileModal").style.display = "flex"; }
+function closeModal() { $("profileModal").style.display = "none"; }
+function saveProfile() {
+  MODAL_MAP.forEach(([id, k]) => { const v = $(id).value.trim(); state.profile[k] = k === "name" ? (v || "사용자") : (parseFloat(v) || state.profile[k]); });
+  saveState(); render(); closeModal();
+}
+
+$("datePicker").value = currentDate;
+$("activitySelect").value = String(state.profile.activity);
+generateAppIcon(state.iconTheme);
+populateWeightExSelect();
+render();
+</script>
+</body>
+</html>
