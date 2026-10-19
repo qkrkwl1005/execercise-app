@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-title" content="인바디 프로" />
   <link id="appleTouchIconLink" rel="apple-touch-icon" href="" />
   <link id="favIconLink" rel="icon" type="image/png" href="" />
-  <title>인바디 프로 매니저 V9.2 (최적화)</title>
+  <title>인바디 프로 매니저 V9.2</title>
   <style>
     :root { --bg:#F2F4F8; --card:#FFF; --box:#F8FAFC; --text:#111827; --sub:#6B7280; --primary:#2563EB; --green:#10B981; --purple:#7C3AED; --amber:#D97706; --cyan:#0891B2; --danger:#EF4444; --border:#E5E7EB; --nav-bg:rgba(255,255,255,0.94); }
     body.dark { --bg:#0B0F19; --card:#151D2E; --box:#1E293B; --text:#F8FAFC; --sub:#94A3B8; --primary:#3B82F6; --green:#10B981; --purple:#A78BFA; --amber:#F59E0B; --cyan:#22D3EE; --danger:#F87171; --border:#2A364F; --nav-bg:rgba(21,29,46,0.95); }
@@ -243,6 +243,7 @@
       </div>
       <div class="cat-chips" id="customMealPresetChips"></div>
 
+      <!-- 사진 판독 & 쿠팡·네이버 복사 원클릭 연동 바 -->
       <label class="field-label">📷 성분표·음식 사진 자동 판독 & 쿠팡·네이버 복사글 즉시 선택</label>
       <div class="photo-vision-bar">
         <button class="btn-vision" onclick="$('foodPhotoInput').click()">📷 사진/캡처로 자동판독</button>
@@ -566,38 +567,115 @@ const WEIGHT_EXERCISE_DB = [
   ["burpee","맨몸/복근","버피테스트 (전신 고강도)",0,0.85,7.5,1.25,0.20,"전신 유·무산소 결합 최고 강도 칼로리 폭격 운동",0.85]
 ].map(([id,cat,name,defKg,rom,mets,stab,epoc,note,isBodyweight])=>({id,cat,name,defKg,rom,mets,stab,epoc,note,isBodyweight}));
 
-// [2] 한국 식품 DB (간소화: 핵심 30개만 유지, 나머지는 검색/OCR로 보완)
+// [2] 식약처 및 제조사 공식 성분표 기준으로 정밀 교정·분리된 한국 식품 DB
+// [name, keys, serving, kcal, carb, prot, fat, satFat, sugar, sodium]
 const KOREAN_FOOD_DB = [
-  ["닭가슴살 100g","닭가슴살 닭안심 닭가슴","100g",110,1.5,23,1.5,0.4,0.5,220],
-  ["바나나 1개","바나나 생바나나","1개 (110g)",98,25,1.2,0.3,0,14,1],
-  ["사과 1개","사과 부사 홍로","1개 (200g)",114,30,0.5,0.3,0,22,2],
-  ["계란 1개","계란 달걀 삶은계란","1개 (50g)",73,0.7,6.5,4.8,1.5,0.2,65],
-  ["햇반 1공기","햇반 쌀밥 흰쌀밥 공깃밥","1공기 (210g)",315,70,5,1.5,0,0,5],
-  ["닭가슴살 소시지 1팩","닭가슴살소시지 닭가슴살볼","1팩 (100g)",145,6,20,4.5,1.2,2,380],
-  ["그릭요거트 100g","그릭요거트 요거트","100g",95,4.5,10,4,2.5,3,45],
-  ["아메리카노 1잔","아메리카노 아이스아메리카노","1잔",10,2,0.5,0,0,0,5],
-  ["카페라떼 1잔","카페라떼 라떼","1잔 (355ml)",150,13,9,7,4.5,11,115],
-  ["제로콜라 1캔","제로콜라 펩시제로","1캔 (355ml)",0,0,0,0,0,0,25],
-  ["방울토마토 10알","방울토마토 토마토","10알 (150g)",24,5.2,1.3,0.2,0,3.5,8],
-  ["바나나 1개","바나나","1개 (110g)",98,25,1.2,0.3,0,14,1],
-  ["고구마 1개","고구마 군고구마","1개 (150g)",195,45,2.5,0.3,0,12,25],
-  ["감자 1개","감자 찐감자","1개 (150g)",115,26,3,0.2,0,1.5,10],
-  ["두부 반모","두부 순두부","반 모 (150g)",126,4,13,6.5,1,1,15],
-  ["삼각김밥 1개","삼각김밥 참치마요삼각김밥","1개 (110g)",195,35,4.5,4,1,1,390],
-  ["김밥 1줄","김밥 일반김밥","1줄 (250g)",440,68,12,12,2.5,3,920],
-  ["떡볶이 1인분","떡볶이 국물떡볶이","1인분 (300g)",510,96,12,8,2,18,1350],
-  ["라면 1봉지","라면 신라면","1봉지 (120g)",500,79,10,16,8,4,1790],
-  ["짜파게티 1봉지","짜파게티","1봉지 (140g)",610,96,11,20,8,7,1100],
-  ["불닭볶음면 1봉지","불닭볶음면","1봉지 (140g)",530,85,12,16,8,7,1280],
-  ["비빔면 1봉지","비빔면 팔도비빔면","1봉지 (130g)",530,82,9,18,8,12,1090],
-  ["컵누들 1개","컵누들","1개 (38g)",120,27,2,0.5,0,3,890],
-  ["단백질 쉐이크 1스쿱","단백질쉐이크 프로틴","1스쿱 (32g)",120,3,24,1.5,0.5,1,130],
-  ["프로틴바 1개","프로틴바 단백질바","1개 (50g)",215,19,12,10,3.6,6,140],
-  ["풀무원 고기만두 4개","풀무원 만두","4개 (160g)",268,23,12.5,14,5,2.5,545],
-  ["비비고 왕교자 5개","비비고 만두","5개 (175g)",348,33,14,18,6,3,580],
-  ["햄버거 1개","햄버거 빅맥","1개",550,46,27,28,9,7,920],
-  ["피자 1조각","피자 페퍼로니","1조각 (110g)",295,34,13,12,5,4,580],
-  ["치킨 반마리","치킨 후라이드","반 마리",950,45,56,60,15,8,1380]
+  ["한마음 정육식당 돼지모둠 구이 (삼겹·목살·항정 1인분 200g)","한마음정육식당 정육식당 돼지한판 돼지모둠 모둠구이","1인분 (200g)",560,1,37,44,15,0,160],
+  ["한마음 정육식당 소모둠 구이 (등심·갈비살·부채살 1인분 200g)","한마음정육식당 정육식당 소한판 소모둠 소갈비살 소고기모둠","1인분 (200g)",440,1,40,30,11,0,150],
+  ["삼겹살 구이 (정육식당/일반 1인분 200g)","한마음정육식당 정육식당 삼겹살 오겹살 대패삼겹살 냉동삼겹살 돼지고기","1인분 (200g)",660,1,34,56,20,0,150],
+  ["돼지목살 구이 (정육식당/일반 1인분 200g)","한마음정육식당 정육식당 목살 돼지목살 스테이크","1인분 (200g)",480,1,40,34,12,0,160],
+  ["돼지 앞다리살 / 뒷다리살 구이 (1인분 200g)","앞다리살 뒷다리살 전지 후지 수육용 구이","1인분 (200g)",370,1,41,22,8,0,140],
+  ["항정살 / 가브리살 구이 (1인분 200g)","항정살 가브리살 갈매기살 특수부위","1인분 (200g)",610,1,32,52,18,0,150],
+  ["돈마호크 / 토마호크 스테이크 구이 (1인분 250g)","돈마호크 토마호크 프렌치랙 스테이크","1인분 (250g)",590,2,48,42,15,1,320],
+  ["양념 돼지갈비 구이 (1인분 250g)","돼지갈비 양념갈비 명륜진사갈비 왕갈비","1인분 (250g)",620,22,42,40,14,16,890],
+  ["소고기 등심 / 갈비살 / 살치살 구이 (1인분 200g)","소고기 한우 등심 소갈비살 살치살 차돌박이 우삼겹","1인분 (200g)",460,1,38,33,12,0,150],
+  ["소고기 부채살 / 우둔살 / 안심 구이 (1인분 200g)","소고기 한우 우둔살 부채살 안심 토시살 스테이크 육회","1인분 (200g)",340,0,44,17,6,0,140],
+  ["사조대림 오븐구이 불고기맛 바 (1개 75g)","사조대림 오븐구이 불고기 오븐구이불고기 핫바 어묵바 간식","1개 (75g)",125,10,9,5.5,1.5,4,490],
+  ["사조대림 화끈어묵바 / 매운 어묵바 (1개 90g)","사조대림 화끈어묵 매운어묵 빨간어묵 어묵바 핫바 꼬치어묵","1개 (90g)",135,16,10,3.2,0.6,5,680],
+  ["사조대림 대림선 부산어묵 / 사각어묵 (100g)","사조대림 대림선 부산어묵 사각어묵 종합어묵 어묵볶음 어묵탕 오뎅","100g",145,18,11,3,0.5,3,720],
+  ["사조대림 크래미 / 스노우크랩킹 맛살 (1팩 90g)","사조대림 크래미 맛살 게맛살 스노우크랩킹 한성크래미","1팩 (90g)",95,12,10,0.8,0.1,6,540],
+  ["사조대림 / 의성마늘 프랑크 소시지 핫바 (1개 80g)","사조대림 소시지 프랑크소시지 의성마늘프랑크 천하장사 빅팜 핫바","1개 (80g)",215,5,11,17,6,2,590],
+  ["사조대림 숯불구이 닭가슴살 바 (1개 80g)","사조대림 오븐구이 숯불구이 닭가슴살바 닭가슴살핫바","1개 (80g)",115,4,18,2.5,0.7,2,380],
+  ["빙그레 더단백 드링크 바나나 / 초코 / 커피 (1팩 250ml)","빙그레 더단백 더단백바나나 더단백초코 더단백커피 프로틴바나나 프로틴음료 단백질쉐이크","1팩 (250ml)",105,5,20,0.6,0.4,0.5,230],
+  ["오리온 닥터유 프로 단백질드링크 초코 / 바나나 (1병 250ml)","오리온 닥터유 닥터유프로 닥터유프로틴 바나나 초코 프로틴음료","1병 (250ml)",150,10,24,2,1.2,1.5,180],
+  ["매일 셀렉스 프로핏 복숭아 / 아메리카노 / 초코 (1팩 250ml)","매일유업 셀렉스 셀렉스프로핏 프로틴음료 단백질쉐이크","1팩 (250ml)",100,4,20,0,0,0,130],
+  ["일동후디스 하이뮨 프로틴 밸런스 액티브 (1팩 250ml)","하이뮨 하이뮨액티브 프로틴음료 바나나 초코 커피","1팩 (250ml)",125,6,20,2,1,1,200],
+  ["랩노쉬 프로틴 드링크 바나나 / 라떼 / 카카오 (1병 350ml)","랩노쉬 랩노쉬프로틴 프로틴바나나 단백질음료","1병 (350ml)",165,11,27,1.8,1,2,190],
+  ["닥터유 단백질바 / 더단백 프로틴바 (1개 50g)","프로틴바 단백질바 닥터유단백질바 더단백바 퀘스트바 커클랜드프로틴바","1개 (50g)",215,19,12,10,3.6,6,140],
+  ["단백질 쉐이크 파우더 (WPI/WPC 1스쿱 32g)","단백질쉐이크 프로틴 마이프로틴 신타6 옵티멈 골드스탠다드 머슬팜 포대유청","1스쿱 (32g)",120,3,24,1.5,0.5,1,130],
+  ["풀무원 얇은피 꽉찬속 고기만두 (1인분 4개, 160g)","풀무원 얇은피 만두 꽉찬속 고기만두 얄피만두 냉동만두 군만두 찐만두","4개 (160g)",268,23,12.5,14,5,2.5,545],
+  ["풀무원 얇은피 꽉찬속 고기만두 (1봉지 8개, 320g)","풀무원 얇은피 만두 꽉찬속 고기만두 얄피만두 한봉지 320g","1봉지 (320g)",535,46,25,27,10,5,1090],
+  ["풀무원 얇은피 꽉찬속 김치만두 (1인분 4개, 160g)","풀무원 얇은피 만두 꽉찬속 김치만두 얄피만두","4개 (160g)",240,25,11.5,10.5,3.8,3,620],
+  ["풀무원 얇은피 꽉찬속 땡초불고기만두 (4개, 160g)","풀무원 얇은피 만두 땡초만두 땡초불고기만두 얄피만두","4개 (160g)",275,25,13,13.5,4.5,4,580],
+  ["CJ 비비고 왕교자 (1인분 5개, 175g)","비비고 왕교자 만두 고기만두 군만두 찐만두 물만두 cj","5개 (175g)",348,33,14,18,6,3,580],
+  ["CJ 비비고 김치왕교자 (1인분 5개, 175g)","비비고 김치왕교자 김치만두 만두 cj","5개 (175g)",315,32,14,14,4.8,3,710],
+  ["CJ 비비고 수교자 / 물만두 (15개, 150g)","비비고 수교자 물만두 만두 cj","150g",270,26,12,13,4.5,2,490],
+  ["목살 김치찌개 (1인분 / 돼지목살 듬뿍)","목살김치찌개 돼지목살김치찌개 김치찌개 고기김치찌개 한식 찌개","1인분 (450g)",460,13,34,30,10,4,1450],
+  ["돼지고기 김치찌개 (일반 1인분)","돼지고기김치찌개 김치찌개 삼겹살김치찌개 앞다리살김치찌개 찌개","1인분 (400g)",420,12,25,30,11,4,1480],
+  ["참치 김치찌개 (1인분)","참치김치찌개 김치찌개 찌개","1인분 (400g)",330,13,24,20,4,4,1390],
+  ["스팸 / 부대찌개 (1인분)","스팸김치찌개 부대찌개 햄김치찌개 김치찌개","1인분 (450g)",540,24,22,39,14,5,1750],
+  ["된장찌개 (두부·야채 일반 1인분)","된장찌개 우렁된장찌개 두부된장찌개 고깃집된장찌개 백반 찌개","1인분 (350g)",195,14,13,9,2,3,1320],
+  ["차돌박이 된장찌개 (1인분)","차돌된장찌개 차돌박이된장찌개 고기된장찌개 정육식당된장찌개 된장찌개","1인분 (400g)",360,14,22,24,9,3,1450],
+  ["순두부찌개 (해물/고기 계란 포함 1인분)","순두부찌개 해물순두부 고기순두부 짬뽕순두부 찌개","1인분 (400g)",295,13,20,18,4,2,1380],
+  ["청국장찌개 (1인분)","청국장 청국장찌개 찌개","1인분 (350g)",250,15,21,12,2,2,1180],
+  ["돼지국밥 / 순대국밥 (밥 포함 1그릇)","국밥 돼지국밥 순대국밥 내장국밥 수육국밥","1그릇 (밥포함)",740,72,38,31,11,2,1620],
+  ["뼈해장국 / 감자탕 (1인분)","뼈해장국 감자탕 우거지해장국 해장국","1그릇 (600g)",620,18,46,38,13,3,1780],
+  ["설렁탕 / 곰탕 (면·밥 별도 기본 국물·고기 1그릇)","설렁탕 곰탕 나주곰탕 도가니탕 사골국","1그릇 (500g)",480,12,36,31,12,1,1150],
+  ["갈비탕 (소갈비 1그릇)","갈비탕 왕갈비탕 소갈비탕","1그릇 (600g)",560,14,42,36,13,2,1340],
+  ["삼계탕 (1인분)","삼계탕 반계탕 백숙 닭한마리","1그릇",910,48,68,48,14,2,1250],
+  ["육개장 (1인분)","육개장 소고기국밥 소고기무국","1그릇 (500g)",380,18,28,22,7,3,1680],
+  ["소고기 미역국 / 계란국 / 콩나물국 (1그릇)","미역국 소고기미역국 계란국 콩나물국 북엇국 황태해장국","1그릇 (350g)",145,6,14,7,2,1,850],
+  ["짜장면 (일반 1그릇)","짜장면 자장면 옛날짜장 유니짜장 중국집 중식","1그릇 (650g)",790,128,22,21,6,14,1780],
+  ["간짜장 (1그릇 / 춘장·고기·양파 볶음)","간짜장 간자장 삼선간짜장 계란간짜장 중국집 중식","1그릇 (700g)",860,132,26,26,7,13,1890],
+  ["쟁반짜장 / 해물짜장 (1인분)","쟁반짜장 해물쟁반짜장 사천짜장 고추짜장","1인분 (700g)",880,130,29,27,7,15,1950],
+  ["짬뽕 (해물/고기 일반 1그릇)","짬뽕 짬봉 삼선짬뽕 해물짬뽕 고추짬뽕 백짬뽕 중국집 중식","1그릇 (750g)",690,102,28,18,5,6,2350],
+  ["차돌짬뽕 / 고기짬뽕 (1그릇)","차돌짬뽕 차돌박이짬뽕 고기짬뽕 교동짬뽕 짬봉","1그릇 (800g)",840,105,36,31,11,6,2450],
+  ["짬뽕밥 / 짜장밥 (1그릇)","짬뽕밥 짬봉밥 짜장밥 자장밥 잡채밥 마파두부밥 중식","1그릇 (700g)",660,92,27,20,6,5,2100],
+  ["짬짜면 / 볶짬면 (반반 메뉴 1그릇)","짬짜면 짜짬면 볶짜면 볶짬면 탕짜면 탕짬면","1그릇 (700g)",760,115,25,22,6,10,2050],
+  ["탕수육 / 찹쌀탕수육 (1인분 220g)","탕수육 찹쌀탕수육 미니탕수육 꿔바로우 깐풍기 유린기 중식","1인분 (220g)",580,58,26,27,7,18,680],
+  ["중식 볶음밥 / 새우볶음밥 (짜장소스 포함 1인분)","볶음밥 중국집볶음밥 새우볶음밥 계란볶음밥 삼선볶음밥","1인분 (450g)",770,108,21,28,6,6,1380],
+  ["마라탕 (소고기·채소·두부 위주 1인분)","마라탕 마라샹궈 훠궈 중식","1인분 (600g)",640,48,28,38,12,6,2150],
+  ["제육볶음 / 돼지불백 (밥 별도 1인분 200g)","제육볶음 오삼불고기 돼지불백 간장불고기 불고기 한식","1인분 (200g)",470,18,31,30,9,12,1150],
+  ["제육덮밥 / 불고기덮밥 (밥 포함 1그릇)","제육덮밥 소불고기덮밥 오징어덮밥 덮밥","1그릇 (450g)",760,88,36,29,8,13,1320],
+  ["보쌈 / 수육 (살코기·삼겹 1인분 200g)","보쌈 수육 마늘보쌈 굴보쌈 편육 돼지고기","1인분 (200g)",540,4,42,38,13,3,480],
+  ["족발 / 불족발 (1인분 250g)","족발 불족발 냉채족발 미니족발 야식","1인분 (250g)",590,8,48,40,13,5,720],
+  ["비빔밥 / 돌솥비빔밥 / 육회비빔밥 (1그릇)","비빔밥 전주비빔밥 돌솥비빔밥 육회비빔밥 꼬막비빔밥 참치비빔밥","1그릇 (450g)",610,88,22,18,4,9,1080],
+  ["김치볶음밥 / 참치김치볶음밥 (계란후라이 포함)","김치볶음밥 참치김치볶음밥 스팸김치볶음밥 오므라이스","1인분 (400g)",645,85,20,24,6,5,1290],
+  ["고등어구이 / 삼치구이 / 갈치구이 (1인분 150g)","고등어구이 삼치구이 갈치구이 연어구이 임연수구이 생선구이","1인분 (150g)",320,1,32,21,5,0,450],
+  ["연어덮밥(사케동) / 회덮밥 (1인분)","연어덮밥 사케동 회덮밥 연어회 광어회 우럭회 생새우회","1인분",540,68,34,14,3,6,780],
+  ["모둠초밥 / 연어·광어초밥 (10피스 1인분)","초밥 모둠초밥 연어초밥 광어초밥 새우초밥 회전초밥 스시","10피스 (1인분)",520,76,28,10,2,8,890],
+  ["춘천 닭갈비 / 안동 찜닭 (1인분 300g)","닭갈비 치즈닭갈비 찜닭 로제찜닭 닭볶음탕 닭도리탕","1인분 (300g)",530,32,42,26,7,14,1280],
+  ["등심 돈까스 / 일식 로스카츠 (1인분)","돈까스 돈가스 등심돈까스 안심돈까스 왕돈까스 일식돈까스 카츠","1인분 (밥·소스포함)",780,74,34,38,11,10,1120],
+  ["치즈 돈까스 / 고구마치즈 돈까스 (1인분)","치즈돈까스 치즈돈가스 고구마치즈돈까스 치즈카츠","1인분",860,76,39,44,16,12,1250],
+  ["물냉면 / 비빔냉면 / 막국수 (1그릇)","냉면 물냉면 비빔냉면 회냉면 막국수 밀면 쫄면 고깃집냉면","1그릇 (600g)",540,102,16,7,2,14,1580],
+  ["바지락 칼국수 / 잔치국수 / 우동 (1그릇)","칼국수 바지락칼국수 닭칼국수 잔치국수 비빔국수 어묵우동 쌀국수","1그릇 (650g)",560,105,20,6,1.5,4,1750],
+  ["일반 김밥 / 야채김밥 (1줄 250g)","김밥 야채김밥 일반김밥 꼬마김밥 편의점김밥 분식","1줄 (250g)",440,68,12,12,2.5,3,920],
+  ["참치마요 삼각김밥 / 전주비빔 삼각김밥 (1개 110g)","삼각김밥 참치마요삼각김밥 전주비빔삼각김밥 편의점삼각김밥","1개 (110g)",195,35,4.5,4,1,1,390],
+  ["참치김밥 / 치즈김밥 / 돈까스김밥 (1줄 280g)","참치김밥 치즈김밥 돈까스김밥 불고기김밥 소고기김밥 키토김밥","1줄 (280g)",520,69,18,18,4,3,1050],
+  ["떡볶이 / 국물떡볶이 (1인분 300g)","떡볶이 국물떡볶이 엽기떡볶이 엽떡 신전떡볶이 로제떡볶이 라볶이 분식","1인분 (300g)",510,96,12,8,2,18,1350],
+  ["찰순대 (내장 포함 1인분 250g)","순대 찰순대 병천순대 순대볶음 분식","1인분 (250g)",420,58,18,12,4,1,680],
+  ["CJ 햇반 / 흰쌀밥 공깃밥 (1공기 210g)","햇반 쌀밥 흰쌀밥 공깃밥 공기밥 즉석밥 밥 한공기 cj 오뚜기밥","1공기 (210g)",315,70,5,1.5,0,0,5],
+  ["CJ 햇반 작은공기 / 반공기 (130g)","햇반 작은공기 반공기 소형 쌀밥 밥","1개 (130g)",190,43,3,0.6,0,0,3],
+  ["현미밥 / 잡곡밥 / 흑미밥 (1공기 210g)","햇반 현미밥 잡곡밥 흑미밥 오곡밥 귀리밥 곤약밥 밥","1공기 (210g)",300,65,6.5,1.8,0,0,10],
+  ["농심 신라면 / 오뚜기 진라면 (봉지 120g)","라면 신라면 진라면 안성탕면 너구리 삼양라면 열라면 참깨라면 봉지라면","1봉지 (120g)",500,79,10,16,8,4,1790],
+  ["신라면 소컵 / 육개장 사발면 (작은 컵라면 65~86g)","컵라면 신라면소컵 진라면소컵 육개장사발면 김치사발면 튀김우동 새우탕","1개 (86g)",385,55,7,15,6,3,1520],
+  ["농심 짜파게티 (1봉지 140g)","짜파게티 짜슐랭 짜장라면 볶음라면 라면","1봉지 (140g)",610,96,11,20,8,7,1100],
+  ["삼양 불닭볶음면 (1봉지 140g)","불닭볶음면 까르보불닭 볶음라면 매운라면","1봉지 (140g)",530,85,12,16,8,7,1280],
+  ["팔도 비빔면 / 배홍동 비빔면 (1봉지 130g)","팔도비빔면 비빔면 배홍동 진비빔면 라면","1봉지 (130g)",530,82,9,18,8,12,1090],
+  ["오뚜기 컵누들 (매콤한맛/우동맛 1개 38g)","컵누들 로제컵누들 마라탕컵누들 다이어트라면","1개 (38g)",120,27,2,0.5,0,3,890],
+  ["닭가슴살 오리지널 / 수비드 / 훈제 (1팩 100g)","닭가슴살 하림 아임닭 맛있닭 랭킹닭컴 곰곰 한끼통살 허닭 닭안심","1팩 (100g)",110,1.5,23,1.5,0.4,0.5,220],
+  ["닭가슴살 소시지 / 스테이크 / 볼 (1팩 100g)","닭가슴살소시지 닭가슴살스테이크 닭가슴살볼 닭가슴살만두 오븐구이닭가슴살","1팩 (100g)",145,6,20,4.5,1.2,2,380],
+  ["삶은 계란 / 구운란 / 반숙란 (1개 50g)","계란 달걀 삶은계란 구운란 반숙란 감동란 맥반석계란","1개 (50g)",73,0.7,6.5,4.8,1.5,0.2,65],
+  ["계란후라이 / 스크램블에그 / 계란말이 (2개 분량)","계란후라이 달걀후라이 스크램블에그 계란말이 계란찜 오믈렛","2개 분량",185,2,13,14,3.5,1,260],
+  ["두부 / 모두부 / 연두부 (반 모 150g)","두부 모두부 부침두부 연두부 순두부 두부김치","반 모 (150g)",126,4,13,6.5,1,1,15],
+  ["서브웨이 로스트치킨 / 로티세리 / 터키 (15cm)","서브웨이 써브웨이 로스트치킨 로티세리치킨 터키 베지 이탈리안bmt 에그마요 스테이크앤치즈 샌드위치","15cm (1개)",320,41,26,5,1.5,5,610],
+  ["굽네치킨 오리지널 / 고추바사삭 (반 마리)","굽네치킨 고추바사삭 오리지널 구운치킨 로스트치킨 통닭 치킨","반 마리",540,12,58,28,8,4,920],
+  ["후라이드 치킨 / 양념치킨 (반 마리)","치킨 후라이드치킨 양념치킨 교촌치킨 허니콤보 bhc 뿌링클 bbq 황금올리브 닭강정","반 마리",950,45,56,60,15,8,1380],
+  ["햄버거 단품 (빅맥/상하이버거/와퍼/싸이버거)","햄버거 맥도날드 빅맥 상하이버거 쿼터파운더 버거킹 와퍼 맘스터치 싸이버거 롯데리아 불고기버거","1개 (단품)",550,46,27,28,9,7,920],
+  ["피자 (페퍼로니/포테이토/콤비네이션 1조각)","피자 페퍼로니피자 포테이토피자 고구마피자 치즈피자 도미노피자 피자헛","1조각 (110g)",295,34,13,12,5,4,580],
+  ["샤인머스캣 / 청포도 (100g, 약 10~12알)","샤인머스캣 샤인머스켓 포도 청포도 거봉 과일","100g (약 10알)",68,17.5,0.6,0.2,0,15,2],
+  ["사과 (중간 크기 1개 200g)","사과 부사 홍로 아오리 감홍 과일","1개 (200g)",114,30,0.5,0.3,0,22,2],
+  ["방울토마토 / 대추방울토마토 (10알, 150g)","방울토마토 대추방울토마토 스테비아토마토 완숙토마토 토마토 과일 채소","10알 (150g)",24,5.2,1.3,0.2,0,3.5,8],
+  ["바나나 (중간 1개 110g)","바나나 생바나나 과일","1개 (110g)",98,25,1.2,0.3,0,14,1],
+  ["딸기 (10알, 약 150g)","딸기 설향 금실 과일","10알 (150g)",54,12.5,1.2,0.4,0,8,2],
+  ["귤 / 감귤 (1개 80g)","귤 감귤 오렌지 천혜향 한라봉 레드향 자몽 과일","1개 (80g)",32,8,0.5,0.1,0,6.5,1],
+  ["수박 / 참외 / 멜론 / 복숭아 / 배 (1인분 200g)","수박 참외 메론 멜론 복숭아 백도 황도 천도복숭아 배 단감 홍시 키위 블루베리 과일","1인분 (200g)",78,19,1.2,0.3,0,15,3],
+  ["찐 고구마 / 군고구마 (1개 150g)","고구마 군고구마 밤고구마 호박고구마 구황작물","1개 (150g)",195,45,2.5,0.3,0,12,25],
+  ["찐 감자 / 구운 감자 (1개 150g)","감자 찐감자 구운감자 알감자 웨지감자","1개 (150g)",115,26,3,0.2,0,1.5,10],
+  ["그릭요거트 (무가당 플레인 100g)","그릭요거트 요거트 플레인요거트 비요뜨 유제품 우유 두유","100g",95,4.5,10,4,2.5,3,45],
+  ["아이스 아메리카노 / 블랙커피 (1잔)","아메리카노 아이스아메리카노 아아 커피 스타벅스 메가커피 컴포즈","1잔",10,2,0.5,0,0,0,5],
+  ["카페라떼 / 두유라떼 / 바나나라떼 (1잔 355ml)","카페라떼 라떼 카푸치노 플랫화이트 바닐라라떼 바나나우유 커피","1잔 (355ml)",150,13,9,7,4.5,11,115],
+  ["제로콜라 / 제로사이다 / 제로음료 (1캔 355ml)","제로콜라 펩시제로 칠성사이다제로 나랑드사이다 탄산수 음료","1캔 (355ml)",0,0,0,0,0,0,25]
 ].map(([name,keys,serving,kcal,carb,prot,fat,satFat,sugar,sodium])=>({name,keys,serving,kcal,carb,prot,fat,satFat,sugar,sodium}));
 
 // [3] 10대 영양제 DB
@@ -619,7 +697,7 @@ const SUPP_META = [
 
 const defaultState = {
   profile: { name:"김동욱", height:180, weight:81.0, targetWeight:75.9, smm:36.9, bfm:16.5, pbf:20.3, bmr:1764, activity:1.2, deficit:500 },
-  darkMode:false, bankAutoAdjust:false, iconTheme:"navy", geminiApiKey:"", naverApiKey:"", naverApiSecret:"", mealPresets:[], workoutRoutines:[], logs:{}
+  darkMode:false, bankAutoAdjust:false, iconTheme:"navy", geminiApiKey:"", mealPresets:[], workoutRoutines:[], logs:{}
 };
 
 let state = loadState(), currentDate = getTodayStr(), currentSearchMatches = [], selectedFoodBase = null;
@@ -895,11 +973,12 @@ function addCardioExercise() {
   saveState(); render();
 }
 
-// ===== 자연어·수량 파서, 영양성분 검증기 & 정밀 검색 엔진 =====
+// ===== [핵심 수정] 자연어·수량 파서, 영양성분 검증기 & 정밀 검색 엔진 =====
 const TYPO_MAP = [["짬봉","짬뽕"],["자장면","짜장면"],["간자장","간짜장"],["샤인머스켓","샤인머스캣"],["돈가스","돈까스"],["얄피","얇은피"],["떡복이","떡볶이"],["달걀","계란"],["오뎅","어묵"],["써브웨이","서브웨이"]];
 function fixKoreanFoodTypos(s) { return TYPO_MAP.reduce((acc,[k,v])=>acc.replace(new RegExp(k,"g"),v), s||""); }
 function normalizeStr(s) { return fixKoreanFoodTypos(s).toLowerCase().replace(/[^가-힣a-z0-9]/g, ""); }
 
+// 탄단지 합산 열량과 표시 열량 간 오차 검증 및 자동 보정
 function validateNutritionItem(it) {
   const c = Math.max(0, parseFloat(it.carb) || 0);
   const p = Math.max(0, parseFloat(it.prot) || 0);
@@ -980,7 +1059,7 @@ function searchLocalDB(coreQuery) {
     }
     if (tokens.length >= 2) {
       if (matched === tokens.length) score += 140;
-      else if (matched < Math.ceil(tokens.length * 0.4) && score < 120) score = 0;
+      else if (matched < Math.ceil(tokens.length * 0.6) && score < 190) score = 0; // 부분 단어 오매칭 완전 차단
     }
     if (score >= 50) scored.push({ item, score, matched });
   }
@@ -1028,6 +1107,7 @@ function renderFoodSearchResults(list, banner = "", mult = 1.0) {
 function parseFatSecretStrict(raw) {
   if (!raw) return [];
   const items = [];
+  // 1. HTML 테이블 Row 단위 엄격 파싱 (절대 다른 행과 섞이지 않음)
   if (raw.includes("<table") || raw.includes("searchResult")) {
     const doc = new DOMParser().parseFromString(raw, "text/html");
     doc.querySelectorAll("table.generic.searchResult tr, .searchResult tr").forEach(tr => {
@@ -1047,16 +1127,19 @@ function parseFatSecretStrict(raw) {
     });
     if (items.length) return items;
   }
+  // 2. Jina Markdown 파싱: 반드시 직전 1~2줄 이내의 식품 링크만 매칭
   const lines = raw.split(/\n+/).map(l => l.trim()).filter(Boolean);
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (!line.includes("칼로리:") || !line.includes("kcal")) continue;
     const kM = line.match(/칼로리:\s*([\d,.]+)\s*kcal/i);
     if (!kM) continue;
+    // 현재 줄 또는 바로 윗줄에서 음식명 추출
     let foodTitle = "";
     for (let j = i; j >= Math.max(0, i - 2); j--) {
       const linkMatches = [...lines[j].matchAll(/\[([^\]]+)\]\(https?:\/\/www\.fatsecret\.kr\/[^)]+\)/g)];
       if (linkMatches.length > 0) {
+        // 브랜드가 [브랜드] [제품명] 순으로 있을 경우 합침
         foodTitle = linkMatches.map(m => m[1].trim()).filter(x => !x.includes("칼로리") && !x.includes("더 보기")).join(" ");
         if (foodTitle) break;
       }
@@ -1077,38 +1160,22 @@ function parseFatSecretStrict(raw) {
 
 async function fetchOpenFoodFacts(q) {
   try {
-    const ctrl = new AbortController(), id = setTimeout(() => ctrl.abort(), 8000);
-    const params = new URLSearchParams({
-      search_terms: q,
-      search_simple: "1",
-      action: "process",
-      json: "1",
-      page_size: "25",
-      countries_tags: "en:south-korea",
-      sort_by: "unique_scans_n",
-      fields: "product_name,product_name_ko,brands,serving_size,nutriments,nutrition_grades,code"
-    });
-    const url = `https://world.openfoodfacts.org/cgi/search.pl?${params.toString()}`;
+    const ctrl = new AbortController(), id = setTimeout(() => ctrl.abort(), 5500);
+    const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=10`;
     const res = await fetch(url, { signal: ctrl.signal }); clearTimeout(id);
     if (!res.ok) return [];
     const data = await res.json();
-    const seen = new Set();
     return (data.products || []).map(p => {
       const n = p.nutriments || {};
       const title = (p.product_name_ko || p.product_name || "").trim();
       const brand = (p.brands || "").split(",")[0].trim();
-      if (!title) return null;
-      const hasServ = !!n["energy-kcal_serving"];
-      const sfx = hasServ ? "_serving" : "_100g";
-      const kcal = n["energy-kcal" + sfx] || (n["energy_100g"] ? Math.round(n["energy_100g"] / 4.184) : 0);
-      if (!kcal) return null;
-      const key = normalizeStr(title) + "_" + kcal;
-      if (seen.has(key)) return null;
-      seen.add(key);
-      const grade = p.nutrition_grades ? ` [${p.nutrition_grades.toUpperCase()}]` : "";
+      const kcal = n["energy-kcal_serving"] || n["energy-kcal_100g"] || (n.energy_100g ? Math.round(n.energy_100g / 4.184) : 0);
+      if (!title || !kcal) return null;
+      const useServ = !!n["energy-kcal_serving"];
+      const sfx = useServ ? "_serving" : "_100g";
       return validateNutritionItem({
-        name: `${brand && !title.includes(brand) ? `[${brand}] ` : ""}${title}${grade}`,
-        serving: hasServ ? (p.serving_size || "1회 제공량") : "100g 기준",
+        name: `${brand && !title.includes(brand) ? `[${brand}] ` : ""}${title}`,
+        serving: useServ ? (p.serving_size || "1회 제공량") : "100g 기준",
         kcal,
         carb: n["carbohydrates" + sfx] || 0,
         prot: n["proteins" + sfx] || 0,
@@ -1141,27 +1208,6 @@ async function fetchFatSecretSingleQuery(q) {
   } catch (e) { return []; }
 }
 
-async function fetchNaverFood(q) {
-  const clientId = state.naverApiKey, clientSecret = state.naverApiSecret;
-  if (!clientId || !clientSecret) return [];
-  try {
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(
-      `https://openapi.naver.com/v1/search/shop.json?query=${encodeURIComponent(q)}&display=10`
-    )}`;
-    const res = await fetch(proxyUrl, {
-      headers: { "X-Naver-Client-Id": clientId, "X-Naver-Client-Secret": clientSecret }
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return (data.items || []).map(p => ({
-      name: p.title.replace(/<[^>]*>/g, ""),
-      serving: "네이버 쇼핑",
-      kcal: 0, carb: 0, prot: 0, fat: 0, satFat: 0, sugar: 0, sodium: 0,
-      isWeb: true, isNaver: true
-    }));
-  } catch (e) { return []; }
-}
-
 async function searchLiveWebFood() {
   const raw = $("foodSearchInput").value.trim();
   if (!raw) return alert("검색할 음식 이름을 먼저 입력해 주세요.");
@@ -1177,8 +1223,7 @@ async function searchLiveWebFood() {
   const qs = [...new Set([coreQuery, ...(tks.length >= 2 ? [tks.slice(-2).join(" "), tks[0] + " " + tks[tks.length-1]] : [])])];
   const settled = await Promise.allSettled([
     fetchOpenFoodFacts(coreQuery),
-    ...qs.map(fetchFatSecretSingleQuery),
-    fetchNaverFood(coreQuery)
+    ...qs.map(fetchFatSecretSingleQuery)
   ]);
   const webRes = [], seen = new Set();
   settled.forEach(r => r.status === "fulfilled" && (r.value || []).forEach(it => {
@@ -1194,7 +1239,7 @@ async function searchLiveWebFood() {
   }
 }
 
-// ===== 사진/캡처 업로드 자동 판독 =====
+// ===== [신규 기능 1] 사진/캡처 업로드 자동 판독 (Tesseract 한국어 OCR + Gemini Vision AI 겸용) =====
 function openAiKeyModal() {
   $("geminiKeyInput").value = state.geminiApiKey || "";
   $("aiKeyModal").style.display = "flex";
@@ -1203,7 +1248,7 @@ function saveAiKey() {
   state.geminiApiKey = $("geminiKeyInput").value.trim();
   saveState();
   $("aiKeyModal").style.display = "none";
-  alert(state.geminiApiKey ? "Gemini AI 비전 키가 저장되었습니다." : "AI 키가 해제되었습니다.");
+  alert(state.geminiApiKey ? "Gemini AI 비전 키가 저장되었습니다. 이제 모든 음식 사진과 상품 캡처를 AI가 판독합니다." : "AI 키가 해제되었습니다. 기본 내장 한국어 OCR 모드로 동작합니다.");
 }
 
 function fileToBase64(file) {
@@ -1246,6 +1291,7 @@ async function loadTesseract() {
   });
 }
 
+// 텍스트(OCR 또는 복사글)에서 영양성분 및 상품명을 정밀 추출하는 통합 파서
 function extractNutritionFromRawText(rawText, fallbackName = "") {
   const text = (rawText || "").replace(/\r/g, " ");
   const numAfter = (kwRegex) => {
@@ -1263,6 +1309,7 @@ function extractNutritionFromRawText(rawText, fallbackName = "") {
 
   if (!kcal && (carb || prot || fat)) kcal = Math.round(carb * 4 + prot * 4 + fat * 9);
 
+  // 텍스트 내 식품명/상품명 추출
   let cleanTitle = fallbackName;
   if (!cleanTitle) {
     const firstLine = text.split(/\n+/)[0].replace(/(?:영양정보|영양성분|쿠팡|네이버|칼로리|[\d,.]+kcal).*/gi, "").trim();
@@ -1289,30 +1336,35 @@ async function handleFoodPhoto(ev) {
 
   try {
     const dataUrl = await fileToBase64(file);
+    // 1. Gemini API 키가 설정된 경우 AI 비전 판독 우선 실행
     if (state.geminiApiKey) {
-      statusBox.innerHTML = `🤖 <b>AI 비전이 사진을 정밀 판독 중입니다...</b>`;
+      statusBox.innerHTML = `🤖 <b>AI 비전이 사진을 정밀 판독 중입니다...</b> (음식/상품명 및 영양성분 추출)`;
       try {
         const aiItem = await analyzePhotoWithGemini(dataUrl);
         if (aiItem && aiItem.kcal > 0) {
           selectedFoodBase = aiItem;
           activeMult = 1.0;
           applyFoodToForm(1.0);
-          statusBox.innerHTML = `✅ <b>AI 사진 판독 완료:</b> <b>${aiItem.name}</b> (${aiItem.kcal}kcal · 탄${aiItem.carb}g · 단${aiItem.prot}g · 지${aiItem.fat}g)`;
+          statusBox.innerHTML = `✅ <b>AI 사진 판독 완료:</b> <b>${aiItem.name}</b> (${aiItem.kcal}kcal · 탄${aiItem.carb}g · 단${aiItem.prot}g · 지${aiItem.fat}g)가 아래 성분표에 자동 선택되었습니다!`;
           ev.target.value = "";
           return;
         }
       } catch (err) {}
     }
-    statusBox.innerHTML = `📸 <b>사진 속 영양성분표/상품명을 스캔 중입니다...</b>`;
+
+    // 2. 내장 한국어 OCR 엔진(Tesseract.js)으로 영양성분표 및 상품 캡처 텍스트 추출
+    statusBox.innerHTML = `📸 <b>사진 속 영양성분표/상품명을 스캔 중입니다...</b> (약 3~6초 소요)`;
     const Tesseract = await loadTesseract();
     const { data: { text } } = await Tesseract.recognize(dataUrl, "kor+eng");
     const extracted = extractNutritionFromRawText(text, $("foodSearchInput").value.trim());
+
     if (extracted) {
       selectedFoodBase = extracted;
       activeMult = 1.0;
       applyFoodToForm(1.0);
-      statusBox.innerHTML = `✅ <b>사진 성분표 스캔 완료:</b> <b>${extracted.name}</b> (${extracted.kcal}kcal · 탄${extracted.carb}g · 단${extracted.prot}g · 지${extracted.fat}g)`;
+      statusBox.innerHTML = `✅ <b>사진 성분표 스캔 완료:</b> <b>${extracted.name}</b> (${extracted.kcal}kcal · 탄${extracted.carb}g · 단${extracted.prot}g · 지${extracted.fat}g)가 자동 입력되었습니다!`;
     } else {
+      // 성분표 숫자가 없는 상품 썸네일 캡처인 경우 OCR로 읽은 텍스트로 DB/스마트 매칭
       const ocrWords = text.replace(/[^가-힣a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
       const queryCandidate = ocrWords.slice(0, 25) || fileBaseName;
       const matches = searchLocalDB(queryCandidate);
@@ -1322,16 +1374,16 @@ async function handleFoodPhoto(ev) {
         applyFoodToForm(1.0);
         statusBox.innerHTML = `✅ <b>사진 속 상품명 인식 완료:</b> <b>'${matches[0].name}'</b> 항목으로 자동 선택되었습니다!`;
       } else {
-        statusBox.innerHTML = `⚠️ 사진에서 영양성분 숫자를 찾지 못했습니다.`;
+        statusBox.innerHTML = `⚠️ 사진에서 영양성분 숫자를 찾지 못했습니다. 영양성분표가 잘 보이게 찍거나 우측 <b>[⚙️ AI키]</b>에 무료 Gemini 키를 등록하면 일반 음식 사진도 판독됩니다.`;
       }
     }
   } catch (e) {
-    statusBox.innerHTML = `⚠️ 이미지 분석 중 오류가 발생했습니다.`;
+    statusBox.innerHTML = `⚠️ 이미지 분석 중 오류가 발생했습니다. 다시 시도해 주세요.`;
   }
   ev.target.value = "";
 }
 
-// ===== 쿠팡·네이버 복사글 적용 =====
+// ===== [신규 기능 2] 쿠팡·네이버에서 복사한 상품명/성분 원클릭 자동 선택 =====
 async function importFromClipboard() {
   let clipText = "";
   try {
@@ -1339,10 +1391,12 @@ async function importFromClipboard() {
       clipText = (await navigator.clipboard.readText() || "").trim();
     }
   } catch (e) {}
+
   if (!clipText) {
     clipText = prompt("쿠팡이나 네이버에서 복사한 상품명 또는 영양성분 텍스트를 여기에 붙여넣으세요:") || "";
   }
   if (!clipText.trim()) return;
+
   $("pasteRawInput").value = clipText;
   parsePastedNutrition(true);
 }
@@ -1395,6 +1449,8 @@ function parsePastedNutrition(fromClipBtn = false) {
   const raw = $("pasteRawInput").value.trim();
   if (!raw) return;
   const statusBox = $("ocrStatusBox");
+
+  // 1. 복사한 텍스트에 영양성분 숫자가 포함되어 있는 경우 즉시 추출
   const extracted = extractNutritionFromRawText(raw, $("foodSearchInput").value.trim());
   if (extracted) {
     selectedFoodBase = extracted;
@@ -1404,19 +1460,23 @@ function parsePastedNutrition(fromClipBtn = false) {
     statusBox.innerHTML = `✅ <b>복사한 영양성분 적용 완료:</b> <b>${extracted.name}</b> (${extracted.kcal}kcal · 탄${extracted.carb}g · 단${extracted.prot}g · 지${extracted.fat}g)`;
     return;
   }
+
+  // 2. 쿠팡·네이버에서 '상품명'만 복사해온 경우: 불필요한 수식어 제거 후 DB 매칭 + 실시간 웹검색 자동 실행
   const cleanedProductTitle = raw
     .replace(/\[[^\]]*\]/g, " ")
     .replace(/(?:쿠팡|네이버|로켓배송|무료배송|특가|할인|https?:\/\/\S+)/gi, " ")
     .replace(/\s+/g, " ").trim();
+
   $("foodSearchInput").value = cleanedProductTitle;
   const parsed = parseSmartKoreanFoodQuery(cleanedProductTitle);
   activeMult = parsed.mult || 1.0;
   const matches = searchLocalDB(parsed.coreQuery);
+
   if (matches.length > 0) {
     selectedFoodBase = validateNutritionItem(matches[0]);
     setPortionMultiplier(activeMult);
     statusBox.style.display = "block";
-    statusBox.innerHTML = `✅ <b>복사한 상품 자동 선택 완료:</b> <b>'${matches[0].name}'</b> 성분이 아래에 적용되었습니다!`;
+    statusBox.innerHTML = `✅ <b>복사한 상품 자동 선택 완료:</b> <b>'${matches[0].name}'</b> 성분이 아래에 적용되었습니다! 다른 세부 상품을 고르려면 아래 실시간 검색 결과를 터치하세요.`;
   }
   $("pasteScannerBox").style.display = "none";
   searchLiveWebFood();
