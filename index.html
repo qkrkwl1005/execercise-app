@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-title" content="인바디 프로" />
   <link id="appleTouchIconLink" rel="apple-touch-icon" href="" />
   <link id="favIconLink" rel="icon" type="image/png" href="" />
-  <title>인바디 프로 매니저 V9.2</title>
+  <title>인바디 프로 매니저 V9.3</title>
   <style>
     :root { --bg:#F2F4F8; --card:#FFF; --box:#F8FAFC; --text:#111827; --sub:#6B7280; --primary:#2563EB; --green:#10B981; --purple:#7C3AED; --amber:#D97706; --cyan:#0891B2; --danger:#EF4444; --border:#E5E7EB; --nav-bg:rgba(255,255,255,0.94); }
     body.dark { --bg:#0B0F19; --card:#151D2E; --box:#1E293B; --text:#F8FAFC; --sub:#94A3B8; --primary:#3B82F6; --green:#10B981; --purple:#A78BFA; --amber:#F59E0B; --cyan:#22D3EE; --danger:#F87171; --border:#2A364F; --nav-bg:rgba(21,29,46,0.95); }
@@ -28,6 +28,7 @@
     .timer-bar { padding:8px 12px; margin-bottom:12px; }
     .timer-display { font-size:14px; font-weight:900; color:var(--primary); font-variant-numeric:tabular-nums; }
     .timer-btn { border-radius:8px; padding:5px 8px; }
+    .timer-btn.active { background:var(--primary); color:#FFF; border-color:var(--primary); }
     .tab-pane { display:none; }
     .tab-pane.active { display:block; animation:fadeIn .16s ease-in-out; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(3px); } to { opacity:1; transform:translateY(0); } }
@@ -37,7 +38,6 @@
     .badge.purple { background:rgba(124,58,237,.16); color:var(--purple); }
     .badge.green { background:rgba(16,185,129,.16); color:var(--green); }
     .badge.cyan { background:rgba(8,145,178,.16); color:var(--cyan); }
-    .badge.amber { background:rgba(245,158,11,.18); color:var(--amber); }
     .inbody-chips, .macro-grid, .row-3, .nf-grid, .timing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
     .inbody-chips { margin-bottom:12px; }
     .chip, .macro-box, .nf-cell { background:var(--box); border:1px solid var(--border); border-radius:12px; padding:8px 6px; text-align:center; }
@@ -166,7 +166,7 @@
   <!-- [탭 1] 홈 -->
   <div id="tab-home" class="tab-pane active">
     <div class="card">
-      <div class="card-title"><span>⚡ 오늘의 대사량 & 칼로리 밸런스</span><span class="badge">인바디 79점</span></div>
+      <div class="card-title"><span>⚡ 오늘의 대사량 & 칼로리 밸런스</span><span class="badge" id="inbodyScoreBadge">인바디 79점</span></div>
       <div class="inbody-chips">
         <div class="chip"><span class="label">현재 / 적정체중</span><span class="val" id="chipWeight">81.0 / 75.9kg</span></div>
         <div class="chip"><span class="label">골격근량</span><span class="val" id="chipSmm">36.9 kg</span></div>
@@ -193,7 +193,7 @@
       <div class="metrics-grid">
         <div class="metric-box"><div class="m-label">기초대사량 (실시간 연동)</div><div class="m-val" id="valBmr">1,764 kcal</div><div class="m-sub" id="valBmrSub"></div></div>
         <div class="metric-box"><div class="m-label">총 소모량 (활동+운동+시너지)</div><div class="m-val" style="color:var(--primary);" id="valTdee">2,117 kcal</div><div class="m-sub" id="valTdeeSub"></div></div>
-        <div class="metric-box"><div class="m-label" id="lblTargetTitle">권장 섭취 목표 (-500)</div><div class="m-val" style="color:var(--green);" id="valTarget">1,764 kcal</div><div class="m-sub">지방 -5.1kg 감량 기준</div></div>
+        <div class="metric-box"><div class="m-label" id="lblTargetTitle">권장 섭취 목표 (-500)</div><div class="m-val" style="color:var(--green);" id="valTarget">1,764 kcal</div><div class="m-sub" id="lblTargetSub">지방 -5.1kg 감량 기준</div></div>
         <div class="metric-box"><div class="m-label">오늘 섭취한 칼로리</div><div class="m-val" style="color:var(--danger);" id="valEaten">0 kcal</div><div class="m-sub" id="valNetSub"></div></div>
       </div>
       <div class="progress-wrap">
@@ -243,6 +243,10 @@
       </div>
       <div class="cat-chips" id="customMealPresetChips"></div>
 
+      <!-- [신규] 인기·카테고리 바로선택 (검색 못 해도 터치만으로 선택) -->
+      <label class="field-label">🔥 인기·카테고리 바로 선택 (터치만으로 즉시 성분표가 열립니다)</label>
+      <div class="cat-chips" id="foodCatChips"></div>
+
       <!-- 사진 판독 & 쿠팡·네이버 복사 원클릭 연동 바 -->
       <label class="field-label">📷 성분표·음식 사진 자동 판독 & 쿠팡·네이버 복사글 즉시 선택</label>
       <div class="photo-vision-bar">
@@ -253,7 +257,7 @@
       <input type="file" id="foodPhotoInput" accept="image/*" style="display:none;" onchange="handleFoodPhoto(event)" />
       <div class="ocr-status-box" id="ocrStatusBox"></div>
 
-      <label class="field-label">음식·브랜드·식당 메뉴 검색 (입력 즉시 내장 DB + 웹 검색)</label>
+      <label class="field-label">음식·브랜드·식당 메뉴 검색 (입력 즉시 내장 124종 DB + 오타·부분검색 자동보정, 1.8초 후 웹검색 자동실행)</label>
       <div class="search-bar-wrap">
         <input type="text" id="foodSearchInput" placeholder="예: 사조대림 오븐구이, 더단백 바나나, 정육식당 삼겹살..." oninput="onFoodSearchInput()" onkeydown="if(event.key==='Enter')searchLiveWebFood()" />
         <button class="btn-search" id="btnWebSearch" onclick="searchLiveWebFood()">🌐 실시간 웹검색</button>
@@ -312,10 +316,11 @@
       </div>
       <div class="row-4">
         <div><label class="field-label">칼로리(kcal)</label><input type="number" id="foodKcal" placeholder="kcal" inputmode="numeric" /></div>
-        <div><label class="field-label">탄수화물(g)</label><input type="number" id="foodCarb" placeholder="g" inputmode="numeric" /></div>
-        <div><label class="field-label">단백질(g)</label><input type="number" id="foodProt" placeholder="g" inputmode="numeric" /></div>
-        <div><label class="field-label">지방(g)</label><input type="number" id="foodFat" placeholder="g" inputmode="numeric" /></div>
+        <div><label class="field-label">탄수화물(g)</label><input type="number" id="foodCarb" placeholder="g" step="0.1" inputmode="decimal" /></div>
+        <div><label class="field-label">단백질(g)</label><input type="number" id="foodProt" placeholder="g" step="0.1" inputmode="decimal" /></div>
+        <div><label class="field-label">지방(g)</label><input type="number" id="foodFat" placeholder="g" step="0.1" inputmode="decimal" /></div>
       </div>
+      <button class="btn-soft" style="width:100%;margin-bottom:6px;" onclick="saveCurrentToCustomDB()">📌 이 영양성분을 '내 음식 사전'에 영구 등록</button>
       <button class="btn-primary btn-green" onclick="addFood()">+ 식단에 추가하기</button>
       <ul class="log-list" id="foodList"></ul>
     </div>
@@ -323,6 +328,10 @@
 
   <!-- [탭 3] 운동 -->
   <div id="tab-workout" class="tab-pane">
+    <div class="card">
+      <div class="card-title"><span>💪 최근 7일 부위별 볼륨 & 회복 상태</span><span class="badge purple">권장 10~20세트/주</span></div>
+      <div class="row-3" id="muscleVolumeGrid"></div>
+    </div>
     <div class="card">
       <div class="card-title"><span>🏋️ 내 신체 맞춤 웨이트 · 유산소 계산기</span><span class="badge" id="exTabBadge">-0 kcal</span></div>
       <div class="quick-action-bar">
@@ -336,7 +345,7 @@
       </div>
 
       <div id="workoutWeightPane">
-        <label class="field-label">운동 빠른 검색 (예: 바벨컬, 해머컬, 덤벨컬, 벤치프레스, 스미스, 스쿼트 등)</label>
+        <label class="field-label">운동 빠른 검색 (총 94종 · 예: 바벨컬, 해머컬, 힙스러스트, 케틀벨 스윙 등)</label>
         <input type="text" id="exSearchInput" placeholder="운동 이름을 치면 바로 필터링됩니다..." oninput="populateWeightExSelect()" style="border:2px solid var(--primary);" />
         <div class="cat-chips" id="exCatChips">
           <button class="cat-chip active" onclick="selectExCategory('ALL',this)">전체 종목</button>
@@ -344,17 +353,32 @@
           <button class="cat-chip" onclick="selectExCategory('팔',this)">팔 (바벨컬/해머컬/삼두)</button>
           <button class="cat-chip" onclick="selectExCategory('등',this)">등 (랫풀/로우/데드)</button>
           <button class="cat-chip" onclick="selectExCategory('어깨',this)">어깨 (프레스/사레레)</button>
-          <button class="cat-chip" onclick="selectExCategory('하체',this)">하체 (스쿼트/프레스)</button>
-          <button class="cat-chip" onclick="selectExCategory('맨몸/복근',this)">맨몸/복근 (푸쉬업/풀업)</button>
+          <button class="cat-chip" onclick="selectExCategory('하체',this)">하체 (스쿼트/힙/레그)</button>
+          <button class="cat-chip" onclick="selectExCategory('맨몸/복근',this)">맨몸/복근 (푸쉬업/플랭크)</button>
         </div>
-        <label class="field-label">종목 선택 (프리웨이트 / 스미스머신 / 덤벨 / 케이블 구분 계산)</label>
+        <label class="field-label">종목 선택 (총 94종 · 프리웨이트 / 스미스머신 / 덤벨 / 케이블 / 머신 구분 계산)</label>
         <select id="exPreset" onchange="onSelectWeightEx()"></select>
         <div id="prevRecordBanner" style="font-size:11.5px;color:var(--primary);font-weight:700;margin:-2px 0 8px 2px;"></div>
         <div class="row-4">
           <div><label class="field-label" id="lblExWeight">중량(kg)</label><input type="number" step="0.5" id="exWeightKg" value="25" inputmode="decimal" oninput="calcWeightKcal()" /></div>
-          <div><label class="field-label">횟수(회/세트)</label><input type="number" id="exReps" value="10" inputmode="numeric" oninput="calcWeightKcal()" /></div>
+          <div><label class="field-label" id="lblExReps">횟수(회/세트)</label><input type="number" id="exReps" value="10" inputmode="numeric" oninput="calcWeightKcal()" /></div>
           <div><label class="field-label">세트수(Set)</label><input type="number" id="exSets" value="4" inputmode="numeric" oninput="calcWeightKcal()" /></div>
-          <div><label class="field-label">총 시간(분)</label><input type="number" id="exMin" value="10" inputmode="numeric" oninput="calcWeightKcal()" /></div>
+          <div><label class="field-label" id="lblExMin">총 시간(분) <span style="color:var(--primary);">(자동)</span></label><input type="number" step="0.5" id="exMin" value="10" inputmode="decimal" oninput="exMinManual=true;calcWeightKcal()" /></div>
+        </div>
+        <!-- [신규] 세트간 휴식 시간 — 휴식 중에도 칼로리가 소모되므로 정밀 계산에 반영 -->
+        <div class="quick-action-bar" id="exRestChipBar" style="margin-top:-2px;">
+          <span style="font-size:11px;font-weight:700;color:var(--sub);flex-shrink:0;">⏳ 세트간 휴식</span>
+          <button class="timer-btn" data-rest="45" onclick="setRestSec(45)">45초</button>
+          <button class="timer-btn" data-rest="60" onclick="setRestSec(60)">60초</button>
+          <button class="timer-btn" data-rest="90" onclick="setRestSec(90)">90초</button>
+          <button class="timer-btn" data-rest="120" onclick="setRestSec(120)">120초</button>
+          <input type="number" id="exRestSec" value="60" min="0" step="5" oninput="onRestSecInput()" style="width:62px;padding:6px 8px;font-size:13px;margin-bottom:0;background:var(--card);" />
+          <button class="btn-quick" style="flex-shrink:0;" onclick="exMinManual=false;calcWeightKcal()">⏱️ 시간 자동계산 복귀</button>
+        </div>
+        <!-- [신규] 실전 세트 카운터: 세트 완료 원클릭 → 진행 세트 추적 + 휴식 타이머 자동 가동 -->
+        <div class="quick-action-bar" style="margin-top:-2px;">
+          <button class="btn-soft" id="btnLiveSetCheck" style="background:rgba(16,185,129,.14);border-color:var(--green);color:var(--green);" onclick="completeOneLiveSet()">✅ 세트 완료 & 휴식 시작 (0 / 4세트 완료)</button>
+          <button class="btn-soft" style="flex:.28;" onclick="resetLiveSetCount()">리셋</button>
         </div>
         <div class="quick-action-bar" style="margin-top:-2px;">
           <button class="btn-soft" onclick="addPyramidSet()">➕ 피라미드 세트 추가 (세트별 무게가 다를 때)</button>
@@ -412,7 +436,7 @@
   <!-- [탭 4] 영양제 -->
   <div id="tab-supp" class="tab-pane">
     <div class="card">
-      <div class="card-title"><span>💊 영양제 10종 골든타임 & 약학 팩트</span><span class="badge purple" id="suppTabBadge">운동 보조 시너지</span></div>
+      <div class="card-title"><span>💊 영양제 10종 골든타임 & 약학 팩트</span><span class="badge purple" id="suppTabBadge">복용 가이드</span></div>
       <div class="timeline-box">
         <b>⏰ 하루 시간대별 원클릭 복용 체크 (누르면 해당 시간 영양제가 일괄 입력됩니다)</b>
         <div class="slot-grid">
@@ -432,7 +456,12 @@
     <div class="card">
       <div class="card-title"><span>📈 최근 7일 칼로리 적자 & 체중 추이</span><span class="badge" id="weeklyFatLossBadge">7일 누적 분석</span></div>
       <div id="weeklySummaryBox" style="font-size:12.5px;line-height:1.55;margin-bottom:12px;padding:10px;background:var(--box);border-radius:12px;border:1px solid var(--border);"></div>
+      <div id="weightTrendSvgBox" style="margin-bottom:12px;"></div>
       <div id="weeklyChartContainer"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span>🧬 인바디 골격근·체지방 변화 기록</span><span class="badge cyan">측정 이력 자동 누적</span></div>
+      <div id="inbodyHistoryBox" style="font-size:12px;"></div>
     </div>
     <div class="card">
       <div class="card-title"><span>📱 아이폰 홈 화면 전용 앱 아이콘 설정</span><span class="badge purple">고해상도 512px</span></div>
@@ -488,6 +517,10 @@
       <div><label class="field-label">체지방률 (%)</label><input type="number" step="0.1" id="pPbf" /></div>
       <div><label class="field-label">기초대사량 (kcal)</label><input type="number" id="pBmr" /></div>
     </div>
+    <div class="row-2">
+      <div><label class="field-label">신장 (cm)</label><input type="number" step="0.1" id="pHeight" /></div>
+      <div><label class="field-label">목표 적자폭 (kcal, 유지=0)</label><input type="number" step="50" id="pDeficit" /></div>
+    </div>
     <div class="row-2" style="margin-top:8px;">
       <button class="btn-outline" style="padding:12px;" onclick="closeModal()">취소</button>
       <button class="btn-primary" style="margin-top:0;" onclick="saveProfile()">저장하기</button>
@@ -519,7 +552,14 @@ const STORAGE_KEY = "INBODY_IOS_APP_V9";
 const PREV_KEYS = ["INBODY_IOS_APP_V8","INBODY_IOS_APP_V7","INBODY_IOS_APP_V6","INBODY_IOS_APP_V5","INBODY_IOS_APP_V4","INBODY_IOS_APP_V3","INBODY_IOS_APP_V2","INBODY_IOS_APP_V1"];
 const WEB_FOOD_CACHE_KEY = "INBODY_FOOD_WEB_CACHE_V4";
 
-// [1] 웨이트 44종 DB
+// [핵심 개선 상수] 세트간 휴식 중 대사(MET), 1회 수행 템포(초), 세트 진입/정리 시간(초)
+const REST_MET = 2.2, TEMPO_SEC = 4.5, SET_OVERHEAD_SEC = 10;
+// [신규] 등척성(시간제) 종목: '회'가 아닌 '초' 단위 입력 처리 + 소수점 1자리 반올림 유틸
+const ISOMETRIC_IDS = new Set(["plank", "side_plank", "wall_sit", "farmer_walk"]);
+const round1 = v => Math.round((parseFloat(v) || 0) * 10) / 10;
+
+// [수정] 실제 요소 개수는 94종 (기존 44종 + 신규 50종) — 주석 불일치 정정
+// [1] 웨이트 94종 DB (기존 44종 + 신규 50종)
 const WEIGHT_EXERCISE_DB = [
   ["barbell_curl","팔","바벨 컬 (Barbell Curl)",25,0.48,3.8,1.08,0.09,"양팔 이두근(3.64kg×2) 동시 수축 + 입식 코어 안정근 개입"],
   ["ezbar_curl","팔","이지바 컬 (EZ-Bar Curl)",25,0.46,3.7,1.05,0.09,"손목 부담을 줄이고 상완이두근 바깥쪽·안쪽 집중 수축"],
@@ -538,7 +578,7 @@ const WEIGHT_EXERCISE_DB = [
   ["db_bench","가슴","덤벨 벤치프레스 (양손 합산 중량)",50,0.52,5.4,1.22,0.14,"바벨보다 가동범위가 길고 좌우 균형 안정근이 최대치로 동원됨"],
   ["incline_db_press","가슴","인클라인 덤벨 프레스 (양손 합산 중량)",44,0.52,5.4,1.22,0.14,"윗가슴 최대 수축·이완 및 좌우 밸런스 강화"],
   ["chest_press_machine","가슴","체스트 프레스 머신 / 해머스트렝스",65,0.44,4.6,0.92,0.11,"안전하게 고중량 다빈도 볼륨을 채우기 좋은 머신 프레스"],
-  ["cable_crossover","가슴","케이블 크로스오버 / 펙덱 플라이 (가슴안쪽)",35,0.55,4.1,1.00,0.09,"대흉근 내측 수축 및 스트레칭 고립 운동"],
+  ["cable_crossover","가슴","케이블 크로스오버 (가슴 안쪽)",35,0.55,4.1,1.00,0.09,"대흉근 내측 수축 및 스트레칭 고립 운동"],
   ["dips","가슴","딥스 (아랫가슴·삼두 체중 부하)",0,0.45,5.6,1.18,0.14,"내 체중(81kg)의 약 90%를 밀어 올리는 고강도 상체 복합 운동",0.90],
   ["deadlift","등","바벨 데드리프트 (컨벤셔널/루마니안)",90,0.56,6.5,1.25,0.18,"전신 후면 사슬(등·둔근·햄스트링) 총동원, 애프터번 최고 종목"],
   ["smith_deadlift","등","스미스머신 루마니안 데드리프트",80,0.52,5.8,1.02,0.15,"광배근 하부 및 후면 타겟 고정 궤적 데드리프트"],
@@ -563,11 +603,61 @@ const WEIGHT_EXERCISE_DB = [
   ["pushup","맨몸/복근","팔굽혀펴기 / 푸쉬업 (맨몸 체중 부하)",0,0.42,4.2,1.10,0.12,"내 체중(81.0kg)의 66%인 약 53.5kg을 밀어 올리는 상체 운동",0.66],
   ["pullup","맨몸/복근","턱걸이 / 풀업 / 친업 (맨몸 체중 부하)",0,0.58,5.5,1.20,0.15,"내 체중(81.0kg)의 95%인 약 77kg을 끌어당기는 고강도 등 운동",0.95],
   ["bw_squat","맨몸/복근","맨몸 스쿼트 (에어 스쿼트)",0,0.55,4.5,1.05,0.11,"하체 근육(19.7kg)을 활용해 체중을 들어 올리는 맨몸 운동",0.72],
-  ["situp","맨몸/복근","윗몸일으키기 / 크런치 / 행잉 레그레이즈 (복부)",0,0.35,3.6,1.00,0.08,"복직근·코어 수축 및 몸통 체지방(9.0kg) 탄력 관리",0.40],
-  ["burpee","맨몸/복근","버피테스트 (전신 고강도)",0,0.85,7.5,1.25,0.20,"전신 유·무산소 결합 최고 강도 칼로리 폭격 운동",0.85]
+  ["situp","맨몸/복근","윗몸일으키기 / 크런치 (복부)",0,0.35,3.6,1.00,0.08,"복직근·코어 수축 및 몸통 체지방(9.0kg) 탄력 관리",0.40],
+  ["burpee","맨몸/복근","버피테스트 (전신 고강도)",0,0.85,7.5,1.25,0.20,"전신 유·무산소 결합 최고 강도 칼로리 폭격 운동",0.85],
+  ["concentration_curl","팔","컨센트레이션 컬 (한 손씩 합산 중량)",16,0.50,3.6,0.95,0.07,"팔꿈치를 허벅지에 고정해 반동 없이 이두근 피크 수축"],
+  ["reverse_curl","팔","리버스 컬 / 브라치오 컬 (전완·이두)",20,0.45,3.9,1.02,0.08,"손등 위 그립으로 전완 신근과 팔뚝 굵기를 함께 발달"],
+  ["zottman_curl","팔","조트만 컬 (올림 회외·내림 회내)",16,0.50,4.0,1.08,0.09,"들어 올릴 땐 이두, 내릴 땐 전완 — 복합 고립 컬"],
+  ["close_grip_bench","팔","클로즈 그립 벤치프레스 (삼두 중점)",50,0.46,5.0,1.12,0.13,"어깨너비 그립으로 삼두근에 고중량 자극을 주는 복합 종목"],
+  ["bench_dip","팔","벤치 딥스 (맨몸 삼두)",0,0.42,4.5,0.98,0.10,"벤치에 손을 두고 체중을 실어 하강·상승하는 삼두 맨몸 운동",0.60],
+  ["triceps_kickback","팔","덤벨 트라이셉스 킥백 (합산 중량)",12,0.45,3.3,0.92,0.07,"팔꿈치 고정 후 팔을 뒤로 쭉 펴며 삼두 마무리 수축"],
+  ["v_bar_pushdown","팔","V바/스트레이트바 케이블 푸쉬다운",35,0.44,3.7,0.98,0.08,"바 그립 형태에 따라 삼두 외측·내측 자극을 분리"],
+  ["cable_overhead_ext","팔","케이블 오버헤드 익스텐션 (장두 신장)",25,0.55,3.6,1.00,0.08,"삼두 장두가 최대로 늘어나는 자세의 고립 효율 최고 종목"],
+  ["pec_deck","가슴","펙덱 플라이 머신 (가슴 모으기)",35,0.55,4.0,0.90,0.09,"팔꿈치 고정 궤적으로 대흉근 수평 내전만 고립"],
+  ["cable_fly","가슴","케이블 체스트 플라이 (장력 유지)",30,0.58,4.0,0.95,0.09,"궤적 끝까지 장력이 유지되는 가슴 중앙 집중 플라이"],
+  ["decline_bench","가슴","디클라인 벤치프레스 (아랫가슴)",55,0.44,4.9,1.10,0.12,"아랫가슴·대흉근 외측 섬유 타겟"],
+  ["incline_db_fly","가슴","인클라인 덤벨 플라이 (윗가슴 이완·수축)",24,0.58,4.2,1.05,0.10,"윗가슴 섬유를 최대 신장까지 늘리는 스트레칭성 플라이"],
+  ["chest_press_wide","가슴","와이드 그립 벤치프레스 (가슴 외측)",55,0.46,5.2,1.12,0.13,"그립을 넓혀 가동범위를 줄이고 대흉근 외측 자극"],
+  ["chinup","등","친업 (언더그립 턱걸이)",0,0.55,5.4,1.18,0.14,"언더그립으로 이두 개입이 늘어 광배 하부에 강한 자극",0.95],
+  ["wide_pullup","등","와이드 그립 풀업 (등 폭 최대화)",0,0.55,5.6,1.20,0.15,"넓은 그립으로 광배근 외측 섬유를 최대로 동원",0.95],
+  ["chest_supported_row","등","체스트 서포티드 로우 (해머스트렝스)",50,0.50,5.0,0.95,0.12,"가슴받침에 몸을 고정해 허리 반동 없이 등 후면 고립"],
+  ["single_cable_row","등","원암 케이블 로우 (좌우 등 균형)",30,0.50,4.6,1.02,0.11,"한쪽씩 당겨 좌우 등 두께 불균형을 교정"],
+  ["shrug","등","바벨/덤벨 슈러그 (승모근)",40,0.22,4.2,0.88,0.07,"어깨를 으쓱해 상부 승모근(트랩)을 수축"],
+  ["back_extension","등","백 익스텐션 / 하이퍼 익스텐션",0,0.45,3.5,0.90,0.08,"척추기립근·둔근을 강화해 데드리프트 안정성 확보",0.60],
+  ["arnold_press","어깨","아놀드 프레스 (덤벨 회전 프레스 합산)",30,0.55,5.2,1.18,0.13,"회전 궤적으로 삼각근 전면·측면에 지속 장력 유지"],
+  ["front_raise","어깨","덤벨/케이블 프론트 레이즈 (합산)",12,0.55,3.8,1.00,0.08,"삼각근 전면 고립 — 프레스 종목 보조"],
+  ["upright_row","어깨","바벨/케이블 업라이트 로우",30,0.45,4.6,1.02,0.09,"측면 삼각근과 승모근을 동시 자극하는 당기기"],
+  ["machine_shoulder","어깨","숄더 프레스 머신 (고정 궤적)",45,0.50,4.7,0.94,0.11,"안정적으로 고중량을 싣는 머신 어깨 볼륨 종목"],
+  ["cable_lateral","어깨","케이블 사이드 레터럴 (한 손씩)",8,0.55,3.9,1.05,0.08,"케이블 장력이 끝까지 유지되는 측면 삼각근 고립"],
+  ["hip_thrust","하체","바벨 힙 스러스트 (둔근)",80,0.35,5.5,1.05,0.13,"둔근 최대 신장→수축으로 힙 라인과 스쿼트 약점 보강"],
+  ["glute_bridge","하체","힙 브릿지 / 싱글레그 브릿지 (맨몸)",0,0.30,4.0,0.92,0.08,"둔근 활성화 및 워밍업용 맨몸 힙 운동",0.55],
+  ["bulgarian_db","하체","불가리안 스플릿 스쿼트 (덤벨 합산)",24,0.55,5.8,1.20,0.15,"한 다리씩 고립해 좌우 하체 균형을 교정",0.60],
+  ["sumo_dead","하체","스모 데드리프트 (와이드 스탠스)",90,0.52,6.3,1.22,0.17,"넓은 스탠스로 내전근·둔근 중심 후면 사슬 자극"],
+  ["front_squat","하체","바벨 프론트 스쿼트",70,0.58,6.2,1.22,0.17,"상체를 세워 대퇴사두·코어에 집중하는 스쿼트",0.70],
+  ["goblet_squat","하체","고블릿 스쿼트 (덤벨/케틀벨)",30,0.55,5.5,1.10,0.13,"가슴 앞 중량으로 자세가 안정되는 초중급 하체",0.65],
+  ["step_up","하체","박스/덤벨 스텝업 (합산 중량)",20,0.32,5.0,1.05,0.10,"계단 오르기 패턴으로 둔근·대퇴 단측 균형 강화",0.55],
+  ["calf_raise","하체","스탠딩 카프 레이즈 (종아리)",60,0.14,3.8,0.85,0.05,"비복근 고립 — 발끝 최대 신전으로 종아리 윗부분"],
+  ["seated_calf","하체","시티드 카프 레이즈 (앉아서 종아리)",40,0.12,3.5,0.85,0.05,"무릎을 굽혀 깊은 가자미근을 집중 자극"],
+  ["leg_press_wide","하체","레그프레스 와이드 스탠스 (내측·둔근)",140,0.45,5.3,0.85,0.14,"발 폭을 넓혀 내전근·둔근 비중을 높인 레그프레스"],
+  ["jump_squat","하체","점프 스쿼트 (폭발성 맨몸)",0,0.60,7.8,1.15,0.20,"폭발적 점프로 순발력과 EPOC(애프터번) 극대화",0.80],
+  ["adductor_machine","하체","애덕터 머신 (안쪽 허벅지)",40,0.40,3.5,0.85,0.06,"내전근 고립 — 허벅지 안쪽 라인 정리"],
+  ["abductor_machine","하체","압덕터 머신 (바깥 힙)",35,0.40,3.5,0.85,0.06,"중둔근 고립 — 힙 상단 라인"],
+  ["wall_sit","하체","월싯 (벽 버티기 아이소메트릭)",0,0.02,5.0,0.90,0.09,"90도 유지 버티기 — 대퇴 근지구력 폭탄",0.50],
+  ["plank","맨몸/복근","플랭크 (기본 코어)",0,0.0,3.3,0.90,0.06,"복횡근·복직근 등척성(버티기) 수축 — 코어 안정",0.35],
+  ["side_plank","맨몸/복근","사이드 플랭크 (옆구리 코어)",0,0.0,3.5,0.90,0.06,"복사근 등척성 강화 — 허리 라인 및 척추 안정",0.35],
+  ["hanging_leg_raise","맨몸/복근","행잉 레그레이즈 (매달린 채 복근)",0,0.55,4.5,1.05,0.09,"하복부·장요근을 고립시키는 최강 맨몸 복부 운동",0.90],
+  ["lying_leg_raise","맨몸/복근","리버스 크런치 / 라잉 레그레이즈",0,0.45,3.8,0.95,0.08,"복직근 하부 수축 — 아랫배 집중"],
+  ["russian_twist","맨몸/복근","러시안 트위스트 (회전 코어)",5,0.30,4.0,1.00,0.08,"복사근·복횡근 회전 수축 — 옆구리 사이드 컷"],
+  ["mountain_climber","맨몸/복근","마운틴 클라이머 (코어 유산소)",0,0.30,8.0,1.10,0.15,"플랭크 자세에서 무릎 교대 유산소성 코어 폭격",0.55],
+  ["jumping_jack","맨몸/복근","점핑잭 (전신 유산소 워밍업)",0,0.30,8.0,1.05,0.14,"전신 리듬 유산소 — 워밍업·혈류 개선 필수",0.60],
+  ["ab_rollout","맨몸/복근","압 휠 롤아웃 (코어 폭발성)",0,0.60,4.5,1.10,0.10,"복부 최대 신장 부하 — 복횡근·전신 긴장",0.50],
+  ["cable_crunch","맨몸/복근","케이블/머신 크런치 (가중 복근)",40,0.40,3.8,0.95,0.08,"가중치를 단 복근 고립 — 복근 두께감 형성"],
+  ["superman","맨몸/복근","슈퍼맨 (엎드려 등·둔근)",0,0.25,3.0,0.90,0.06,"척추기립근·둔근 맨몸 강화 — 굽은 등 교정",0.40],
+  ["farmer_walk","맨몸/복근","파머스 워크 (무거운 덤벨 캐리 합산)",40,0.0,5.0,1.15,0.10,"그립·승모·코어 전신 긴장 유지 — 지구력 캐리"],
+  ["kettlebell_swing","맨몸/복근","케틀벨 스윙 (힙 폭발 전신)",24,0.50,9.8,1.20,0.20,"힙 힌지 폭발 스윙 — 심박·둔근·코어 동시 최고 소모"]
 ].map(([id,cat,name,defKg,rom,mets,stab,epoc,note,isBodyweight])=>({id,cat,name,defKg,rom,mets,stab,epoc,note,isBodyweight}));
 
-// [2] 식약처 및 제조사 공식 성분표 기준으로 정밀 교정·분리된 한국 식품 DB
+// [2] 식약처 및 제조사 공식 성분표 기준으로 정밀 교정·분리된 한국 식품 DB (124종)
 // [name, keys, serving, kcal, carb, prot, fat, satFat, sugar, sodium]
 const KOREAN_FOOD_DB = [
   ["한마음 정육식당 돼지모둠 구이 (삼겹·목살·항정 1인분 200g)","한마음정육식당 정육식당 돼지한판 돼지모둠 모둠구이","1인분 (200g)",560,1,37,44,15,0,160],
@@ -615,10 +705,10 @@ const KOREAN_FOOD_DB = [
   ["삼계탕 (1인분)","삼계탕 반계탕 백숙 닭한마리","1그릇",910,48,68,48,14,2,1250],
   ["육개장 (1인분)","육개장 소고기국밥 소고기무국","1그릇 (500g)",380,18,28,22,7,3,1680],
   ["소고기 미역국 / 계란국 / 콩나물국 (1그릇)","미역국 소고기미역국 계란국 콩나물국 북엇국 황태해장국","1그릇 (350g)",145,6,14,7,2,1,850],
-  ["짜장면 (일반 1그릇)","짜장면 자장면 옛날짜장 유니짜장 중국집 중식","1그릇 (650g)",790,128,22,21,6,14,1780],
-  ["간짜장 (1그릇 / 춘장·고기·양파 볶음)","간짜장 간자장 삼선간짜장 계란간짜장 중국집 중식","1그릇 (700g)",860,132,26,26,7,13,1890],
+  ["짜장면 (일반 1그릇 650g)","짜장면 자장면 춘장면 중국집 중식","1그릇 (650g)",790,128,22,21,6,14,1780],
+  ["간짜장 (1그릇 700g)","간짜장 간자장 삼선간짜장 계란간짜장 중국집 중식","1그릇 (700g)",860,132,26,26,7,13,1890],
   ["쟁반짜장 / 해물짜장 (1인분)","쟁반짜장 해물쟁반짜장 사천짜장 고추짜장","1인분 (700g)",880,130,29,27,7,15,1950],
-  ["짬뽕 (해물/고기 일반 1그릇)","짬뽕 짬봉 삼선짬뽕 해물짬뽕 고추짬뽕 백짬뽕 중국집 중식","1그릇 (750g)",690,102,28,18,5,6,2350],
+  ["짬뽕 (해물/고기 일반 1그릇)","짬뽕 짬봉 삼선짬뽕 해물짬뽕 고추짬뽕 백짬뽕 중식","1그릇 (750g)",690,102,28,18,5,6,2350],
   ["차돌짬뽕 / 고기짬뽕 (1그릇)","차돌짬뽕 차돌박이짬뽕 고기짬뽕 교동짬뽕 짬봉","1그릇 (800g)",840,105,36,31,11,6,2450],
   ["짬뽕밥 / 짜장밥 (1그릇)","짬뽕밥 짬봉밥 짜장밥 자장밥 잡채밥 마파두부밥 중식","1그릇 (700g)",660,92,27,20,6,5,2100],
   ["짬짜면 / 볶짬면 (반반 메뉴 1그릇)","짬짜면 짜짬면 볶짜면 볶짬면 탕짜면 탕짬면","1그릇 (700g)",760,115,25,22,6,10,2050],
@@ -675,15 +765,33 @@ const KOREAN_FOOD_DB = [
   ["그릭요거트 (무가당 플레인 100g)","그릭요거트 요거트 플레인요거트 비요뜨 유제품 우유 두유","100g",95,4.5,10,4,2.5,3,45],
   ["아이스 아메리카노 / 블랙커피 (1잔)","아메리카노 아이스아메리카노 아아 커피 스타벅스 메가커피 컴포즈","1잔",10,2,0.5,0,0,0,5],
   ["카페라떼 / 두유라떼 / 바나나라떼 (1잔 355ml)","카페라떼 라떼 카푸치노 플랫화이트 바닐라라떼 바나나우유 커피","1잔 (355ml)",150,13,9,7,4.5,11,115],
-  ["제로콜라 / 제로사이다 / 제로음료 (1캔 355ml)","제로콜라 펩시제로 칠성사이다제로 나랑드사이다 탄산수 음료","1캔 (355ml)",0,0,0,0,0,0,25]
+  ["제로콜라 / 제로사이다 / 제로음료 (1캔 355ml)","제로콜라 펩시제로 칠성사이다제로 나랑드사이다 탄산수 음료","1캔 (355ml)",0,0,0,0,0,0,25],
+  ["계란찜 / 달걀찜 (1인분)","계란찜 달걀찜 계란찌개 반찬 집밥","1인분 (150g)",150,3,12,9,2.5,1,380],
+  ["치즈스틱 / 모짜렐라 치즈봉 (4개)","치즈스틱 모짜렐라스틱 치즈봉 치즈볼 프랭크봉","4개",300,25,12,17,8,3,620],
+  ["김말이 / 야채튀김 모둠 (5개)","김말이 야채튀김 오징어튀김 고구마튀김 새우튀김 모둠튀김","5개",280,28,6,15,3,2,480],
+  ["떡꼬치 / 소떡소떡 (1개)","떡꼬치 소떡소떡 소시지떡꼬치 길거리음식 야식","1개",180,28,5,5,1.5,6,520],
+  ["길거리 토스트 / 모닝토스트 (1개)","길거리토스트 모닝토스트 인생토스트 팔도토스트 계란토스트","1개",420,52,14,16,4,8,760],
+  ["쫄면 (1인분)","쫄면 웃긴쫄면 전주쫄면 비빔쫄면 국물쫄면","1그릇 (550g)",520,95,12,9,1.5,16,1350],
+  ["라멘 (돈코츠/쇼유 1그릇)","라멘 돈코츠라멘 쇼유라멘 미소라멘 츠케멘 일식","1그릇 (600g)",650,85,30,22,7,5,2100],
+  ["김치전 / 해물파전 (1인분)","파전 김치전 해물파전 부추전 모둠전 전","1인분 (250g)",480,55,10,23,3,4,950],
+  ["계란빵 (1개)","계란빵 길거리계란빵 달걀빵","1개",260,32,8,10,2.5,9,320],
+  ["핫도그 / 감자핫도그 (1개)","핫도그 감자핫도그 콘도그 프랭크버터","1개",290,35,8,12,3.5,7,680],
+  ["두부조림 / 두부김치 (1인분)","두부조림 두부김치 매콤두부조림 반찬","1인분",210,10,16,11,1.5,2,780],
+  ["매운 닭발 (1인분)","닭발 매운닭발 국물닭발 무뼈닭발 야식","1인분",420,18,35,22,5,6,1580],
+  ["곱창 / 대창 구이 (1인분 150g)","곱창 대창 막창 양곱창 소곱창 곱창구이","1인분 (150g)",430,5,30,32,12,1,480],
+  ["아이스크림 바 / 빵빠레 (1개)","아이스크림 빵빠레 죠스바 스크류바 수박바 폴라포 설빙","1개",120,22,1,3,2,16,40],
+  ["우유 / 저지방우유 (1컵 200ml)","우유 흰우유 저지방우유 무지방우유 서울우유 매일우유","1컵 (200ml)",130,12,7,7,4.5,12,105],
+  ["검은콩 두유 / 저당두유 (1팩 190ml)","두유 검은콩두유 저당두유 흑콩두유 옛날두유 두유단백","1팩 (190ml)",140,12,7,7,1,4,105],
+  ["감자튀김 / 프렌치프라이 (중 사이즈)","감자튀김 프렌치프라이 웨지포테이토 포테이토튀김","중 (120g)",380,48,4,19,3,0.5,270],
+  ["쌀국수 (퍼/팟타이 1그릇)","쌀국수 퍼 팟타이 베트남쌀국수 보쌈퍼 쏘사지퍼","1그릇 (600g)",480,75,25,8,2,6,1300]
 ].map(([name,keys,serving,kcal,carb,prot,fat,satFat,sugar,sodium])=>({name,keys,serving,kcal,carb,prot,fat,satFat,sugar,sodium}));
 
 // [3] 10대 영양제 DB
 const SUPP_META = [
   ["probiotics","① 유산균 (프로바이오틱스)","억CFU",100,100,"fasted","🌅 아침 기상 직후 공복 + 물 1컵(200ml) (비타민C와 간격 둘 것)","밤새 분비된 위산을 <b>생수 1컵으로 희석</b>해 복용하면 유익균이 위장에 머무는 시간이 줄어들어 십이지장으로 빠르게 통과합니다. (강산성인 비타민 C와 동시 복용 시 균 사멸 위험이 있으므로 최소 1시간 간격을 두세요.)","고단백 식단(130g/일) 시 대장 내 단백질 부패균이 만드는 암모니아·가스를 억제하고 장내 유익균 증식·배변 활동·장 면역계를 정상 유지합니다.","고단백 식단 장내 부패균 억제 및 소화 흡수 환경이 최적화되었습니다.","","아침 기상 직후 물 1컵과 함께 1캡슐(10~100억 CFU) 복용을 권장합니다."],
-  ["creatine","② 크레아틴 (모노하이드레이트)","mg",5000,3000,"meal","🏋️ 운동 직후 식사 또는 탄수화물·단백질 섭취 직후 (15분 내)","골격근 세포막의 크레아틴 수송체(<b>SLC6A8</b>)는 <b>인슐린</b>에 의해 열립니다. 따라서 공복보다 운동 직후 탄수화물·단백질 식사와 함께 복용할 때 근육 저장 효율이 극대화됩니다.","근육 내 인산크레아틴(PCr)을 채워 무산소 웨이트 시 ATP 에너지를 즉각 재합성하고 골격근(36.9kg) 중량·볼륨을 높입니다. (근세포 내 수분을 끌어당기므로 <b>섭취 시 하루 물 목표량이 +500ml 자동 증가</b>합니다.)","근육 내 ATP 재합성 및 세포내수분(29.8L) 보유력이 강화되었습니다."," (웨이트 수행능력 부스팅 반영)","운동 직후 식사/쉐이크와 함께 3,000~5,000mg 복용을 권장합니다."],
-  ["arginine","③ L-아르기닌 (산화질소·혈류 부스터)","mg",4000,3000,"fasted","⚡ 운동 30~45분 전 완전 공복 (식후 최소 2시간 뒤 단독 섭취)","소장 흡수 통로(CAT-1)를 일반 단백질 아미노산(라이신 등)과 공유합니다. <b>식사 직후나 단백질 쉐이크와 함께 먹으면 흡수 경쟁에서 밀려 효과가 반감</b>되므로 반드시 공복에 드세요.","산화질소(NO)를 생성해 혈관을 확장시키고 근육 산소·영양 공급(펌핑) 및 암모니아(피로물질) 해독을 돕습니다.","산화질소 혈관 확장 활성화!"," 운동 수행능력 및 대사 시너지가 반영되었습니다.","웨이트 30~45분 전 공복에 3,000~5,000mg 섭취를 권장합니다."],
-  ["carnitine","④ L-카르니틴 (지방 미토콘드리아 수송)","mg",1500,1000,"fasted","🔥 운동 30~60분 전 또는 아침/점심 식후","복용 후 1~2시간 뒤 혈중 농도가 정점에 도달하므로 운동 전에 복용하거나, 인슐린이 분비되는 식후에 복용하면 근육 내 흡수가 잘 됩니다.","긴사슬 지방산을 미토콘드리아 내부로 실어 나르는 <b>CPT-I 효소 셔틀</b> 역할을 하여 유산소 운동 시 체지방(16.5kg) 연소 효율과 운동 피로 개선을 돕습니다.","미토콘드리아 지방산 수송 셔틀 활성화!"," (유산소 지방 산화 시너지 반영)","운동 30~60분 전 1,000~2,000mg 복용을 권장합니다."],
+  ["creatine","② 크레아틴 (모노하이드레이트)","mg",5000,3000,"meal","🏋️ 운동 직후 식사 또는 탄수화물·단백질 섭취 직후 (15분 내)","골격근 세포막의 크레아틴 수송체(<b>SLC6A8</b>)는 <b>인슐린</b>에 의해 열립니다. 따라서 공복보다 운동 직후 탄수화물·단백질 식사와 함께 복용할 때 근육 저장 효율이 극대화됩니다.","근육 내 인산크레아틴(PCr)을 채워 무산소 웨이트 시 ATP 에너지를 즉각 재합성하고 골격근(36.9kg) 중량·볼륨을 높입니다. (근세포 내 수분을 끌어당기므로 <b>섭취 시 하루 물 목표량이 +500ml 자동 증가</b>합니다.)","근육 내 ATP 재합성 및 세포내수분(29.8L) 보유력이 강화되었습니다."," (웨이트 수행능력·볼륨 보조 효과)","운동 직후 식사/쉐이크와 함께 3,000~5,000mg 복용을 권장합니다."],
+  ["arginine","③ L-아르기닌 (산화질소·혈류 부스터)","mg",4000,3000,"fasted","⚡ 운동 30~45분 전 완전 공복 (식후 최소 2시간 뒤 단독 섭취)","소장 흡수 통로(CAT-1)를 일반 단백질 아미노산(라이신 등)과 공유합니다. <b>식사 직후나 단백질 쉐이크와 함께 먹으면 흡수 경쟁에서 밀려 효과가 반감</b>되므로 반드시 공복에 드세요.","산화질소(NO)를 생성해 혈관을 확장시키고 근육 산소·영양 공급(펌핑) 및 암모니아(피로물질) 해독을 돕습니다.","산화질소 혈관 확장 활성화!"," 운동 수행능력(펌핑·피로물질 해독) 보조 효과가 활성화되었습니다.","웨이트 30~45분 전 공복에 3,000~5,000mg 섭취를 권장합니다."],
+  ["carnitine","④ L-카르니틴 (지방 미토콘드리아 수송)","mg",1500,1000,"fasted","🔥 운동 30~60분 전 또는 아침/점심 식후","복용 후 1~2시간 뒤 혈중 농도가 정점에 도달하므로 운동 전에 복용하거나, 인슐린이 분비되는 식후에 복용하면 근육 내 흡수가 잘 됩니다.","긴사슬 지방산을 미토콘드리아 내부로 실어 나르는 <b>CPT-I 효소 셔틀</b> 역할을 하여 유산소 운동 시 체지방(16.5kg) 연소 효율과 운동 피로 개선을 돕습니다.","미토콘드리아 지방산 수송 셔틀 활성화!"," (유산소 지방 산화 보조 효과)","운동 30~60분 전 1,000~2,000mg 복용을 권장합니다."],
   ["vitb","⑤ 비타민 B군 복합체 (활성형 B-Complex)","mg",100,100,"meal","☀️ 아침 또는 점심 식사 직후 (15분 내 / 늦은 밤 복용 피하기)","에너지 대사를 깨우는 조효소이므로 오전에 먹어야 하루 활력이 올라가고 수면을 방해하지 않습니다. 고함량은 빈속에 위장 장애(울렁거림)가 있을 수 있어 식후 즉시 복용합니다.","탄수화물(B1)·단백질(B6)·지방(B2·B5)을 에너지(ATP)로 전환하는 TCA 회로의 필수 조효소로, 기초대사량(1,764kcal) 회전율을 유지합니다.","탄·단·지 에너지 전환 대사 효소가 정상 가동 중입니다.","","아침 또는 점심 식후 1정(50~100mg) 복용을 권장합니다."],
   ["omega3","⑥ 오메가-3 (EPA + DHA 합산)","mg",1200,1000,"meal","🍽️ 점심 또는 저녁 식사 직후 ~ 15분 이내 (공복 절대 비권장)","지용성 지방산이므로 식사 중 분비되는 <b>담즙산</b>과 리파아제 효소가 있어야 유화되어 소장 흡수율이 공복 대비 최대 3배 높아지고 비린내 역류가 없습니다.","혈중 중성지질·혈행 개선 및 인슐린 민감성을 높이고 지방 산화 유전자(PPAR-α) 발현과 운동 후 근육 염증(DOMS) 회복을 보조합니다.","혈행 개선 및 항염·지방산 대사 보조 중입니다.","","점심 또는 저녁 식사 직후 1,000~2,000mg 복용을 권장합니다."],
   ["vitd","⑦ 비타민 D3 (콜레칼시페롤)","IU",2000,2000,"meal","🍽️ 점심 또는 저녁 식사 직후 (오메가-3와 동시 복용 최적)","지용성 비타민이므로 지방이 포함된 식사 직후나 <b>오메가-3와 함께 복용할 때 담즙산에 의해 흡수율이 30~50% 상승</b>합니다.","칼슘 흡수를 도와 높은 골무기질량(3.73kg)을 유지하고, 골격근 세포 내 비타민 D 수용체(VDR)와 결합해 근력 유지 및 면역·호르몬 합성을 돕습니다.","골무기질(3.73kg) 및 골격근 수용체(VDR) 기능 유지 중입니다.","","저녁 식후 오메가-3와 함께 2,000~4,000 IU 복용을 권장합니다."],
@@ -696,27 +804,58 @@ const SUPP_META = [
 }));
 
 const defaultState = {
-  profile: { name:"김동욱", height:180, weight:81.0, targetWeight:75.9, smm:36.9, bfm:16.5, pbf:20.3, bmr:1764, activity:1.2, deficit:500 },
-  darkMode:false, bankAutoAdjust:false, iconTheme:"navy", geminiApiKey:"", mealPresets:[], workoutRoutines:[], logs:{}
+  profile: { name:"김동욱", height:180, weight:81.0, baselineWeight:81.0, targetWeight:75.9, smm:36.9, bfm:16.5, pbf:20.3, bmr:1764, activity:1.2, deficit:500 },
+  darkMode:false, bankAutoAdjust:false, iconTheme:"navy", geminiApiKey:"", mealPresets:[], workoutRoutines:[], inbodyHistory:[], customFoods:[], logs:{}
 };
 
-let state = loadState(), currentDate = getTodayStr(), currentSearchMatches = [], selectedFoodBase = null;
+let state = null, currentDate = getTodayStr(), currentSearchMatches = [], selectedFoodBase = null;
 let activeMult = 1.0, currentExCat = "ALL", currentCardioTiming = "post_weight", pyramidSets = [];
-let restTimerInterval = null, restRemainingSec = 0, webFoodCache = loadWebCache();
+let restTimerInterval = null, restEndTime = 0, sharedAudioCtx = null, webFoodCache = {};
+let exMinManual = false, autoWebTimer = null, lastAutoWebQ = "", currentFoodCat = "인기";
+// [신규] 항목 수정 중 보존해야 할 임시값: 나트륨(입력칸 없음) + 실전 세트 카운터
+let editingSodium = null, liveDoneSets = 0;
 
 function getTodayStr() { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().split("T")[0]; }
-function getOffsetDateStr(base, diff) { const d = new Date(base); d.setDate(d.getDate() + diff); return d.toISOString().split("T")[0]; }
+// [수정] new Date("YYYY-MM-DD")의 UTC 파싱 오차 제거 — 로컬 타임존 기준으로 안전하게 날짜 이동
+function getOffsetDateStr(base, diff) {
+  const [y, m, d] = base.split("-").map(Number);
+  const dt = new Date(y, m - 1, d + diff);
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+}
+// [신규] XSS·마크업 깨짐 방지 이스케이프 (사용자 입력명 렌더링 시 사용)
+function esc(str) {
+  return String(str ?? "").replace(/[&<>"']/g, m => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[m]));
+}
 
 function loadState() {
   try {
     for (const k of [STORAGE_KEY, ...PREV_KEYS]) {
       const s = localStorage.getItem(k);
-      if (s) return { ...defaultState, ...JSON.parse(s) };
+      if (s) {
+        const m = { ...defaultState, ...JSON.parse(s) };
+        // [수정] BMR 연동 기준 체중 마이그레이션 (기존 하드코딩 81kg 제거)
+        if (!m.profile.baselineWeight) m.profile.baselineWeight = m.profile.weight;
+        return m;
+      }
     }
   } catch (e) {}
   return JSON.parse(JSON.stringify(defaultState));
 }
-function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+state = loadState();
+webFoodCache = loadWebCache();
+// [수정] localStorage 용량 초과(QuotaExceededError) 방어: 웹검색 캐시를 우선 비우고 재시도
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    localStorage.removeItem(WEB_FOOD_CACHE_KEY);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (err) {
+      alert("브라우저 저장 공간이 가득 찼습니다. [리포트·아이콘] 탭에서 백업파일(.json)을 먼저 저장해 주세요.");
+    }
+  }
+}
 function loadWebCache() { try { return JSON.parse(localStorage.getItem(WEB_FOOD_CACHE_KEY) || "{}"); } catch (e) { return {}; } }
 function saveWebCache() { try { localStorage.setItem(WEB_FOOD_CACHE_KEY, JSON.stringify(webFoodCache)); } catch (e) {} }
 
@@ -762,29 +901,45 @@ function switchTab(tabId, btnEl) {
   if (tabId === "report") renderWeeklyReport();
 }
 
+// [수정] AudioContext 6개 제한 누수 방지(공유 컨텍스트) + 백그라운드 전환 시 setInterval 지연 대비
+// 종료시각(restEndTime) 기반 동기화로 실제 경과시간과 항상 일치하도록 교정
 function playTimerAlarm() {
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (sharedAudioCtx.state === "suspended") sharedAudioCtx.resume();
     [0, 0.22, 0.44].forEach(d => {
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.frequency.setValueAtTime(880, ctx.currentTime + d);
-      g.gain.setValueAtTime(0.25, ctx.currentTime + d);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + d + 0.18);
-      o.connect(g); g.connect(ctx.destination);
-      o.start(ctx.currentTime + d); o.stop(ctx.currentTime + d + 0.18);
+      const o = sharedAudioCtx.createOscillator(), g = sharedAudioCtx.createGain();
+      o.frequency.setValueAtTime(880, sharedAudioCtx.currentTime + d);
+      g.gain.setValueAtTime(0.25, sharedAudioCtx.currentTime + d);
+      g.gain.exponentialRampToValueAtTime(0.001, sharedAudioCtx.currentTime + d + 0.18);
+      o.connect(g); g.connect(sharedAudioCtx.destination);
+      o.start(sharedAudioCtx.currentTime + d); o.stop(sharedAudioCtx.currentTime + d + 0.18);
     });
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
   } catch (e) {}
 }
-function startRestTimer(sec) {
-  clearInterval(restTimerInterval); restRemainingSec = sec;
-  const tick = () => $("restTimerDisplay").textContent = `${Math.floor(restRemainingSec/60)}:${String(restRemainingSec%60).padStart(2,'0')} 남음`;
-  tick();
-  restTimerInterval = setInterval(() => {
-    if (--restRemainingSec <= 0) { clearInterval(restTimerInterval); $("restTimerDisplay").textContent = "🔔 휴식 끝! 세트 시작!"; playTimerAlarm(); }
-    else tick();
-  }, 1000);
+function syncRestTimer() {
+  if (!restEndTime) return;
+  const remain = Math.ceil((restEndTime - Date.now()) / 1000);
+  if (remain <= 0) {
+    clearInterval(restTimerInterval); restEndTime = 0;
+    $("restTimerDisplay").textContent = "🔔 휴식 끝! 세트 시작!";
+    playTimerAlarm();
+  } else {
+    $("restTimerDisplay").textContent = `${Math.floor(remain / 60)}:${String(remain % 60).padStart(2, "0")} 남음`;
+  }
 }
-function stopRestTimer() { clearInterval(restTimerInterval); $("restTimerDisplay").textContent = "대기중"; }
+function startRestTimer(sec) {
+  clearInterval(restTimerInterval);
+  // iOS 정책: 사용자 제스처 시점에 오디오 컨텍스트를 미리 생성·활성화해야 알람이 울림
+  if (!sharedAudioCtx) { try { sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  restEndTime = Date.now() + sec * 1000;
+  syncRestTimer();
+  restTimerInterval = setInterval(syncRestTimer, 250);
+}
+function stopRestTimer() { clearInterval(restTimerInterval); restEndTime = 0; $("restTimerDisplay").textContent = "대기중"; }
+// 화면 복귀 시 즉시 동기화 (백그라운드에서 멈춰 보이던 카운트다운 교정)
+document.addEventListener("visibilitychange", () => { if (!document.hidden) syncRestTimer(); });
 
 function saveDailyBio() {
   ensureDateLog(currentDate);
@@ -792,20 +947,52 @@ function saveDailyBio() {
   if (w > 30 && w < 250) { l.weight = w; if (currentDate === getTodayStr()) state.profile.weight = w; }
   if (s >= 0 && s <= 24) l.sleepHours = s;
   l.condition = $("dailyCondSelect").value;
+  // 체중·수면 변경은 운동 칼로리 계산(dynBmr·체중 연동)에 영향 — 저장 직전에만 재계산
+  calcWeightKcal(); calcCardioKcal();
   saveState(); render();
 }
 function toggleBankAutoAdjust() { state.bankAutoAdjust = !state.bankAutoAdjust; saveState(); render(); }
 
-function calcWeeklyCalorieBank() {
-  const p = state.profile, baseTdee = Math.round(p.bmr * p.activity);
-  let cumulativeDiff = 0, recordedDays = 0;
-  for (let i = 1; i <= 6; i++) {
-    const l = state.logs[getOffsetDateStr(currentDate, -i)];
-    if (!l) continue;
-    const eaten = (l.foods || []).reduce((s, x) => s + x.kcal, 0), ex = (l.exercises || []).reduce((s, x) => s + x.kcal, 0);
-    if (eaten > 0) { recordedDays++; cumulativeDiff += eaten - Math.max(p.bmr, baseTdee + ex - (p.deficit || 500)); }
+// [신규] 7일 이동평균 체중 — 일일 ±0.5~1.5kg 변동은 대부분 글리코겐·수분(대사 기여 0 kcal/kg)이므로
+// 단일 일자 체중을 BMR에 즉시 연동하면 나트륨·크레아틴 수분정체일에 오히려 BMR이 올라가는 역설 발생.
+// 골격근 약 13 kcal/kg/day(Wang et al., 2010, Am J Clin Nutr) 기준을 이동평균 체중에만 적용.
+function getMovingAvgWeight(dStr, days = 7) {
+  const arr = [];
+  for (let i = 0; i < days; i++) {
+    const w = state.logs[getOffsetDateStr(dStr, -i)]?.weight;
+    if (w > 30) arr.push(w);
   }
-  return { cumulativeDiff, recordedDays };
+  return arr.length ? round1(arr.reduce((a, b) => a + b, 0) / arr.length) : state.profile.weight;
+}
+
+// [통합] 홈·칼로리 뱅크·주간 리포트가 동일한 기준을 쓰도록 일별 대사 계산을 단일 함수로 추출
+// (기존: 뱅크/리포트는 고정 bmr×activity, 홈은 dynBmr·수면·컨디션·시너지 반영 → 탭마다 수치 불일치)
+function getDayEnergySummary(dStr) {
+  const p = state.profile, l = state.logs[dStr];
+  const curW = l?.weight || p.weight, baseW = p.baselineWeight || p.weight;
+  const avgW = getMovingAvgWeight(dStr, 7);
+  const dynBmr = Math.round(p.bmr + (avgW - baseW) * 13);
+  const sleep = l?.sleepHours ?? 7.0, cond = l?.condition || "normal";
+  const condF = (sleep < 6 || cond === "tired") ? 0.96 : cond === "good" ? 1.02 : 1.0;
+  const baseTdee = Math.round(dynBmr * p.activity * condF);
+  const eaten = (l?.foods || []).reduce((s, x) => s + x.kcal, 0);
+  const exKcal = (l?.exercises || []).reduce((s, x) => s + x.kcal, 0);
+  // [사실 교정] 크레아틴·아르기닌·카르니틴은 수행 볼륨(중량·횟수·시간)을 늘려주는 보조제이지,
+  // 동일 일량에서 열발생을 +13% 높이지 않음(ISSN 공식 입장문, Kreider et al., 2017, JISSN).
+  // 늘어난 수행량은 이미 운동 기록에 반영되므로 별도 가산은 일일 목표 과다 산정 → 0 처리.
+  const synKcal = 0;
+  const totalBurned = baseTdee + exKcal + synKcal;
+  const target = Math.max(dynBmr, totalBurned - (p.deficit || 500));
+  return { curW, avgW, baseW, dynBmr, baseTdee, eaten, exKcal, synKcal, totalBurned, target, has: eaten > 0 || exKcal > 0 };
+}
+
+function calcWeeklyCalorieBank() {
+  let cumulativeDiff = 0;
+  for (let i = 1; i <= 6; i++) {
+    const s = getDayEnergySummary(getOffsetDateStr(currentDate, -i));
+    if (s.eaten > 0) cumulativeDiff += s.eaten - s.target;
+  }
+  return { cumulativeDiff };
 }
 
 function addWater(ml, reset = false) {
@@ -873,7 +1060,7 @@ function findLastRecordForExercise(title) {
 }
 function onSelectWeightEx() {
   const ex = WEIGHT_EXERCISE_DB.find(x => x.id === $("exPreset").value);
-  pyramidSets = []; renderPyramidBox();
+  pyramidSets = []; exMinManual = false; renderPyramidBox();
   if (!ex) {
     $("exName").value = ""; $("prevRecordBanner").textContent = "";
     $("exCalcBreakdown").innerHTML = "운동 이름과 소모 칼로리를 직접 입력해 추가하세요.";
@@ -881,50 +1068,155 @@ function onSelectWeightEx() {
   }
   const shortName = ex.name.split(" (")[0];
   $("exName").value = shortName; $("exWeightKg").value = ex.defKg;
+  // [신규] 등척성(플랭크·월싯 등) 종목은 '회'가 아닌 '초' 단위 — 라벨 전환 + 입력값 자동 보정
+  const isIso = ISOMETRIC_IDS.has(ex.id);
+  $("lblExReps").textContent = isIso ? "유지시간(초/세트)" : "횟수(회/세트)";
+  if (isIso && parseInt($("exReps").value, 10) <= 15) $("exReps").value = 60;
+  if (!isIso && parseInt($("exReps").value, 10) >= 45) $("exReps").value = 10;
   const last = findLastRecordForExercise(shortName);
-  $("prevRecordBanner").textContent = last ? `📌 직전 수행 기록 (${last.date.slice(5)}): ${last.entry.name}` : `💡 첫 기록 종목입니다. 평소 다루는 중량(kg)을 입력해 보세요.`;
-  $("lblExWeight").textContent = ex.isBodyweight && ex.defKg === 0 ? "추가중량(맨몸=0)" : ex.name.includes("양손 합산") ? "양손 합산(kg)" : "중량(kg)";
+  // [신규] 점진적 과부하 원클릭 적용 (직전 기록이 있을 때만)
+  if (last?.entry?.meta) {
+    const m = last.entry.meta;
+    $("prevRecordBanner").innerHTML = `📌 직전(${last.date.slice(5)}): ${m.kg}kg × ${m.reps}${isIso ? "초" : "회"} × ${m.sets}세트
+      <button class="btn-quick" style="padding:3px 6px;" onclick="applyLastOverload('same')">그대로</button>
+      <button class="btn-quick" style="padding:3px 6px;" onclick="applyLastOverload('reps')">+1회</button>
+      <button class="btn-quick" style="padding:3px 6px;" onclick="applyLastOverload('weight')">+2.5kg</button>`;
+  } else {
+    $("prevRecordBanner").textContent = last ? `📌 직전 수행 기록 (${last.date.slice(5)}): ${last.entry.name}` : `💡 첫 기록 종목입니다. 평소 다루는 중량(kg)을 입력해 보세요.`;
+  }
+  $("lblExWeight").textContent = ex.isBodyweight && ex.defKg === 0 ? "추가중량(맨몸=0)" : ex.name.includes("합산") ? "양손 합산(kg)" : "중량(kg)";
+  resetLiveSetCount(); // 종목 전환 시 세트 카운터 초기화
+  calcWeightKcal();
+}
+// [신규] 직전 기록 기반 점진적 과부하 원클릭 적용 (+2.5kg / +1회)
+function applyLastOverload(mode) {
+  const ex = WEIGHT_EXERCISE_DB.find(x => x.id === $("exPreset").value);
+  if (!ex) return;
+  const last = findLastRecordForExercise(ex.name.split(" (")[0]);
+  const m = last?.entry?.meta;
+  if (!m) return;
+  const isIso = ISOMETRIC_IDS.has(ex.id);
+  $("exWeightKg").value = mode === "weight" ? round1(m.kg + 2.5) : m.kg;
+  $("exReps").value = mode === "reps" ? (m.reps + 1) : m.reps;
+  $("exSets").value = m.sets;
+  $("exRestSec").value = m.restSec ?? 60;
+  exMinManual = false;
   calcWeightKcal();
 }
 function addPyramidSet() {
   const kg = parseFloat($("exWeightKg").value) || 0, reps = parseInt($("exReps").value || "0", 10);
-  if (reps <= 0) return alert("횟수를 1회 이상 입력해주세요.");
+  if (reps <= 0) return alert("횟수(또는 유지시간)를 1 이상 입력해주세요.");
   pyramidSets.push({ kg, reps }); $("exSets").value = pyramidSets.length;
+  renderPyramidBox(); calcWeightKcal();
+  // [신규] 세트 추가 즉시 설정된 휴식 시간으로 상단 타이머 자동 가동
+  const restSec = parseInt($("exRestSec").value, 10) || 60;
+  if (restSec > 0) startRestTimer(restSec);
+}
+function removePyramidSet(idx) {
+  pyramidSets.splice(idx, 1);
+  $("exSets").value = Math.max(1, pyramidSets.length);
   renderPyramidBox(); calcWeightKcal();
 }
 function clearPyramidSets() { pyramidSets = []; renderPyramidBox(); calcWeightKcal(); }
 function renderPyramidBox() {
   const box = $("pyramidBox");
   box.style.display = pyramidSets.length ? "block" : "none";
-  if (pyramidSets.length) box.innerHTML = `<div style="font-size:11px;font-weight:800;color:var(--primary);margin-bottom:4px;">📊 피라미드 세트 구성 (${pyramidSets.length}세트 누적중)</div>` + pyramidSets.map((s, i) => `<div class="pyramid-row"><span><b>${i+1}세트:</b> ${s.kg}kg × ${s.reps}회 (볼륨 ${s.kg*s.reps}kg)</span></div>`).join("");
+  if (pyramidSets.length) {
+    const isIso = ISOMETRIC_IDS.has($("exPreset").value);
+    box.innerHTML = `<div style="font-size:11px;font-weight:800;color:var(--primary);margin-bottom:4px;">📊 피라미드 세트 구성 (${pyramidSets.length}세트 누적중)</div>` +
+      pyramidSets.map((s, i) => `<div class="pyramid-row"><span><b>${i+1}세트:</b> ${s.kg}kg × ${s.reps}${isIso ? "초" : "회"}${isIso ? "" : ` (볼륨 ${s.kg*s.reps}kg)`}</span><button class="btn-del" style="padding:2px 6px;" onclick="removePyramidSet(${i})">×</button></div>`).join("");
+  } else {
+    box.innerHTML = "";
+  }
 }
+
+// [세트간 휴식 UI] 휴식 초 설정 칩 + 자동/수동 시간 전환
+function setRestSec(v) {
+  $("exRestSec").value = v;
+  $$("#exRestChipBar .timer-btn").forEach(b => b.classList.toggle("active", +b.dataset.rest === v));
+  exMinManual = false; calcWeightKcal();
+}
+function onRestSecInput() {
+  exMinManual = false;
+  const v = Math.max(0, parseInt($("exRestSec").value, 10) || 0);
+  $$("#exRestChipBar .timer-btn").forEach(b => b.classList.toggle("active", +b.dataset.rest === v));
+  calcWeightKcal();
+}
+
 function calcWeightKcal() {
   const ex = WEIGHT_EXERCISE_DB.find(x => x.id === $("exPreset").value);
   if (!ex) return;
-  const p = state.profile, mins = parseFloat($("exMin").value) || 0, bwLoad = ex.isBodyweight ? Math.round(p.weight * ex.isBodyweight * 10) / 10 : 0;
-  let totalReps = 0, totalVolumeKg = 0, est1RM = 0;
+  const p = state.profile, manualMin = exMinManual ? (parseFloat($("exMin").value) || 0) : null;
+  const restSecCfg = Math.max(0, parseInt($("exRestSec").value, 10) || 0);
+  const bwLoad = ex.isBodyweight ? Math.round(p.weight * ex.isBodyweight * 10) / 10 : 0;
+  let totalReps = 0, totalVolumeKg = 0, est1RM = 0, sets = 0;
   if (pyramidSets.length) {
+    sets = pyramidSets.length;
     pyramidSets.forEach(s => { totalReps += s.reps; totalVolumeKg += Math.round((s.kg + bwLoad) * s.reps); est1RM = Math.max(est1RM, s.kg * (1 + s.reps / 30)); });
   } else {
-    const kg = parseFloat($("exWeightKg").value) || 0, reps = parseInt($("exReps").value || "0", 10), sets = parseInt($("exSets").value || "0", 10);
+    const kg = parseFloat($("exWeightKg").value) || 0, reps = parseInt($("exReps").value || "0", 10);
+    sets = parseInt($("exSets").value || "0", 10);
     totalReps = reps * sets; totalVolumeKg = Math.round((kg + bwLoad) * totalReps); est1RM = kg > 0 ? kg * (1 + reps / 30) : 0;
   }
+  // [핵심 개선 + 사실 교정] 시간 분배: 실제 수행 vs 세트간 휴식(2.2MET)
+  // 등척성 종목(plank·wall_sit 등)은 입력값이 '초'이므로 1회 템포(4.5초) 배수를 곱하지 않는다 (기존: 플랭크 60초→270초로 4.5배 과대계산)
+  const isIso = ISOMETRIC_IDS.has(ex.id);
+  const activeMin = totalReps > 0
+    ? (isIso ? (totalReps + sets * SET_OVERHEAD_SEC) / 60 : (totalReps * TEMPO_SEC + sets * SET_OVERHEAD_SEC) / 60)
+    : (manualMin || 0);
+  const restMin = totalReps > 0 ? (manualMin != null ? Math.max(0, manualMin - activeMin) : Math.max(0, sets - 1) * restSecCfg / 60) : Math.max(0, (manualMin || 0) - activeMin);
+  const totalMin = manualMin != null ? manualMin : activeMin + restMin;
+  if (!exMinManual && totalMin > 0) { $("exMin").value = Math.round(totalMin * 10) / 10; $("lblExMin").innerHTML = `총 시간(분) <span style="color:var(--primary);">(자동: 활동+휴식)</span>`; }
+  else if (exMinManual) $("lblExMin").innerHTML = `총 시간(분) <span style="color:var(--amber);">(수동 입력)</span>`;
+
   const romMeters = ex.rom * ((p.height || 180) / 175), smmRatio = p.smm / 32;
   const mechanicalKcal = (totalVolumeKg * 9.81 * romMeters * 1.4) / (4184 * 0.185) * ex.stab;
-  const timeMetabolicKcal = 1.05 * (Math.max(1.5, ex.mets * ex.stab) - 1) * p.weight * (mins / 60) * (0.85 + 0.15 * smmRatio);
-  const activeTotal = Math.round(mechanicalKcal + timeMetabolicKcal), epocKcal = Math.round(activeTotal * ex.epoc * smmRatio), finalKcal = activeTotal + epocKcal;
+  const activeMets = Math.max(1.5, ex.mets * ex.stab);
+  const activeTimeKcal = (activeMets - 1) * p.weight * (activeMin / 60) * 1.05;
+  const restTimeKcal = (REST_MET - 1) * p.weight * (restMin / 60);
+  // [사실 교정] Compendium of Physical Activities(Ainsworth 2011; Herrmann 2024)의 저항운동 MET(3.5~6.0)는
+  // 외적 중량 거상 산소량을 이미 포함 — 역학 열량 + MET 열량을 100% 합산하면 수행 구간이 이중 계상됨.
+  // 두 모델 중 큰 값을 수행 구간 대사로 채택해 과대 추정 제거.
+  const workPhaseKcal = Math.max(mechanicalKcal, activeTimeKcal);
+  const activeTotal = Math.round(workPhaseKcal + restTimeKcal), epocKcal = Math.round(activeTotal * ex.epoc * smmRatio), finalKcal = activeTotal + epocKcal;
   $("exKcal").value = finalKcal;
-  $("exCalcBreakdown").innerHTML = `<b>🔬 내 신체(${p.height}cm · ${p.weight}kg · 골격근 ${p.smm}kg) 정밀 계산:</b><br/>• <b>총 볼륨(Volume):</b> 총 ${totalReps}회 거상 = <b>${totalVolumeKg.toLocaleString()} kg</b> ${est1RM > 0 ? `| <b>추정 1RM: ${est1RM.toFixed(1)}kg</b>` : ""}<br/>• <b>거상 역학 소모:</b> <b>${Math.round(mechanicalKcal)} kcal</b> + <b>${mins}분 호흡·심박 대사: ${Math.round(timeMetabolicKcal)} kcal</b><br/>• <b>골격근 애프터번(EPOC): +${epocKcal} kcal</b> → <b>🔥 총 ${finalKcal} kcal</b> (지방 약 <b>${(finalKcal/7.7).toFixed(1)}g</b> 연소)<br/><span style="color:var(--sub);font-size:11px;">💡 ${ex.note}</span>`;
+  const volLine = isIso ? `총 ${totalReps}초 등척성 유지` : `총 ${totalReps}회 거상 = <b>${totalVolumeKg.toLocaleString()} kg</b> ${est1RM > 0 ? `| <b>추정 1RM: ${est1RM.toFixed(1)}kg</b>` : ""}`;
+  const tempoLine = isIso ? "(유지시간 합산)" : `(1회 약 ${TEMPO_SEC}초 템포)`;
+  $("exCalcBreakdown").innerHTML = `<b>🔬 내 신체(${p.height}cm · ${p.weight}kg · 골격근 ${p.smm}kg) 정밀 계산:</b><br/>• <b>총 볼륨(Volume):</b> ${volLine}<br/>• <b>시간 분배:</b> 실제 수행 <b>${activeMin.toFixed(1)}분</b> ${tempoLine} + <b>세트간 휴식 ${restMin.toFixed(1)}분</b> (${restSecCfg}초 × ${Math.max(0, sets - 1)}회) = 총 ${totalMin.toFixed(1)}분<br/>• <b>소모 분해:</b> 수행 구간 <b>${Math.round(workPhaseKcal)} kcal</b> (역학 ${Math.round(mechanicalKcal)} / MET 대사 ${Math.round(activeTimeKcal)} 중 큰 값 — 이중 합산 방지) + <b>휴식 중 대사(2.2MET): ${Math.round(restTimeKcal)} kcal</b><br/>• <b>골격근 애프터번(EPOC): +${epocKcal} kcal</b> → <b>🔥 총 ${finalKcal} kcal</b> (지방 약 <b>${(finalKcal/7.7).toFixed(1)}g</b> 연소)<br/><span style="color:var(--sub);font-size:11px;">💡 ${ex.note} · 휴식 중에도 서서 호흡·심박 유지로 평좌(1MET)보다 높은 2.2MET 대사가 계속 소모됩니다.</span>`;
+  updateLiveSetBtn();
 }
 function addWeightExercise() {
-  const baseName = $("exName").value.trim(), mins = parseInt($("exMin").value || "0", 10), kcal = parseInt($("exKcal").value, 10);
+  const baseName = $("exName").value.trim(), mins = parseFloat($("exMin").value) || 0, kcal = parseInt($("exKcal").value, 10);
   if (!baseName || isNaN(kcal)) return;
-  const kg = parseFloat($("exWeightKg").value) || 0, reps = parseInt($("exReps").value || "0", 10), sets = parseInt($("exSets").value || "0", 10);
-  const detail = pyramidSets.length ? `피라미드 ${pyramidSets.length}세트 [${pyramidSets.map(s=>`${s.kg}kg×${s.reps}`).join("/")}] · ${mins}분` : (reps > 0 && sets > 0 ? `${kg > 0 ? kg + "kg · " : "맨몸 · "}${reps}회×${sets}세트 · ${mins}분` : `${mins}분`);
+  const ex = WEIGHT_EXERCISE_DB.find(x => x.id === $("exPreset").value);
+  const isIso = ex ? ISOMETRIC_IDS.has(ex.id) : false;
+  const kg = parseFloat($("exWeightKg").value) || 0, reps = parseInt($("exReps").value || "0", 10), sets = parseInt($("exSets").value || "0", 10), restSec = Math.max(0, parseInt($("exRestSec").value, 10) || 0);
+  const unit = isIso ? "초" : "회";
+  const detail = pyramidSets.length ? `피라미드 ${pyramidSets.length}세트 [${pyramidSets.map(s=>`${s.kg}kg×${s.reps}${unit}`).join("/")}] · 휴식${restSec}초 · ${mins}분` : (reps > 0 && sets > 0 ? `${kg > 0 ? kg + "kg · " : "맨몸 · "}${reps}${unit}×${sets}세트 · 휴식${restSec}초 · ${mins}분` : `${mins}분`);
   ensureDateLog(currentDate);
-  state.logs[currentDate].exercises.push({ name: `[웨이트] ${baseName} (${detail})`, mins, kcal });
-  pyramidSets = []; renderPyramidBox(); saveState(); render();
+  // [신규] meta 구조화 저장 → 직전 중량·횟수 복원/증량 계산 가능 (기존: 문자열 name만 저장)
+  // [사실 교정] 피라미드 세트 원본 저장 누락 → 수정 시 세트별 중량·횟수 데이터가 사라지던 문제
+  state.logs[currentDate].exercises.push({ name: `[웨이트] ${baseName} (${detail})`, mins, kcal, meta: { exId: ex?.id || "", cat: ex?.cat || "기타", kg, reps, sets: pyramidSets.length || sets, restSec, pyramidSets: pyramidSets.length ? pyramidSets.map(s => ({ ...s })) : null } });
+  pyramidSets = []; renderPyramidBox(); resetLiveSetCount(); saveState(); render();
 }
+
+// [신규] 실전 세트 카운터 — 동일 중량 다세트 수행 시 "세트 완료" 원클릭으로
+// 진행 세트 수 추적 + 설정된 휴식시간 타이머 자동 가동 (매 세트 수동 클릭·암산 제거)
+function updateLiveSetBtn() {
+  const btn = $("btnLiveSetCheck");
+  if (!btn) return;
+  const targetSets = parseInt($("exSets").value || "4", 10);
+  btn.textContent = `✅ 세트 완료 & 휴식 시작 (${liveDoneSets} / ${targetSets}세트 완료)`;
+}
+function completeOneLiveSet() {
+  const targetSets = parseInt($("exSets").value || "4", 10);
+  liveDoneSets = Math.min(targetSets, liveDoneSets + 1);
+  updateLiveSetBtn();
+  const restSec = parseInt($("exRestSec").value, 10) || 60;
+  if (liveDoneSets < targetSets && restSec > 0) startRestTimer(restSec);
+  else if (liveDoneSets === targetSets) $("restTimerDisplay").textContent = "🎉 목표 세트 완료!";
+}
+function resetLiveSetCount() { liveDoneSets = 0; updateLiveSetBtn(); }
 
 function selectCardioTiming(t, btnEl) { currentCardioTiming = t; $$(".timing-btn").forEach(b => b.classList.remove("active")); btnEl.classList.add("active"); calcCardioKcal(); }
 function onChangeCardioMachine() {
@@ -939,15 +1231,22 @@ function calcCardioKcal() {
   const p = state.profile, log = state.logs[currentDate], m = $("cardioMachine").value;
   const spd = parseFloat($("cardioSpeed").value) || 0, grd = parseFloat($("cardioGrade").value) || 0, mins = parseFloat($("cardioMins").value) || 0;
   const spdM = spd * (1000 / 60), grdF = grd / 100;
-  let vo2 = 3.5, modeText = "";
+  let grossVo2 = 3.5, modeText = "";
   if (m === "treadmill") {
-    vo2 = spd <= 6.5 ? 0.1 * spdM + 1.8 * spdM * grdF + 3.5 : 0.2 * spdM + 0.9 * spdM * grdF + 3.5;
-    modeText = `${spd <= 6.5 ? "걷기" : "러닝"} 공식 (${spd}km/h · 경사 ${grd}%)`;
+    grossVo2 = spd <= 6.5 ? 0.1 * spdM + 1.8 * spdM * grdF + 3.5 : 0.2 * spdM + 0.9 * spdM * grdF + 3.5;
+    modeText = `${spd <= 6.5 ? "걷기" : "러닝"} 순소모 공식 (${spd}km/h · 경사 ${grd}%)`;
   } else if (m === "cycle") {
-    vo2 = Math.max(3.5, 0.28 * spd + grd * 0.3) * 3.5; modeText = `실내 싸이클 (${spd}km/h)`;
+    // [사실 교정] 기존 하한 3.5MET 고정 → 저속 주행까지 과대계산. 실제 싸이클 저강도 ~2.0MET 하한 + 정지 시 1.0MET
+    const cycleMets = spd > 0 ? Math.max(2.0, 0.28 * spd + grd * 0.3) : 1.0;
+    grossVo2 = cycleMets * 3.5;
+    modeText = `실내 싸이클 (${spd}km/h · ${cycleMets.toFixed(1)} METs)`;
   } else {
-    vo2 = 3.5 * (7.5 + spd * 0.4); modeText = `천국의 계단 (강도 ${spd})`;
+    grossVo2 = 3.5 * (spd > 0 ? 7.5 + spd * 0.4 : 1.0);
+    modeText = `천국의 계단 (강도 ${spd})`;
   }
+  // [사실 교정] ACSM 공식의 3.5ml/kg/min은 안정시 대사(1MET) 포함 Gross VO2 — 순수 추가 소모량(Net)만 반영해
+  // 일일 기초·활동 대사(baseTdee)와의 이중 합산 제거 + 웨이트 계산의 순소모(activeMets-1) 기준과 통일
+  const vo2 = (spd > 0 && mins > 0) ? Math.max(0, grossVo2 - 3.5) : 0;
   const baseKcal = (vo2 * p.weight / 1000) * 5 * mins;
   let mult = 1.0, fatR = 0.50, tTitle = "[일반 유산소]", advice = "표준 탄수화물·지방 대사 비율(약 50:50)로 연소됩니다.";
   if (currentCardioTiming === "post_weight") {
@@ -963,7 +1262,7 @@ function calcCardioKcal() {
   const mLabel = m === "treadmill" ? (spd <= 6.5 ? (grd > 0 ? "인클라인 경사걷기" : "빠른걷기") : "러닝/조깅") : (m === "cycle" ? "실내 싸이클" : "천국의 계단");
   $("cardioName").value = `${tTitle} ${mLabel} (${spd}km/h${grd > 0 ? '·경사'+grd+'%' : ''})`;
   $("cardioKcal").value = finalKcal;
-  $("cardioCalcBreakdown").innerHTML = `<b>🏃 ACSM 공식 × 내 체중(${p.weight}kg) 정밀 분석 (${modeText}):</b><br/>• <b>총 소모 열량:</b> <b>${finalKcal} kcal</b> (분당 ${(finalKcal/Math.max(1,mins)).toFixed(1)} kcal · 산소섭취량 ${vo2.toFixed(1)} ml/kg/min)<br/>• <b>에너지원 분해 비율:</b> 지방 연소 <b>${fatKcal} kcal (${Math.round(fatR*100)}%)</b> + 탄수화물 <b>${carbKcal} kcal (${Math.round((1-fatR)*100)}%)</b><br/>• <b>🔥 실제 태운 순수 체지방량: 약 ${(fatKcal/7.7).toFixed(1)} g</b><br/><span style="display:block;margin-top:4px;">${advice}</span>`;
+  $("cardioCalcBreakdown").innerHTML = `<b>🏃 ACSM 공식 × 내 체중(${p.weight}kg) 정밀 분석 (${modeText}):</b><br/>• <b>총 소모 열량:</b> <b>${finalKcal} kcal</b> (분당 ${(finalKcal/Math.max(1,mins)).toFixed(1)} kcal · 순 산소섭취량 ${vo2.toFixed(1)} ml/kg/min — 안정시 3.5 차감)<br/>• <b>에너지원 분해 비율:</b> 지방 연소 <b>${fatKcal} kcal (${Math.round(fatR*100)}%)</b> + 탄수화물 <b>${carbKcal} kcal (${Math.round((1-fatR)*100)}%)</b><br/>• <b>🔥 실제 태운 순수 체지방량: 약 ${(fatKcal/7.7).toFixed(1)} g</b><br/><span style="display:block;margin-top:4px;">${advice}</span>`;
 }
 function addCardioExercise() {
   const name = $("cardioName").value.trim(), mins = parseInt($("cardioMins").value || "0", 10), kcal = parseInt($("cardioKcal").value, 10);
@@ -973,8 +1272,8 @@ function addCardioExercise() {
   saveState(); render();
 }
 
-// ===== [핵심 수정] 자연어·수량 파서, 영양성분 검증기 & 정밀 검색 엔진 =====
-const TYPO_MAP = [["짬봉","짬뽕"],["자장면","짜장면"],["간자장","간짜장"],["샤인머스켓","샤인머스캣"],["돈가스","돈까스"],["얄피","얇은피"],["떡복이","떡볶이"],["달걀","계란"],["오뎅","어묵"],["써브웨이","서브웨이"]];
+// ===== [핵심 개선] 자연어·수량 파서 + 카테고리 탐색 + 오타/부분 매칭(퍼지) 검색 =====
+const TYPO_MAP = [["짬봉","짬뽕"],["자장면","짜장면"],["간자장","간짜장"],["샤인머스켓","샤인머스캣"],["돈가스","돈까스"],["얄피","얇은피"],["떡복이","떡볶이"],["달걀","계란"],["오뎅","어묵"],["써브웨이","서브웨이"],["우동국","우동"],["라또","라떼"],["김치지찌개","김치찌개"],["김지찌개","김치찌개"],["프랭크불구이","프랑크"],["수육용","수육"]];
 function fixKoreanFoodTypos(s) { return TYPO_MAP.reduce((acc,[k,v])=>acc.replace(new RegExp(k,"g"),v), s||""); }
 function normalizeStr(s) { return fixKoreanFoodTypos(s).toLowerCase().replace(/[^가-힣a-z0-9]/g, ""); }
 
@@ -1019,6 +1318,55 @@ function parseSmartKoreanFoodQuery(raw) {
   return { coreQuery: text.replace(/\s+/g, " ").trim() || fixKoreanFoodTypos(raw.trim()), mult, unitLabel };
 }
 
+// [신규] 식품 카테고리 자동 분류 → 검색 없이도 터치로 바로 선택
+const FOOD_CAT_RULES = [
+  ["분식·패스트푸드", /라면|짜파게티|떡볶이|순대|핫도그|토스트|계란빵|김말이|떡꼬치|만두|교자|누들|볶음면|비빔면|쫄면|칼국수|잔치국수|우동|냉면|햄버거|피자|샌드위치|서브웨이|어묵|맛살|크래미|핫바/],
+  ["중식", /짜장|짬뽕|탕수육|마라|볶음밥|유린기|꿔바로우/],
+  ["일식·초밥", /초밥|스시|돈까스|라멘|연어|광어|사케|카츠|쌀국수/],
+  ["찌개·국밥", /찌개|전골|국밥|해장국|감자탕|설렁|미역국|계란국|된장|청국장|순두부|육개장|탕/],
+  ["고기·치킨", /삼겹|목살|항정|가브리|돈마호크|토마호크|소고기|등심|안심|부채|우둔|차돌|곱창|치킨|닭발|족발|보쌈|제육|불고기|갈비|정육|모둠|소시지|프랑크|스팸|베이컨/],
+  ["편의점·단백질", /더단백|닥터유|셀렉스|하이뮨|프로틴|단백질|닭가슴살|쉐이크|요거트/],
+  ["밥·김밥", /비빔밥|김밥|햇반|쌀밥|공깃밥|현미밥/],
+  ["과일·샐러드", /샤인머스|사과|토마토|바나나|딸기|귤|수박|참외|멜론|복숭아|키위|블루베리|과일|샐러드|포케/],
+  ["간식·음료", /커피|라떼|콜라|사이다|음료|우유|두유|아이스크림|과자|에너지/],
+  ["채소·계란·두부", /두부|계란|감자|고구마|채소|나물/],
+  ["기타", /./]
+];
+function categorizeFood(it) { const s = it.name + " " + it.keys; for (const [c, r] of FOOD_CAT_RULES) if (r.test(s)) return c; return "기타"; }
+const FOOD_CATS = ["인기","전체","찌개·국밥","고기·치킨","중식","일식·초밥","분식·패스트푸드","편의점·단백질","밥·김밥","과일·샐러드","간식·음료","채소·계란·두부"];
+const POPULAR_FOOD_QUERIES = ["한마음 정육식당 돼지모둠","목살 김치찌개","짜파게티","닭가슴살 오리지널","더단백 드링크","풀무원 얇은피 꽉찬속 고기만두","삶은 계란","두부 / 모두부","현미밥","아이스 아메리카노","바나나 (중간","찐 고구마","참치마요 삼각김밥","크래미","그릭요거트","CJ 햇반 / 흰쌀밥"];
+function popularFoods() { return POPULAR_FOOD_QUERIES.map(q => KOREAN_FOOD_DB.find(it => it.name.includes(q))).filter(Boolean); }
+function foodsInCategory(cat) {
+  if (cat === "인기") return popularFoods();
+  if (cat === "전체") return KOREAN_FOOD_DB.slice(0, 20);
+  return KOREAN_FOOD_DB.filter(it => categorizeFood(it) === cat);
+}
+function renderFoodCategoryChips() {
+  $("foodCatChips").innerHTML = FOOD_CATS.map(c => `<button class="cat-chip${c === currentFoodCat ? " active" : ""}" onclick="browseFoodCategory('${c}',this)">${c === "인기" ? "🔥 인기" : c}</button>`).join("");
+}
+function browseFoodCategory(cat, btnEl) {
+  currentFoodCat = cat;
+  $$("#foodCatChips .cat-chip").forEach(b => b.classList.remove("active"));
+  if (btnEl) btnEl.classList.add("active");
+  $("foodSearchInput").value = ""; onFoodSearchInput();
+}
+function renderCategoryBrowse() {
+  const list = foodsInCategory(currentFoodCat);
+  const tag = currentFoodCat === "전체" ? "내장 공식 DB (검색창에 입력하면 전체 탐색)" : currentFoodCat === "인기" ? "자주 먹는 인기 메뉴" : "카테고리";
+  renderFoodSearchResults(list.slice(0, 20), `🔥 <b>${currentFoodCat}</b> — ${tag} · 항목 터치 시 아래 성분표에 바로 선택됩니다`, activeMult || 1.0);
+}
+
+// [신규] 오타·부분 입력 허용 퍼지 매칭 (2글자 그램 유사도)
+function dice2(a, b) {
+  if (a.length < 2 || b.length < 2) return a === b ? 1 : 0;
+  const A = [], B = [];
+  for (let i = 0; i < a.length - 1; i++) A.push(a.substr(i, 2));
+  for (let i = 0; i < b.length - 1; i++) B.push(b.substr(i, 2));
+  const map = {}; A.forEach(g => map[g] = (map[g] || 0) + 1);
+  let inter = 0; B.forEach(g => { if (map[g] > 0) { inter++; map[g]--; } });
+  return 2 * inter / (A.length + B.length);
+}
+
 function buildSmartEstimatedFood(coreQuery) {
   const q = normalizeStr(coreQuery);
   if (!q || q.length < 2) return null;
@@ -1035,7 +1383,14 @@ function buildSmartEstimatedFood(coreQuery) {
     [/불고기|제육|주물럭/, () => ["1인분 (200g 기준)",470,18,31,30,9,12,1150]],
     [/소시지|후랑크|스팸|베이컨/, () => ["1회분 (80g 기준)",215,5,11,17,6,2,590]],
     [/샐러드|포케/, () => ["1보울 (조합추정)",380,35,24,15,3,6,520]],
-    [/샌드위치|토스트|베이글|빵/, () => ["1개 (조합추정)",360,48,14,12,4,8,540]]
+    [/샌드위치|토스트|베이글|빵/, () => ["1개 (조합추정)",360,48,14,12,4,8,540]],
+    [/돈까스|카츠/, () => ["1인분 (조합추정)",780,74,34,38,11,10,1120]],
+    [/김밥/, () => ["1줄 (조합추정)",470,70,13,13,3,4,980]],
+    [/떡볶이/, () => ["1인분 (조합추정)",510,96,12,8,2,18,1350]],
+    [/치킨/, () => ["반 마리 (조합추정)",800,35,55,45,12,6,1200]],
+    [/곱창|닭발/, () => ["1인분 (조합추정)",430,12,32,26,8,4,1400]],
+    [/커피|라떼|스타벅스|메가|컴포즈/, () => ["1잔 (조합추정)",140,12,8,6,3.5,10,110]],
+    [/우유|두유/, () => ["1컵 (조합추정)",135,11,7,6.5,4,11,100]]
   ];
   const hit = estRules.find(([rgx]) => rgx.test(q));
   if (!hit) return null;
@@ -1049,7 +1404,9 @@ function searchLocalDB(coreQuery) {
   const qClean = normalizeStr(coreQuery);
   if (!qClean) return [];
   const tokens = coreQuery.trim().toLowerCase().split(/\s+/).map(normalizeStr).filter(Boolean), scored = [];
-  for (const item of KOREAN_FOOD_DB) {
+  // [신규] 내 음식 사전(커스텀 등록분)을 최우선으로 검색 — OCR/AI 판독·수동 입력 음식을 재사용
+  const allFoods = [...(state.customFoods || []), ...KOREAN_FOOD_DB];
+  for (const item of allFoods) {
     const tNorm = normalizeStr(item.name), kNorm = normalizeStr(item.keys);
     let score = tNorm.includes(qClean) ? 260 : (tNorm + " " + kNorm).includes(qClean) ? 190 : 0, matched = 0;
     for (const tk of tokens) {
@@ -1064,11 +1421,23 @@ function searchLocalDB(coreQuery) {
     if (score >= 50) scored.push({ item, score, matched });
   }
   scored.sort((a, b) => b.score - a.score);
-  const res = scored.slice(0, 12).map(s => s.item);
+  let res = scored.slice(0, 12).map(s => s.item);
   const hasStrongMatch = scored.length > 0 && (scored[0].score >= 180 || scored[0].matched === tokens.length);
   if (!hasStrongMatch) {
     const est = buildSmartEstimatedFood(coreQuery);
     if (est) res.unshift(est);
+  }
+  // [신규] 정확 매칭 실패 시 2글자 그램 유사도로 오타/부분 검색 허용
+  if (!scored.length) {
+    const fuzzy = [];
+    for (const item of allFoods) {
+      const tNorm = normalizeStr(item.name), kNorm = normalizeStr(item.keys);
+      const tokenSims = tokens.map(tk => Math.max(dice2(tk, tNorm), dice2(tk, kNorm)) * 0.9);
+      const sim = Math.max(dice2(qClean, tNorm), dice2(qClean, kNorm), ...tokenSims);
+      if (sim >= 0.42) fuzzy.push({ item, sim });
+    }
+    fuzzy.sort((a, b) => b.sim - a.sim);
+    res = fuzzy.slice(0, 8).map(f => f.item);
   }
   return res;
 }
@@ -1076,12 +1445,21 @@ function searchLocalDB(coreQuery) {
 function quickSearchExample(txt) { $("foodSearchInput").value = txt; onFoodSearchInput(); }
 function onFoodSearchInput() {
   const raw = $("foodSearchInput").value.trim(), resBox = $("foodSearchResults"), hintBox = $("smartParseHint");
-  if (!raw) { resBox.style.display = hintBox.style.display = "none"; return; }
+  if (!raw) { hintBox.style.display = "none"; clearTimeout(autoWebTimer); renderCategoryBrowse(); return; }
   const parsed = parseSmartKoreanFoodQuery(raw);
   activeMult = parsed.mult || 1.0;
   hintBox.style.display = (parsed.unitLabel || parsed.coreQuery !== raw) ? "block" : "none";
-  if (hintBox.style.display === "block") hintBox.innerHTML = `🔍 스마트 인식: <b>'${parsed.coreQuery}'</b> ${parsed.unitLabel ? `× <b>${parsed.unitLabel} (${activeMult}배 자동 적용)</b>` : "(단어 자동 보정됨)"}`;
-  renderFoodSearchResults([...(webFoodCache[normalizeStr(parsed.coreQuery)] || []), ...searchLocalDB(parsed.coreQuery)], "", activeMult);
+  if (hintBox.style.display === "block") hintBox.innerHTML = `🔍 스마트 인식: <b>'${esc(parsed.coreQuery)}'</b> ${parsed.unitLabel ? `× <b>${parsed.unitLabel} (${activeMult}배 자동 적용)</b>` : "(단어 자동 보정됨)"}`;
+  const local = searchLocalDB(parsed.coreQuery), cached = webFoodCache[normalizeStr(parsed.coreQuery)] || [];
+  renderFoodSearchResults([...cached, ...local], cached.length ? `✅ 캐시된 실시간 웹검색 결과 (${cached.length}건) + 공식 DB` : "", activeMult);
+  // [신규] 로컬 매칭이 약하면 1.8초 후 실시간 웹검색 자동 실행
+  clearTimeout(autoWebTimer);
+  if (!local.length || local.every(it => it.isAiEst)) {
+    autoWebTimer = setTimeout(() => {
+      const cur = $("foodSearchInput").value.trim();
+      if (cur && cur === raw && cur !== lastAutoWebQ) { lastAutoWebQ = cur; searchLiveWebFood(); }
+    }, 1800);
+  }
 }
 
 function renderFoodSearchResults(list, banner = "", mult = 1.0) {
@@ -1089,25 +1467,24 @@ function renderFoodSearchResults(list, banner = "", mult = 1.0) {
   const resBox = $("foodSearchResults"); resBox.style.display = "block";
   const bHtml = banner ? `<div class="search-status-banner">${banner}</div>` : "";
   if (!list || !list.length) {
-    resBox.innerHTML = bHtml + `<div style="padding:14px;font-size:12px;color:var(--sub);text-align:center;line-height:1.5;">일치하는 내장 항목이 없습니다.<br/>우측 <b>[🌐 실시간 웹검색]</b> 또는 <b>[📷 사진/캡처로 자동판독]</b>을 눌러보세요!</div>`;
+    resBox.innerHTML = bHtml + `<div style="padding:14px;font-size:12px;color:var(--sub);text-align:center;line-height:1.5;">일치하는 항목이 없습니다.<br/>위의 <b>[🌐 실시간 웹검색]</b> 또는 <b>[📷 사진/캡처로 자동판독]</b>을 눌러보세요!</div>`;
     return;
   }
   const mLbl = mult !== 1.0 ? ` <b style="color:var(--primary);">(${mult}배 적용)</b>` : "";
   resBox.innerHTML = bHtml + list.map((it, i) => `
     <div class="search-item" onclick="selectSearchedFood(${i})">
       <div>
-        <div class="s-name"><span class="s-tag ${it.isWeb?'web':it.isAiEst?'ai':''}">${it.isWeb?'실시간웹':it.isAiEst?'스마트추정':'공식DB'}</span>${it.name}${mLbl}</div>
-        <div class="s-meta">${it.serving||'1회분'} | 탄 ${Math.round((it.carb||0)*mult*10)/10}g · 단 ${Math.round((it.prot||0)*mult*10)/10}g · 지 ${Math.round((it.fat||0)*mult*10)/10}g${it.sodium?' · 나트륨 '+Math.round(it.sodium*mult)+'mg':''}</div>
+        <div class="s-name"><span class="s-tag ${it.isWeb?'web':it.isAiEst?'ai':''}">${it.isWeb?'실시간웹':it.isAiEst?'스마트추정':'공식DB'}</span>${esc(it.name)}${mLbl}</div>
+        <div class="s-meta">${esc(it.serving||'1회분')} | 탄 ${round1((it.carb||0)*mult)}g · 단 ${round1((it.prot||0)*mult)}g · 지 ${round1((it.fat||0)*mult)}g${it.sodium?' · 나트륨 '+Math.round(it.sodium*mult)+'mg':''}</div>
       </div>
       <div class="s-right-box"><span class="s-kcal">${Math.round(it.kcal*mult)} kcal</span><button class="btn-instant-add" onclick="instantAddSearchedFood(${i},event)">+바로추가</button></div>
     </div>`).join("");
 }
 
-// ===== [핵심 수정] 행 밀림 없는 FatSecret 파서 + OpenFoodFacts 공식 API 병렬 웹 검색 =====
+// ===== 행 밀림 없는 FatSecret 파서 + OpenFoodFacts 공식 API 병렬 웹 검색 =====
 function parseFatSecretStrict(raw) {
   if (!raw) return [];
   const items = [];
-  // 1. HTML 테이블 Row 단위 엄격 파싱 (절대 다른 행과 섞이지 않음)
   if (raw.includes("<table") || raw.includes("searchResult")) {
     const doc = new DOMParser().parseFromString(raw, "text/html");
     doc.querySelectorAll("table.generic.searchResult tr, .searchResult tr").forEach(tr => {
@@ -1127,19 +1504,16 @@ function parseFatSecretStrict(raw) {
     });
     if (items.length) return items;
   }
-  // 2. Jina Markdown 파싱: 반드시 직전 1~2줄 이내의 식품 링크만 매칭
   const lines = raw.split(/\n+/).map(l => l.trim()).filter(Boolean);
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (!line.includes("칼로리:") || !line.includes("kcal")) continue;
     const kM = line.match(/칼로리:\s*([\d,.]+)\s*kcal/i);
     if (!kM) continue;
-    // 현재 줄 또는 바로 윗줄에서 음식명 추출
     let foodTitle = "";
     for (let j = i; j >= Math.max(0, i - 2); j--) {
       const linkMatches = [...lines[j].matchAll(/\[([^\]]+)\]\(https?:\/\/www\.fatsecret\.kr\/[^)]+\)/g)];
       if (linkMatches.length > 0) {
-        // 브랜드가 [브랜드] [제품명] 순으로 있을 경우 합침
         foodTitle = linkMatches.map(m => m[1].trim()).filter(x => !x.includes("칼로리") && !x.includes("더 보기")).join(" ");
         if (foodTitle) break;
       }
@@ -1208,9 +1582,47 @@ async function fetchFatSecretSingleQuery(q) {
   } catch (e) { return []; }
 }
 
+// [신규] 가공식품 바코드(EAN-13/KAN 등 8~14자리) 단건 조회 —
+// 키워드 검색(cgi/search.pl)은 한국어 매칭률이 낮지만, 바코드 단건 API는
+// 국내 편의점 음료·프로틴바·가공식품을 0.3초 내 정확히 반환
+async function fetchFoodByBarcode(code) {
+  try {
+    const ctrl = new AbortController(), id = setTimeout(() => ctrl.abort(), 5500);
+    const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json`, { signal: ctrl.signal });
+    clearTimeout(id);
+    if (!res.ok) return null;
+    const { status, product: p } = await res.json();
+    if (status !== 1 || !p) return null;
+    const n = p.nutriments || {};
+    const useServ = n["energy-kcal_serving"] != null;
+    const sfx = useServ ? "_serving" : "_100g";
+    return validateNutritionItem({
+      name: `${p.brands ? `[${p.brands.split(",")[0].trim()}] ` : ""}${p.product_name_ko || p.product_name || code}`,
+      serving: useServ ? (p.serving_size || "1회 제공량") : "100g 기준",
+      kcal: n["energy-kcal" + sfx] || 0,
+      carb: n["carbohydrates" + sfx] || 0,
+      prot: n["proteins" + sfx] || 0,
+      fat:  n["fat" + sfx] || 0,
+      satFat: n["saturated-fat" + sfx] || 0,
+      sugar:  n["sugars" + sfx] || 0,
+      sodium: (n["sodium" + sfx] || 0) * 1000,
+      isWeb: true
+    });
+  } catch (e) { return null; }
+}
+
 async function searchLiveWebFood() {
   const raw = $("foodSearchInput").value.trim();
-  if (!raw) return alert("검색할 음식 이름을 먼저 입력해 주세요.");
+  if (!raw) return alert("검색어를 먼저 입력해 주세요.");
+  // [신규] 바코드 숫자(8~14자리) 입력 시 키워드 검색을 건너뛰고 단건 API로 즉시 분기
+  if (/^\d{8,14}$/.test(raw)) {
+    const item = await fetchFoodByBarcode(raw);
+    if (item) {
+      selectedFoodBase = item;
+      setPortionMultiplier(1.0);
+      return renderFoodSearchResults([item], `✅ 바코드(${esc(raw)}) 제품 조회 완료`, 1.0);
+    }
+  }
   const { coreQuery, mult } = parseSmartKoreanFoodQuery(raw);
   activeMult = mult || 1.0;
   const cacheKey = normalizeStr(coreQuery), local = searchLocalDB(coreQuery);
@@ -1239,7 +1651,7 @@ async function searchLiveWebFood() {
   }
 }
 
-// ===== [신규 기능 1] 사진/캡처 업로드 자동 판독 (Tesseract 한국어 OCR + Gemini Vision AI 겸용) =====
+// ===== 사진/캡처 업로드 자동 판독 (Tesseract 한국어 OCR + Gemini Vision AI) =====
 function openAiKeyModal() {
   $("geminiKeyInput").value = state.geminiApiKey || "";
   $("aiKeyModal").style.display = "flex";
@@ -1251,12 +1663,26 @@ function saveAiKey() {
   alert(state.geminiApiKey ? "Gemini AI 비전 키가 저장되었습니다. 이제 모든 음식 사진과 상품 캡처를 AI가 판독합니다." : "AI 키가 해제되었습니다. 기본 내장 한국어 OCR 모드로 동작합니다.");
 }
 
-function fileToBase64(file) {
+// [사실 교정] 12~48MP 원본(4~12MB)을 그대로 Base64 직렬화하면 전송·OCR 지연 유발 →
+// 긴 변 1280px로 canvas 리사이징 + JPEG q0.82 압축 (인식률 저하 없이 용량 90%+ 감소)
+function fileToBase64(file, maxDim = 1280, quality = 0.82) {
   return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(r.result);
-    r.onerror = reject;
-    r.readAsDataURL(file);
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width: w, height: h } = img;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+        else { w = Math.round((w * maxDim) / h); h = maxDim; }
+      }
+      const cv = document.createElement("canvas");
+      cv.width = w; cv.height = h;
+      cv.getContext("2d").drawImage(img, 0, 0, w, h);
+      resolve(cv.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = err => { URL.revokeObjectURL(url); reject(err); };
+    img.src = url;
   });
 }
 
@@ -1291,7 +1717,6 @@ async function loadTesseract() {
   });
 }
 
-// 텍스트(OCR 또는 복사글)에서 영양성분 및 상품명을 정밀 추출하는 통합 파서
 function extractNutritionFromRawText(rawText, fallbackName = "") {
   const text = (rawText || "").replace(/\r/g, " ");
   const numAfter = (kwRegex) => {
@@ -1309,7 +1734,6 @@ function extractNutritionFromRawText(rawText, fallbackName = "") {
 
   if (!kcal && (carb || prot || fat)) kcal = Math.round(carb * 4 + prot * 4 + fat * 9);
 
-  // 텍스트 내 식품명/상품명 추출
   let cleanTitle = fallbackName;
   if (!cleanTitle) {
     const firstLine = text.split(/\n+/)[0].replace(/(?:영양정보|영양성분|쿠팡|네이버|칼로리|[\d,.]+kcal).*/gi, "").trim();
@@ -1336,7 +1760,6 @@ async function handleFoodPhoto(ev) {
 
   try {
     const dataUrl = await fileToBase64(file);
-    // 1. Gemini API 키가 설정된 경우 AI 비전 판독 우선 실행
     if (state.geminiApiKey) {
       statusBox.innerHTML = `🤖 <b>AI 비전이 사진을 정밀 판독 중입니다...</b> (음식/상품명 및 영양성분 추출)`;
       try {
@@ -1345,14 +1768,13 @@ async function handleFoodPhoto(ev) {
           selectedFoodBase = aiItem;
           activeMult = 1.0;
           applyFoodToForm(1.0);
-          statusBox.innerHTML = `✅ <b>AI 사진 판독 완료:</b> <b>${aiItem.name}</b> (${aiItem.kcal}kcal · 탄${aiItem.carb}g · 단${aiItem.prot}g · 지${aiItem.fat}g)가 아래 성분표에 자동 선택되었습니다!`;
+          statusBox.innerHTML = `✅ <b>AI 사진 판독 완료:</b> <b>${esc(aiItem.name)}</b> (${aiItem.kcal}kcal · 탄${aiItem.carb}g · 단${aiItem.prot}g · 지${aiItem.fat}g)가 아래 성분표에 자동 선택되었습니다!`;
           ev.target.value = "";
           return;
         }
       } catch (err) {}
     }
 
-    // 2. 내장 한국어 OCR 엔진(Tesseract.js)으로 영양성분표 및 상품 캡처 텍스트 추출
     statusBox.innerHTML = `📸 <b>사진 속 영양성분표/상품명을 스캔 중입니다...</b> (약 3~6초 소요)`;
     const Tesseract = await loadTesseract();
     const { data: { text } } = await Tesseract.recognize(dataUrl, "kor+eng");
@@ -1362,9 +1784,8 @@ async function handleFoodPhoto(ev) {
       selectedFoodBase = extracted;
       activeMult = 1.0;
       applyFoodToForm(1.0);
-      statusBox.innerHTML = `✅ <b>사진 성분표 스캔 완료:</b> <b>${extracted.name}</b> (${extracted.kcal}kcal · 탄${extracted.carb}g · 단${extracted.prot}g · 지${extracted.fat}g)가 자동 입력되었습니다!`;
+      statusBox.innerHTML = `✅ <b>사진 성분표 스캔 완료:</b> <b>${esc(extracted.name)}</b> (${extracted.kcal}kcal · 탄${extracted.carb}g · 단${extracted.prot}g · 지${extracted.fat}g)가 자동 입력되었습니다!`;
     } else {
-      // 성분표 숫자가 없는 상품 썸네일 캡처인 경우 OCR로 읽은 텍스트로 DB/스마트 매칭
       const ocrWords = text.replace(/[^가-힣a-zA-Z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
       const queryCandidate = ocrWords.slice(0, 25) || fileBaseName;
       const matches = searchLocalDB(queryCandidate);
@@ -1372,7 +1793,7 @@ async function handleFoodPhoto(ev) {
         selectedFoodBase = { ...matches[0] };
         activeMult = 1.0;
         applyFoodToForm(1.0);
-        statusBox.innerHTML = `✅ <b>사진 속 상품명 인식 완료:</b> <b>'${matches[0].name}'</b> 항목으로 자동 선택되었습니다!`;
+        statusBox.innerHTML = `✅ <b>사진 속 상품명 인식 완료:</b> <b>'${esc(matches[0].name)}'</b> 항목으로 자동 선택되었습니다!`;
       } else {
         statusBox.innerHTML = `⚠️ 사진에서 영양성분 숫자를 찾지 못했습니다. 영양성분표가 잘 보이게 찍거나 우측 <b>[⚙️ AI키]</b>에 무료 Gemini 키를 등록하면 일반 음식 사진도 판독됩니다.`;
       }
@@ -1383,7 +1804,7 @@ async function handleFoodPhoto(ev) {
   ev.target.value = "";
 }
 
-// ===== [신규 기능 2] 쿠팡·네이버에서 복사한 상품명/성분 원클릭 자동 선택 =====
+// ===== 쿠팡·네이버에서 복사한 상품명/성분 원클릭 자동 선택 =====
 async function importFromClipboard() {
   let clipText = "";
   try {
@@ -1398,7 +1819,7 @@ async function importFromClipboard() {
   if (!clipText.trim()) return;
 
   $("pasteRawInput").value = clipText;
-  parsePastedNutrition(true);
+  parsePastedNutrition();
 }
 
 function selectSearchedFood(idx) {
@@ -1409,12 +1830,13 @@ function selectSearchedFood(idx) {
 }
 
 function instantAddSearchedFood(idx, ev) {
-  ev.stopPropagation();
+  if (ev) ev.stopPropagation();
   const it = currentSearchMatches[idx]; if (!it) return;
   const m = activeMult || 1.0;
   ensureDateLog(currentDate);
-  state.logs[currentDate].foods.push({ meal:$("mealType").value, name:it.name+(m===1?"":` (${m}배)`), kcal:Math.round(it.kcal*m), carb:Math.round((it.carb||0)*m), prot:Math.round((it.prot||0)*m), fat:Math.round((it.fat||0)*m), sodium:Math.round((it.sodium||0)*m) });
-  saveState(); $("foodSearchInput").value = ""; $("foodSearchResults").style.display = $("smartParseHint").style.display = "none"; activeMult = 1.0; render();
+  // [사실 교정] Math.round의 소수점 손실 제거 — 지방 0.4g 등이 0g으로 왜곡되던 문제 (round1: 소수 첫째 자리 보존)
+  state.logs[currentDate].foods.push({ meal:$("mealType").value, name:it.name+(m===1?"":` (${m}배)`), kcal:Math.round(it.kcal*m), carb:round1((it.carb||0)*m), prot:round1((it.prot||0)*m), fat:round1((it.fat||0)*m), sodium:Math.round((it.sodium||0)*m) });
+  saveState(); $("foodSearchInput").value = ""; $("foodSearchResults").style.display = $("smartParseHint").style.display = "none"; activeMult = 1.0; render(); renderCategoryBrowse();
 }
 
 function setPortionMultiplier(m) {
@@ -1427,7 +1849,7 @@ function applyFoodToForm(m) {
   if (!selectedFoodBase) return;
   const it = selectedFoodBase, k = Math.round(it.kcal*m), c = Math.round((it.carb||0)*m*10)/10, p = Math.round((it.prot||0)*m*10)/10, f = Math.round((it.fat||0)*m*10)/10;
   $("foodName").value = it.name + (m === 1 ? "" : ` (${m}배)`);
-  $("foodKcal").value = k; $("foodCarb").value = Math.round(c); $("foodProt").value = Math.round(p); $("foodFat").value = Math.round(f);
+  $("foodKcal").value = k; $("foodCarb").value = c; $("foodProt").value = p; $("foodFat").value = f;
   $("nutritionLabelBox").style.display = "block";
   $("nfTitle").textContent = `📋 ${it.name}`; $("nfServing").textContent = `${it.serving||"1회 제공량"} × ${m}배`;
   $("nfKcal").textContent = `${k} kcal`; $("nfCarb").textContent = `${c} g`; $("nfProt").textContent = `${p} g`;
@@ -1445,23 +1867,21 @@ function openExternalSearch(pf) {
 
 function togglePasteScanner() { const b = $("pasteScannerBox"); b.style.display = b.style.display === "block" ? "none" : "block"; }
 
-function parsePastedNutrition(fromClipBtn = false) {
+function parsePastedNutrition() {
   const raw = $("pasteRawInput").value.trim();
   if (!raw) return;
   const statusBox = $("ocrStatusBox");
 
-  // 1. 복사한 텍스트에 영양성분 숫자가 포함되어 있는 경우 즉시 추출
   const extracted = extractNutritionFromRawText(raw, $("foodSearchInput").value.trim());
   if (extracted) {
     selectedFoodBase = extracted;
     setPortionMultiplier(1.0);
     $("pasteScannerBox").style.display = "none";
     statusBox.style.display = "block";
-    statusBox.innerHTML = `✅ <b>복사한 영양성분 적용 완료:</b> <b>${extracted.name}</b> (${extracted.kcal}kcal · 탄${extracted.carb}g · 단${extracted.prot}g · 지${extracted.fat}g)`;
+    statusBox.innerHTML = `✅ <b>복사한 영양성분 적용 완료:</b> <b>${esc(extracted.name)}</b> (${extracted.kcal}kcal · 탄${extracted.carb}g · 단${extracted.prot}g · 지${extracted.fat}g)`;
     return;
   }
 
-  // 2. 쿠팡·네이버에서 '상품명'만 복사해온 경우: 불필요한 수식어 제거 후 DB 매칭 + 실시간 웹검색 자동 실행
   const cleanedProductTitle = raw
     .replace(/\[[^\]]*\]/g, " ")
     .replace(/(?:쿠팡|네이버|로켓배송|무료배송|특가|할인|https?:\/\/\S+)/gi, " ")
@@ -1476,7 +1896,7 @@ function parsePastedNutrition(fromClipBtn = false) {
     selectedFoodBase = validateNutritionItem(matches[0]);
     setPortionMultiplier(activeMult);
     statusBox.style.display = "block";
-    statusBox.innerHTML = `✅ <b>복사한 상품 자동 선택 완료:</b> <b>'${matches[0].name}'</b> 성분이 아래에 적용되었습니다! 다른 세부 상품을 고르려면 아래 실시간 검색 결과를 터치하세요.`;
+    statusBox.innerHTML = `✅ <b>복사한 상품 자동 선택 완료:</b> <b>'${esc(matches[0].name)}'</b> 성분이 아래에 적용되었습니다! 다른 세부 상품을 고르려면 아래 실시간 검색 결과를 터치하세요.`;
   }
   $("pasteScannerBox").style.display = "none";
   searchLiveWebFood();
@@ -1486,13 +1906,82 @@ function addFood() {
   const name = $("foodName").value.trim(), kcal = parseInt($("foodKcal").value, 10);
   if (!name || isNaN(kcal)) return alert("음식 이름과 칼로리를 입력해주세요.");
   ensureDateLog(currentDate);
-  state.logs[currentDate].foods.push({ meal:$("mealType").value, name, kcal, carb:parseInt($("foodCarb").value||"0",10), prot:parseInt($("foodProt").value||"0",10), fat:parseInt($("foodFat").value||"0",10), sodium:selectedFoodBase?Math.round((selectedFoodBase.sodium||0)*(activeMult||1)):0 });
+  // [사실 교정] parseInt의 소수점 버림 제거 — 지방 0.6g 등이 0g으로 사라지던 문제 (소수 첫째 자리 보존)
+  state.logs[currentDate].foods.push({ meal:$("mealType").value, name, kcal, carb:round1($("foodCarb").value), prot:round1($("foodProt").value), fat:round1($("foodFat").value), sodium:selectedFoodBase?Math.round((selectedFoodBase.sodium||0)*(activeMult||1)):(editingSodium??0) });
+  editingSodium = null;
   saveState();
   ["foodName","foodKcal","foodCarb","foodProt","foodFat","foodSearchInput"].forEach(id => $(id).value = "");
   $("nutritionLabelBox").style.display = $("smartParseHint").style.display = $("ocrStatusBox").style.display = "none";
-  selectedFoodBase = null; activeMult = 1.0; render();
+  selectedFoodBase = null; activeMult = 1.0; render(); renderCategoryBrowse();
+}
+// [신규] 기록된 식단·운동 항목 수정 — 항목을 폼으로 되돌려 즉시 재수정 (오입력 시 재검색 불필요)
+const MEAL_ORDER = ["아침", "점심", "저녁", "간식/야식"];
+function editLogItem(type, idx) {
+  const list = state.logs[currentDate]?.[type];
+  if (!list || !list[idx]) return;
+  const item = list.splice(idx, 1)[0];
+  if (type === "foods") {
+    $("mealType").value = item.meal || "점심";
+    $("foodName").value = item.name;
+    $("foodKcal").value = item.kcal;
+    $("foodCarb").value = item.carb || 0;
+    $("foodProt").value = item.prot || 0;
+    $("foodFat").value = item.fat || 0;
+    selectedFoodBase = null; activeMult = 1.0;
+    // [사실 교정] 수정 재등록 시 나트륨이 0mg으로 증발하던 유실 방지 (나트륨 입력칸이 없으므로 임시 보관)
+    editingSodium = item.sodium ?? 0;
+  } else {
+    if (item.meta?.exId) {
+      switchWorkoutMode("weight");
+      $("exPreset").value = item.meta.exId;
+      onSelectWeightEx();
+      $("exWeightKg").value = item.meta.kg;
+      $("exReps").value = item.meta.reps;
+      $("exSets").value = item.meta.sets;
+      $("exRestSec").value = item.meta.restSec ?? 60;
+      // [사실 교정] 피라미드 세트 복원 — 저장된 세트별 중량·횟수를 그대로 되돌려 수정
+      if (Array.isArray(item.meta.pyramidSets) && item.meta.pyramidSets.length) {
+        pyramidSets = item.meta.pyramidSets.map(s => ({ ...s }));
+        renderPyramidBox();
+      }
+      calcWeightKcal();
+    } else {
+      const cardioMarkers = ["근력운동 후", "공복 유산소", "일반 유산소", "싸이클", "계단"];
+      if (cardioMarkers.some(k => (item.name || "").includes(k))) {
+        switchWorkoutMode("cardio");
+        $("cardioName").value = item.name.replace(/ · \d+분$/, "");
+        $("cardioMins").value = item.mins;
+        $("cardioKcal").value = item.kcal;
+      } else {
+        switchWorkoutMode("weight");
+        $("exName").value = item.name.replace(/^\[웨이트\]\s*/, "");
+        $("exMin").value = item.mins;
+        $("exKcal").value = item.kcal;
+      }
+    }
+  }
+  saveState(); render();
 }
 function removeLogItem(type, idx) { state.logs[currentDate][type].splice(idx, 1); saveState(); render(); }
+
+// [신규] 현재 폼에 입력된 음식을 내 음식 사전(customFoods)에 영구 등록 —
+// 학교 식당 메뉴·도시락·프로틴 등 자주 먹는 항목을 다음날 검색창에서 바로 재사용
+function saveCurrentToCustomDB() {
+  const name = $("foodName").value.trim(), kcal = parseInt($("foodKcal").value, 10);
+  if (!name || isNaN(kcal)) return alert("저장할 음식 이름과 칼로리를 먼저 입력해주세요.");
+  state.customFoods = state.customFoods || [];
+  const item = validateNutritionItem({
+    name, keys: name, serving: "내 사전 등록분", kcal,
+    carb: round1($("foodCarb").value), prot: round1($("foodProt").value),
+    fat: round1($("foodFat").value), satFat: 0, sugar: 0,
+    sodium: selectedFoodBase ? Math.round(selectedFoodBase.sodium || 0) : (editingSodium ?? 0)
+  });
+  const existIdx = state.customFoods.findIndex(x => normalizeStr(x.name) === normalizeStr(name));
+  if (existIdx >= 0) state.customFoods[existIdx] = item;
+  else state.customFoods.unshift(item);
+  saveState();
+  alert(`'${name}' 항목이 내 음식 사전에 저장되었습니다. 앞으로 검색창에서 바로 검색됩니다.`);
+}
 
 function checkSuppSlot(slot) {
   ensureDateLog(currentDate);
@@ -1504,30 +1993,82 @@ function checkSuppSlot(slot) {
   else if (slot === "before_sleep") s.magnesium = 350;
   saveState(); render();
 }
+// [신규] 복용 시각(suppTimes) 기록 + 유산균↔비타민C 60분 이내 동시 복용 시 흡수 저해 경고
 function updateSupp(id, val, isAdd = false) {
   ensureDateLog(currentDate);
-  const cur = state.logs[currentDate].supplements[id] || 0;
-  state.logs[currentDate].supplements[id] = isAdd ? cur + val : Math.max(0, parseInt(val || "0", 10));
+  const log = state.logs[currentDate];
+  log.suppTimes = log.suppTimes || {};
+  const nextVal = isAdd ? (log.supplements[id] || 0) + val : Math.max(0, parseInt(val || "0", 10));
+
+  if (nextVal > 0) {
+    const now = Date.now();
+    // 유산균 ↔ 비타민C: 위산·산도 영향으로 유산균 생균 수 감소 우려 — 최소 60분 간격 권장
+    const conflictId = id === "probiotics" ? "vitc" : id === "vitc" ? "probiotics" : null;
+    if (conflictId && log.supplements[conflictId] > 0 && log.suppTimes[conflictId] && (now - log.suppTimes[conflictId] < 3600000)) {
+      const diffMin = Math.round((now - log.suppTimes[conflictId]) / 60000);
+      alert(`⚠️ 흡수 저해 주의: '${conflictId === "vitc" ? "비타민 C" : "유산균"}' 복용 후 ${diffMin}분 경과했습니다. 위산·산도 영향 방지를 위해 최소 60분 간격을 권장합니다.`);
+    }
+    log.suppTimes[id] = now;
+  } else {
+    delete log.suppTimes[id];
+  }
+  log.supplements[id] = nextVal;
   saveState(); render();
 }
 
+// [수정] 홈과 동일한 getDayEnergySummary 기준으로 통일 + 인바디 측정 이력 박스 렌더링
 function renderWeeklyReport() {
-  const p = state.profile, baseTdee = Math.round(p.bmr * p.activity), days = [];
+  const p = state.profile, days = [];
   let totalDef = 0, totalProt = 0, totalEx = 0;
   for (let i = 6; i >= 0; i--) {
-    const dStr = getOffsetDateStr(currentDate, -i), l = state.logs[dStr];
-    const eaten = l?.foods ? l.foods.reduce((s, x) => s + x.kcal, 0) : 0, prot = l?.foods ? l.foods.reduce((s, x) => s + (x.prot||0), 0) : 0, ex = l?.exercises ? l.exercises.reduce((s, x) => s + x.kcal, 0) : 0;
-    const burned = baseTdee + ex, has = eaten > 0 || ex > 0, net = has ? eaten - burned : 0;
-    if (has) { totalDef += net; totalProt += prot; totalEx += ex; }
-    days.push({ date:dStr.slice(5), weight:l?.weight||p.weight, eaten, burned, net, has });
+    const dStr = getOffsetDateStr(currentDate, -i), s = getDayEnergySummary(dStr), l = state.logs[dStr];
+    const prot = (l?.foods || []).reduce((acc, x) => acc + (x.prot || 0), 0);
+    const net = s.has ? s.eaten - s.totalBurned : 0;
+    if (s.has) { totalDef += net; totalProt += prot; totalEx += s.exKcal; }
+    days.push({ date:dStr.slice(5), weight:s.curW, eaten:s.eaten, burned:s.totalBurned, net, has:s.has });
   }
   const fatG = totalDef < 0 ? Math.round(Math.abs(totalDef) / 7.7) : 0;
   $("weeklyFatLossBadge").textContent = `7일 누적 지방 -${fatG}g 연소`;
-  $("weeklySummaryBox").innerHTML = `• <b>최근 7일 누적 칼로리 밸런스:</b> <b>${totalDef>0?"+":""}${totalDef.toLocaleString()} kcal</b> (순수 체지방 약 <b>${fatG}g</b> 감량 상당)<br/>• <b>최근 7일 총 운동 소모량:</b> <b>-${totalEx.toLocaleString()} kcal</b> | <b>누적 단백질 섭취:</b> <b>${totalProt.toLocaleString()} g</b><br/>• <b>인바디 목표 진행도:</b> 시작 81.0kg → 현재 <b>${p.weight}kg</b> (목표 ${p.targetWeight}kg까지 <b>${Math.max(0,p.weight-p.targetWeight).toFixed(1)}kg</b> 남음)`;
+  $("weeklySummaryBox").innerHTML = `• <b>최근 7일 누적 칼로리 밸런스:</b> <b>${totalDef>0?"+":""}${totalDef.toLocaleString()} kcal</b> (순수 체지방 약 <b>${fatG}g</b> 감량 상당)<br/>• <b>최근 7일 총 운동 소모량:</b> <b>-${totalEx.toLocaleString()} kcal</b> | <b>누적 단백질 섭취:</b> <b>${totalProt.toLocaleString()} g</b><br/>• <b>인바디 목표 진행도:</b> 시작 ${(p.baselineWeight||p.weight)}kg → 현재 <b>${p.weight}kg</b> (목표 ${p.targetWeight}kg까지 <b>${Math.max(0,p.weight-p.targetWeight).toFixed(1)}kg</b> 남음)`;
+
+  // [신규] 공복 체중(점선·마커) vs 7일 이동평균(실선) 인라인 SVG 추세선 —
+  // 수분 변동 노이즈와 실제 감량 추세를 한 눈에 구분 (외부 차트 라이브러리 0 의존)
+  const wPts = days.map((d, idx) => ({
+    x: 24 + idx * 52,
+    w: d.weight,
+    ma: getMovingAvgWeight(getOffsetDateStr(currentDate, -(6 - idx)), 7),
+    lbl: d.date
+  }));
+  const allW = wPts.flatMap(p => [p.w, p.ma]);
+  const minW = Math.min(...allW) - 0.5, maxW = Math.max(...allW) + 0.5;
+  const toY = v => Math.round(88 - ((v - minW) / Math.max(0.5, maxW - minW)) * 64);
+  const rawLine = wPts.map(p => `${p.x},${toY(p.w)}`).join(" ");
+  const maLine  = wPts.map(p => `${p.x},${toY(p.ma)}`).join(" ");
+  $("weightTrendSvgBox").innerHTML = `
+    <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:4px;">📉 공복 체중(회색 점선) vs 7일 이동평균(파란 실선)</div>
+    <svg viewBox="0 0 364 112" style="width:100%;height:112px;background:var(--box);border:1px solid var(--border);border-radius:12px;">
+      <polyline fill="none" stroke="var(--sub)" stroke-width="1.5" stroke-dasharray="3,3" points="${rawLine}" />
+      <polyline fill="none" stroke="var(--primary)" stroke-width="2.5" points="${maLine}" />
+      ${wPts.map(p => `
+        <circle cx="${p.x}" cy="${toY(p.w)}" r="3" fill="var(--sub)" />
+        <text x="${p.x}" y="${toY(p.ma) - 7}" font-size="9.5" font-weight="700" fill="var(--text)" text-anchor="middle">${p.ma}</text>
+        <text x="${p.x}" y="105" font-size="9" fill="var(--sub)" text-anchor="middle">${p.lbl}</text>
+      `).join("")}
+    </svg>`;
   $("weeklyChartContainer").innerHTML = days.map(d => {
     const pct = d.has ? Math.min(100, Math.round((d.eaten / Math.max(1, d.burned)) * 100)) : 0, col = !d.has ? "var(--sub)" : d.net <= 0 ? "var(--green)" : "var(--danger)";
     return `<div class="chart-row"><div><b>${d.date}</b><br/><span style="font-size:10px;color:var(--sub);">${d.weight}kg</span></div><div><div style="display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:2px;"><span>섭취 ${d.eaten} / 소모 ${d.burned}</span><span>${pct}%</span></div><div class="chart-bar-wrap"><div class="chart-bar-inner" style="width:${pct}%;background:${col};"></div></div></div><div style="text-align:right;font-weight:800;color:${col};">${!d.has?"기록없음":`${d.net>0?'+':''}${d.net}kcal`}</div></div>`;
   }).join("");
+  // [신규] 인바디(골격근·체지방) 측정 이력 추이 — saveProfile 시 날짜별로 자동 누적
+  const hist = state.inbodyHistory || [];
+  $("inbodyHistoryBox").innerHTML = hist.length
+    ? hist.slice(-6).reverse().map((h, idx, arr) => {
+        const prev = arr[idx + 1];
+        const dSmm = prev ? (h.smm - prev.smm).toFixed(1) : "0.0";
+        const dBfm = prev ? (h.bfm - prev.bfm).toFixed(1) : "0.0";
+        return `<div class="pyramid-row"><span><b>${h.date}</b> · 체중 ${h.weight}kg</span><span>근육 <b>${h.smm}kg</b>(${dSmm >= 0 ? "+" : ""}${dSmm}) · 체지방 <b>${h.bfm}kg</b>(${dBfm >= 0 ? "+" : ""}${dBfm})</span></div>`;
+      }).join("")
+    : `<div class="empty-msg">인바디 수정 시 날짜별 변화 기록이 자동 누적됩니다.</div>`;
 }
 
 function exportBackupClipboard() {
@@ -1543,7 +2084,9 @@ function restoreFromTextarea() {
   try {
     const parsed = JSON.parse($("backupJsonArea").value.trim());
     if (!parsed.profile || !parsed.logs) throw 0;
-    state = { ...defaultState, ...parsed }; saveState(); render(); renderWeeklyReport(); alert("백업 데이터가 완벽하게 복원되었습니다!");
+    state = { ...defaultState, ...parsed };
+    if (!state.profile.baselineWeight) state.profile.baselineWeight = state.profile.weight;
+    saveState(); render(); renderWeeklyReport(); alert("백업 데이터가 완벽하게 복원되었습니다!");
   } catch (e) { alert("올바른 백업 코드 형식이 아닙니다."); }
 }
 function restoreFromFile(ev) {
@@ -1558,21 +2101,26 @@ function changeActivity() { state.profile.activity = parseFloat($("activitySelec
 function render() {
   applyTheme(); ensureDateLog(currentDate);
   const p = state.profile, log = state.logs[currentDate], supps = log.supplements;
-  calcWeightKcal(); calcCardioKcal();
+  // [사실 교정] render()의 매번 강제 calcWeightKcal/calcCardioKcal 호출 제거 —
+  // 운동 수정 버튼으로 값 복원 직후나 물 섭취 시마다 수동 입력 칼로리가 초기 계산값으로 덮어써지던 문제.
+  // 재계산은 입력 이벤트·saveDailyBio·saveProfile 시점에만 수행.
 
   $("headerTitle").textContent = `${p.name}님의 인바디 프로`;
   $("chipWeight").textContent = `${p.weight} / ${p.targetWeight}kg`;
   $("chipSmm").textContent = `${p.smm} kg`;
   $("chipBfm").textContent = `${p.bfm}kg (${p.pbf}%)`;
+  // [신규] 인바디 점수·감량 목표 동적 갱신 (기존: '인바디 79점', '지방 -5.1kg' 고정 텍스트 → 수정해도 무반응)
+  const inbodyScore = Math.max(0, Math.min(99, Math.round(55 + (p.smm - 32) * 5 + (20 - p.pbf) * 2.2)));
+  $("inbodyScoreBadge").textContent = `인바디 ${inbodyScore}점`;
+  const remainWeight = Math.round((p.weight - p.targetWeight) * 10) / 10;
+  $("lblTargetSub").textContent = remainWeight > 0 ? `목표까지 -${remainWeight}kg 감량 기준` : `목표 적정체중 달성 유지`;
   $("dailyWeightInput").value = log.weight || p.weight;
   $("dailySleepInput").value = log.sleepHours ?? 7.0;
   $("dailyCondSelect").value = log.condition || "normal";
 
-  const curW = log.weight || p.weight, dynBmr = Math.round(p.bmr + (curW - 81.0) * 13);
-  const condF = (log.sleepHours < 6 || log.condition === "tired") ? 0.96 : log.condition === "good" ? 1.02 : 1.0;
-  const baseTdee = Math.round(dynBmr * p.activity * condF), exKcal = log.exercises.reduce((s, x) => s + x.kcal, 0);
-  const synKcal = exKcal > 0 ? Math.round(exKcal * (((supps.arginine||0)>=2000?.04:0) + ((supps.creatine||0)>=3000?.04:0) + ((supps.carnitine||0)>=1000?.03:0) + ((supps.omega3||0)>=1000?.02:0))) : 0;
-  const totalBurned = baseTdee + exKcal + synKcal, baseTarget = Math.max(dynBmr, totalBurned - (p.deficit || 500));
+  // [통합] 홈·칼로리 뱅크·주간 리포트가 동일 기준 사용 (체중연동 dynBmr + 수면·컨디션 계수 + 영양제 시너지)
+  const S = getDayEnergySummary(currentDate);
+  const curW = S.curW, baseW = S.baseW, dynBmr = S.dynBmr, exKcal = S.exKcal, baseTdee = S.baseTdee, synKcal = S.synKcal, totalBurned = S.totalBurned, baseTarget = S.target, eatenKcal = S.eaten;
 
   const bank = calcWeeklyCalorieBank(), banner = $("calorieBankBanner"), btnAuto = $("btnToggleBankAuto");
   btnAuto.textContent = `⚖️ 자동 보정 ${state.bankAutoAdjust ? "ON" : "OFF"}`;
@@ -1591,12 +2139,17 @@ function render() {
   const targetIntake = (state.bankAutoAdjust && bankAdj > 0) ? Math.max(dynBmr - 150, baseTarget - bankAdj) : baseTarget;
   $("lblTargetTitle").textContent = (state.bankAutoAdjust && bankAdj > 0) ? `권장 목표 (뱅크 -${bankAdj} 보정됨)` : `권장 섭취 목표 (-500)`;
 
-  const eatenKcal = log.foods.reduce((s, x) => s + x.kcal, 0), eatenCarb = log.foods.reduce((s, x) => s + (x.carb||0), 0);
-  const eatenProt = log.foods.reduce((s, x) => s + (x.prot||0), 0), eatenFat = log.foods.reduce((s, x) => s + (x.fat||0), 0), eatenSodium = log.foods.reduce((s, x) => s + (x.sodium||0), 0);
-  const tProt = Math.round(curW * 1.6), tFat = Math.round(curW * 0.65), tCarb = Math.max(120, Math.round((targetIntake - tProt*4 - tFat*9) / 4));
+  // [사실 교정] IEEE 754 부동소수점 오차(0.6+0.3=0.8999...)가 화면에 노출되던 문제 — round1으로 합산 후 정규화
+  const eatenCarb = round1(log.foods.reduce((s, x) => s + (x.carb||0), 0));
+  const eatenProt = round1(log.foods.reduce((s, x) => s + (x.prot||0), 0)), eatenFat = round1(log.foods.reduce((s, x) => s + (x.fat||0), 0)), eatenSodium = log.foods.reduce((s, x) => s + (x.sodium||0), 0);
+  // [신규 + 사실 보정] 탄수화물 사이클링: 운동일은 글리코겐 회복 위해 탄수화물 비중↑(단백질 1.8g/kg·지방 0.6g/kg),
+  // 휴식일은 인슐린 변동 최소화·근손실 방지 위해 단백질 2.0g/kg·지방 0.75g/kg.
+  // 감량기(에너지 적자) 제지방 방어 단백질 권장은 1.6~2.4g/kg(Helms et al., 2014; Jäger et al., 2017, JISSN).
+  const isWorkoutDay = exKcal > 0;
+  const tProt = Math.round(curW * (isWorkoutDay ? 1.8 : 2.0)), tFat = Math.round(curW * (isWorkoutDay ? 0.6 : 0.75)), tCarb = Math.max(90, Math.round((targetIntake - tProt*4 - tFat*9) / 4));
 
-  $("valBmr").textContent = `${dynBmr.toLocaleString()} kcal`; $("valBmrSub").textContent = `체중 ${curW}kg 실시간 연동`;
-  $("valTdee").textContent = `${totalBurned.toLocaleString()} kcal`; $("valTdeeSub").textContent = `운동 ${exKcal} + 영양제시너지 ${synKcal} kcal`;
+  $("valBmr").textContent = `${dynBmr.toLocaleString()} kcal`; $("valBmrSub").textContent = `체중 7일 이동평균 ${S.avgW}kg 연동 (기준 ${baseW}kg)`;
+  $("valTdee").textContent = `${totalBurned.toLocaleString()} kcal`; $("valTdeeSub").textContent = `기초·활동 대사 ${baseTdee.toLocaleString()} + 운동 ${exKcal.toLocaleString()} kcal`;
   $("valTarget").textContent = `${targetIntake.toLocaleString()} kcal`; $("valEaten").textContent = `${eatenKcal.toLocaleString()} kcal`;
   const netDiff = eatenKcal - totalBurned;
   $("valNetSub").textContent = `총 소모 대비: ${netDiff > 0 ? "+" : ""}${netDiff.toLocaleString()} kcal`;
@@ -1616,15 +2169,29 @@ function render() {
   $("waterBar").style.width = $("waterPctText").textContent = `${watPct}%`;
   $("sodiumStatusText").textContent = `나트륨 ${eatenSodium.toLocaleString()}mg ${exWatC ? '· 크레아틴 수분 +500ml 반영됨' : ''}`;
 
-  $("customMealPresetChips").innerHTML = (state.mealPresets||[]).map((mp,i) => `<span class="cat-chip" onclick="managePreset('apply','foods',${i})">🍱 ${mp.name} <b style="color:var(--danger);margin-left:4px;" onclick="managePreset('del','foods',${i},event)">×</b></span>`).join("");
-  $("customWorkoutRoutineChips").innerHTML = (state.workoutRoutines||[]).map((wr,i) => `<span class="cat-chip" onclick="managePreset('apply','exercises',${i})">🔥 ${wr.name} <b style="color:var(--danger);margin-left:4px;" onclick="managePreset('del','exercises',${i},event)">×</b></span>`).join("");
+  $("customMealPresetChips").innerHTML = (state.mealPresets||[]).map((mp,i) => `<span class="cat-chip" onclick="managePreset('apply','foods',${i})">🍱 ${esc(mp.name)} <b style="color:var(--danger);margin-left:4px;" onclick="managePreset('del','foods',${i},event)">×</b></span>`).join("");
+  $("customWorkoutRoutineChips").innerHTML = (state.workoutRoutines||[]).map((wr,i) => `<span class="cat-chip" onclick="managePreset('apply','exercises',${i})">🔥 ${esc(wr.name)} <b style="color:var(--danger);margin-left:4px;" onclick="managePreset('del','exercises',${i},event)">×</b></span>`).join("");
 
   $("foodTabBadge").textContent = `${eatenKcal.toLocaleString()} kcal / 단백질 ${eatenProt}g`;
   $("exTabBadge").textContent = `-${exKcal.toLocaleString()} kcal`;
-  $("suppTabBadge").textContent = `운동 시너지 +${synKcal} kcal`;
+  // [사실 교정] 영양제 시너지 kcal 가산 제거에 맞춰 배지도 운동 여부 기준 안내로 교정
+  $("suppTabBadge").textContent = exKcal > 0 ? `운동 보조제 ${Object.values(log.supplements).filter(v => v > 0).length}종 확인` : `복용 가이드`;
 
-  $("foodList").innerHTML = log.foods.length ? log.foods.map((f, i) => `<li class="log-item"><div class="log-left"><span class="log-title">[${f.meal}] ${f.name}</span><span class="log-sub">탄 ${f.carb||0}g · 단 ${f.prot||0}g · 지 ${f.fat||0}g${f.sodium?' · 나트륨 '+f.sodium+'mg':''}</span></div><div class="log-right"><span class="log-kcal">+${f.kcal} kcal</span><button class="btn-del" onclick="removeLogItem('foods',${i})">삭제</button></div></li>`).join("") : `<li class="empty-msg">위 검색창에 음식을 입력하거나 사진/복사글 버튼을 눌러보세요!</li>`;
-  $("exList").innerHTML = log.exercises.length ? log.exercises.map((ex, i) => `<li class="log-item"><div class="log-left"><span class="log-title">${ex.name}</span><span class="log-sub">수행 시간: ${ex.mins}분</span></div><div class="log-right"><span class="log-kcal" style="color:var(--primary);">-${ex.kcal} kcal</span><button class="btn-del" onclick="removeLogItem('exercises',${i})">삭제</button></div></li>`).join("") : `<li class="empty-msg">오늘 기록된 운동이 없습니다.</li>`;
+  // [신규] 끼니별(아침·점심·저녁·간식) 그룹 소계 + 끼니당 단백질 20g 합성 기준 표시 (Schoenfeld & Aragon, 2018, JISSN)
+  // idx는 원본 배열 인덱스를 유지해 수정/삭제가 올바른 항목을 가리키도록 함
+  $("foodList").innerHTML = log.foods.length ? MEAL_ORDER.map(mType => {
+    const items = log.foods.map((f, idx) => ({ ...f, idx })).filter(f => f.meal === mType);
+    if (!items.length) return "";
+    const mKcal = items.reduce((s, x) => s + x.kcal, 0), mProt = Math.round(items.reduce((s, x) => s + (x.prot || 0), 0) * 10) / 10;
+    const protOk = mProt >= 20 ? `<span style="color:var(--green);font-size:11px;">✓ 단백질충족(${mProt}g)</span>` : `<span style="color:var(--amber);font-size:11px;">단백질 ${mProt}g</span>`;
+    return `<li style="padding:8px 4px 4px;font-size:12px;font-weight:800;color:var(--primary);display:flex;justify-content:space-between;border-bottom:2px solid var(--border);">
+        <span>🍽️ ${mType} 소계 (${mKcal} kcal)</span>${protOk}
+      </li>` + items.map(f => `<li class="log-item">
+        <div class="log-left"><span class="log-title">${esc(f.name)}</span><span class="log-sub">탄 ${f.carb||0}g · 단 ${f.prot||0}g · 지 ${f.fat||0}g${f.sodium?' · 나트륨 '+f.sodium+'mg':''}</span></div>
+        <div class="log-right"><span class="log-kcal">+${f.kcal} kcal</span><button class="btn-quick" onclick="editLogItem('foods',${f.idx})">수정</button><button class="btn-del" onclick="removeLogItem('foods',${f.idx})">삭제</button></div>
+      </li>`).join("");
+  }).join("") : `<li class="empty-msg">위 검색창에 음식을 입력하거나 사진/복사글 버튼을 눌러보세요!</li>`;
+  $("exList").innerHTML = log.exercises.length ? log.exercises.map((ex, i) => `<li class="log-item"><div class="log-left"><span class="log-title">${esc(ex.name)}</span><span class="log-sub">수행 시간: ${ex.mins}분</span></div><div class="log-right"><span class="log-kcal" style="color:var(--primary);">-${ex.kcal} kcal</span><button class="btn-quick" onclick="editLogItem('exercises',${i})">수정</button><button class="btn-del" onclick="removeLogItem('exercises',${i})">삭제</button></div></li>`).join("") : `<li class="empty-msg">오늘 기록된 운동이 없습니다.</li>`;
 
   $("suppContainer").innerHTML = SUPP_META.map(m => {
     const amt = supps[m.id] || 0;
@@ -1633,20 +2200,69 @@ function render() {
 
   const slpMsg = (log.sleepHours < 6 || log.condition === "tired") ? `⚠️ <b>수면·컨디션 주의 (${log.sleepHours}시간):</b> 코르티솔 상승으로 근손실 위험이 있으니 오늘 유산소는 공복 대신 식후 경사걷기로 진행하시고 취침 전 <b>마그네슘</b>을 꼭 챙기세요.` : `✅ <b>수면·회복 양호 (${log.sleepHours}시간):</b> 호르몬 및 인슐린 민감성이 정상 상태라 웨이트 볼륨과 지방 연소 효율이 극대화됩니다.`;
   $("dailyInsightBox").innerHTML = `• ${slpMsg}<br/>• <b>예상 체지방 감량 속도:</b> 오늘 현재 칼로리 밸런스(<b>${netDiff} kcal</b>) 기준 약 <b>${netDiff<0?Math.round(Math.abs(netDiff)/7.7):0}g</b>의 체지방이 연소되는 페이스입니다.<br/>• <b>영양제 10종 핵심 요약:</b> <b>기상 직후 공복</b>엔 유산균+물1컵, <b>운동 30분 전 공복</b>엔 아르기닌+카르니틴, <b>식사 직후</b>엔 크레아틴·오메가3·비타민B/C/D·밀크씨슬, <b>취침 전</b>엔 마그네슘을 드세요!`;
+
+  // [신규] 최근 7일 부위별 누적 세트 수 + 회복 주기 표시
+  renderMuscleVolumeTracker();
 }
 
-const MODAL_MAP = [["pName","name"],["pWeight","weight"],["pTargetWeight","targetWeight"],["pSmm","smm"],["pBfm","bfm"],["pPbf","pbf"],["pBmr","bmr"]];
-function openModal() { MODAL_MAP.forEach(([id, k]) => $(id).value = state.profile[k]);$("profileModal").style.display = "flex"; }
+// [신규] 근비대 최적 주간 세트 10~20세트 기준(Schoenfeld et al., 2017, J Sports Sci) 부위별 볼륨·회복 트래커
+function renderMuscleVolumeTracker() {
+  const cats = ["가슴", "등", "하체", "어깨", "팔", "맨몸/복근"];
+  const stats = Object.fromEntries(cats.map(c => [c, { sets: 0, lastDiff: null }]));
+  for (let i = 0; i <= 6; i++) {
+    const l = state.logs[getOffsetDateStr(currentDate, -i)];
+    (l?.exercises || []).forEach(ex => {
+      const cat = ex.meta?.cat || WEIGHT_EXERCISE_DB.find(w => ex.name.includes(w.name.split(" (")[0]))?.cat;
+      if (cat && stats[cat]) {
+        const sMatch = ex.meta?.sets || parseInt((ex.name.match(/(\d+)\s*세트/) || [, 0])[1], 10) || 0;
+        stats[cat].sets += sMatch;
+        if (stats[cat].lastDiff === null) stats[cat].lastDiff = i;
+      }
+    });
+  }
+  $("muscleVolumeGrid").innerHTML = cats.map(c => {
+    const { sets, lastDiff } = stats[c];
+    const recTxt = lastDiff === null ? "7일내 휴식" : lastDiff === 0 ? "오늘 수행" : lastDiff === 1 ? "어제(회복중)" : `${lastDiff}일전(회복완료)`;
+    const color = sets >= 10 ? "var(--green)" : sets > 0 ? "var(--primary)" : "var(--sub)";
+    return `<div class="chip"><span class="label">${c} (${recTxt})</span><span class="val" style="color:${color};">${sets} 세트</span></div>`;
+  }).join("");
+}
+
+// [사실 교정] 신장(romMeters 계산용)·적자폭(getDayEnergySummary용)이 모달에 없어 수정 불가했던 누락 보완
+const MODAL_MAP = [["pName","name"],["pHeight","height"],["pWeight","weight"],["pTargetWeight","targetWeight"],["pSmm","smm"],["pBfm","bfm"],["pPbf","pbf"],["pBmr","bmr"],["pDeficit","deficit"]];
+function openModal() { MODAL_MAP.forEach(([id, k]) => $(id).value = state.profile[k]); $("profileModal").style.display = "flex"; }
 function closeModal() { $("profileModal").style.display = "none"; }
 function saveProfile() {
-  MODAL_MAP.forEach(([id, k]) => { const v = $(id).value.trim(); state.profile[k] = k === "name" ? (v || "사용자") : (parseFloat(v) || state.profile[k]); });
-  saveState(); render(); closeModal();
+  // [사실 교정] parseFloat(v) || 이전값 방식은 숫자 0을 거짓으로 평가해 '적자폭 0(유지)' 입력이 무시되던 문제 —
+  // Number.isFinite로 0·음수(증량)도 정상 저장
+  MODAL_MAP.forEach(([id, k]) => {
+    const v = $(id).value.trim();
+    if (k === "name") { state.profile[k] = v || "사용자"; return; }
+    const num = parseFloat(v);
+    if (Number.isFinite(num)) state.profile[k] = num;
+  });
+  // [수정] 새 체중 저장 시 BMR 실시간 연동 기준점도 갱신
+  state.profile.baselineWeight = state.profile.weight;
+  // [신규] 측정 날짜별 인바디 스냅샷 자동 누적 (같은 날 재측정 시 갱신, 골격근·체지방 추이 추적)
+  state.inbodyHistory = state.inbodyHistory || [];
+  const snap = { date: currentDate, weight: state.profile.weight, smm: state.profile.smm, bfm: state.profile.bfm, pbf: state.profile.pbf };
+  const existIdx = state.inbodyHistory.findIndex(x => x.date === currentDate);
+  if (existIdx >= 0) state.inbodyHistory[existIdx] = snap;
+  else state.inbodyHistory.push(snap);
+  state.inbodyHistory.sort((a, b) => a.date.localeCompare(b.date));
+  // 체중·신장 변경은 운동 칼로리 계산에 영향 — 저장 직전에만 재계산
+  calcWeightKcal(); calcCardioKcal();
+  saveState(); render(); renderWeeklyReport(); closeModal();
 }
 
+// ===== 초기화 =====
 $("datePicker").value = currentDate;
 $("activitySelect").value = String(state.profile.activity);
 generateAppIcon(state.iconTheme);
 populateWeightExSelect();
+renderFoodCategoryChips();
+onFoodSearchInput();
+calcWeightKcal(); calcCardioKcal(); // 시작 시 1회 계산 (render 상단 강제 호출 제거로 칼로리 분해표 초기 표시 보장)
 render();
 </script>
 </body>
