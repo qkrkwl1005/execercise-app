@@ -1482,51 +1482,182 @@ function renderFoodSearchResults(list, banner = "", mult = 1.0) {
 }
 
 // ===== 행 밀림 없는 FatSecret 파서 + OpenFoodFacts 공식 API 병렬 웹 검색 =====
+// 기존 로컬스토리지에 잘못 저장된 '영양 정보 비슷한' 캐시 1회 초기화 및 오염 항목 자동 정화
+(function cleanCorruptedWebFoodCache() {
+  const CACHE_FIX_FLAG = "INBODY_WEB_CACHE_FIXED_V2";
+  if (!localStorage.getItem(CACHE_FIX_FLAG)) {
+    webFoodCache = {};
+    saveWebCache();
+    try { localStorage.setItem(CACHE_FIX_FLAG, "1"); } catch (e) {}
+    return;
+  }
+  let changed = false;
+  Object.keys(webFoodCache || {}).forEach(k => {
+    const arr = webFoodCache[k] || [];
+    if (arr.some(it => !it?.name || /영양\s*정보|^비슷한$|비슷한\s*음식/.test(it.name))) {
+      delete webFoodCache[k];
+      changed = true;
+    }
+  });
+  if (changed) saveWebCache();
+})();
+
+const NOISE_FOOD_LABEL_RE = /^(?:영양\s*정보|영양\s*성분|영양\s*분석표?|비슷한(?:\s*음식|\s*식품)?|유사한(?:\s*음식)?|더\s*보기|자세히\s*보기|칼로리|칼로리\s*표|검색|음식|식품|브랜드|인기\s*브랜드|레시피|다이어트|커뮤니티|로그인|회원\s*가입|등록|홈|다음|이전|맨\s*위로|\d+)$/i;
+
+function decodeFoodText(str) {
+  return String(str || "")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isInvalidFoodTitle(label, url = "") {
+  const clean = decodeFoodText(label);
+  if (!clean || clean.length < 1) return true;
+  if (NOISE_FOOD_LABEL_RE.test(clean)) return true;
+  if (/^영양\s*정보|영양\s*정보\s*비슷한|^비슷한$/.test(clean)) return true;
+  if (url && /(?:\/search\b|[?&]q=|[?&]pg=|[?&]page=|\/member|\/Default\.aspx)/i.test(url)) return true;
+  return false;
+}
+
+function extractMdFoodLinks(seg) {
+  // 제목 내 대괄호([브랜드]) 및 URL 내 괄호((컵), (100g)) 중첩을 모두 허용하는 정규식
+  const MD_LINK_RE = /\[((?:[^\[\]]|\[[^\]]*\])+)\]\(((?:https?:\/\/[^/\s()]+)?\/(?:[^\s()]|\([^\s()]*\))*)\)/g;
+  const out = [];
+  for (const m of seg.matchAll(MD_LINK_RE)) {
+    const label = decodeFoodText(m[1]);
+    const url = m[2] || "";
+    if (isInvalidFoodTitle(label, url)) continue;
+    const idx = m.index || 0;
+    const beforeChar = idx > 0 ? seg.slice(0, idx).trimEnd().slice(-1) : "";
+    const afterChar = seg.slice(idx + m[0].length).trimStart()[0] || "";
+    const inParens = beforeChar === "(" && afterChar === ")";
+    out.push({ label, url, inParens });
+  }
+  return out;
+}
+
+function formatBrandAndFoodTitle(mainTitle, brandTitle) {
+  const t = decodeFoodText(mainTitle);
+  const b = decodeFoodText(brandTitle);
+  if (!t) return "";
+  if (!b || t.includes(b)) return t;
+  return `[${b}] ${t}`;
+}
+
 function parseFatSecretStrict(raw) {
   if (!raw) return [];
   const items = [];
-  if (raw.includes("<table") || raw.includes("searchResult")) {
+
+  // 1) 원본 HTML 응답 파싱
+  if (/<(?:table|tr|td|div)\b/i.test(raw) && (raw.includes("searchResult") || raw.includes("prominent"))) {
     const doc = new DOMParser().parseFromString(raw, "text/html");
-    doc.querySelectorAll("table.generic.searchResult tr, .searchResult tr").forEach(tr => {
-      const t = tr.querySelector("a.prominent"), b = tr.querySelector("a.brand"), inf = tr.querySelector("div.smallText, .smallText");
+    const rows = doc.querySelectorAll("table.generic.searchResult tr, .searchResult tr");
+    rows.forEach(tr => {
+      const t = tr.querySelector("a.prominent") || [...tr.querySelectorAll("a")].find(a => !isInvalidFoodTitle(a.textContent, a.getAttribute("href") || ""));
+      const b = tr.querySelector("a.brand");
+      const inf = tr.querySelector("div.smallText, .smallText");
       if (!t || !inf) return;
-      const txt = inf.textContent.replace(/\s+/g, " "), kM = txt.match(/칼로리:\s*([\d,.]+)\s*kcal/i);
+
+      const title = formatBrandAndFoodTitle(t.textContent, b ? b.textContent : "");
+      if (isInvalidFoodTitle(title)) return;
+
+      const infClone = inf.cloneNode(true);
+      infClone.querySelectorAll("a").forEach(a => a.remove());
+      const txt = decodeFoodText(infClone.textContent);
+      const kM = txt.match(/칼로리\s*:\s*([\d,.]+)\s*kcal/i);
       if (!kM) return;
+
+      const numVal = rgx => parseFloat(String((txt.match(rgx) || [, 0])[1]).replace(/,/g, "")) || 0;
       items.push(validateNutritionItem({
-        name: `${b ? `[${b.textContent.trim()}] ` : ""}${t.textContent.trim()}`,
-        serving: (txt.match(/^([^-]+)-\s*칼로리/) || [,"1회 제공량"])[1].trim(),
+        name: title,
+        serving: (txt.match(/^([^-|]+)-\s*칼로리/i) || [, "1회 제공량"])[1].trim(),
         kcal: parseFloat(kM[1].replace(/,/g, "")),
-        carb: parseFloat((txt.match(/탄수화물:\s*([\d,.]+)\s*g/i)||[,0])[1]),
-        prot: parseFloat((txt.match(/단백질:\s*([\d,.]+)\s*g/i)||[,0])[1]),
-        fat: parseFloat((txt.match(/지방:\s*([\d,.]+)\s*g/i)||[,0])[1]),
-        satFat:0, sugar:0, sodium:0, isWeb:true
+        carb: numVal(/탄수화물\s*:\s*([\d,.]+)\s*g/i),
+        prot: numVal(/단백질\s*:\s*([\d,.]+)\s*g/i),
+        fat: numVal(/지방\s*:\s*([\d,.]+)\s*g/i),
+        satFat: 0, sugar: 0, sodium: 0, isWeb: true, source: "fs"
       }));
     });
     if (items.length) return items;
   }
+
+  // 2) r.jina.ai 마크다운 응답 파싱
   const lines = raw.split(/\n+/).map(l => l.trim()).filter(Boolean);
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (!line.includes("칼로리:") || !line.includes("kcal")) continue;
-    const kM = line.match(/칼로리:\s*([\d,.]+)\s*kcal/i);
+    if (!/칼로리\s*:/i.test(line) || !/kcal/i.test(line)) continue;
+    const kM = line.match(/칼로리\s*:\s*([\d,.]+)\s*kcal/i);
     if (!kM) continue;
+
+    // 칼로리: 뒷부분에 붙는 [영양 정보] - [비슷한] 링크를 원천 배제하기 위해 앞부분만 분리
+    const beforeCal = line.split(/칼로리\s*:/i)[0] || "";
     let foodTitle = "";
-    for (let j = i; j >= Math.max(0, i - 2); j--) {
-      const linkMatches = [...lines[j].matchAll(/\[([^\]]+)\]\(https?:\/\/www\.fatsecret\.kr\/[^)]+\)/g)];
-      if (linkMatches.length > 0) {
-        foodTitle = linkMatches.map(m => m[1].trim()).filter(x => !x.includes("칼로리") && !x.includes("더 보기")).join(" ");
-        if (foodTitle) break;
+    let pendingBrand = "";
+
+    // 같은 줄(칼로리 앞부분)에서 먼저 링크 확인
+    const inlineLinks = extractMdFoodLinks(beforeCal);
+    if (inlineLinks.length > 0) {
+      const main = inlineLinks.find(x => !x.inParens) || inlineLinks[0];
+      const brand = inlineLinks.find(x => x !== main && x.inParens) || (inlineLinks.length >= 2 ? inlineLinks[1] : null);
+      foodTitle = formatBrandAndFoodTitle(main.label, brand ? brand.label : "");
+    }
+
+    // 같은 줄에 없으면 직전 줄들을 역탐색 (이전 음식의 칼로리 줄 침범 차단)
+    if (!foodTitle) {
+      for (let j = i - 1; j >= Math.max(0, i - 3); j--) {
+        const prevLine = lines[j];
+        if (/칼로리\s*:.*kcal/i.test(prevLine)) break;
+        if (/^(?:Title:|URL Source:|Markdown Content:|검색\s*요약)/i.test(prevLine)) break;
+
+        const links = extractMdFoodLinks(prevLine);
+        if (links.length > 0) {
+          const nonParen = links.filter(x => !x.inParens);
+          const paren = links.filter(x => x.inParens);
+          // ([브랜드]) 단독 줄인 경우 브랜드만 보관하고 한 줄 더 위에서 본 음식명 탐색
+          if (!nonParen.length && paren.length) {
+            pendingBrand = paren[0].label;
+            continue;
+          }
+          const main = nonParen[0] || links[0];
+          const brand = paren[0] || (nonParen.length >= 2 ? nonParen[1] : null);
+          foodTitle = formatBrandAndFoodTitle(main.label, brand ? brand.label : pendingBrand);
+          if (foodTitle) break;
+        } else if (j === i - 1) {
+          // 링크 마크다운 없이 일반 텍스트로만 제목이 내려온 경우 폴백
+          const plain = decodeFoodText(prevLine.replace(/^[#>*|\-\s]+|[|\-\s]+$/g, ""));
+          if (plain && plain.length <= 50 && !isInvalidFoodTitle(plain) && !/칼로리|탄수화물|단백질/.test(plain)) {
+            foodTitle = plain;
+            break;
+          }
+        }
       }
     }
-    if (!foodTitle) continue;
+
+    if (!foodTitle || isInvalidFoodTitle(foodTitle)) continue;
+
+    const servingClean = decodeFoodText(
+      beforeCal
+        .replace(/\[((?:[^\[\]]|\[[^\]]*\])+)\]\([^)]*\)/g, " ")
+        .replace(/\(\s*\)/g, " ")
+        .replace(/^[|\-\s•*]+|[|\-\s•*]+$/g, "")
+    ) || "1회 제공량";
+
+    const numVal = rgx => parseFloat(String((line.match(rgx) || [, 0])[1]).replace(/,/g, "")) || 0;
     items.push(validateNutritionItem({
       name: foodTitle,
-      serving: (line.match(/([^|\n-]+)-\s*칼로리:/) || [,"1회 제공량"])[1].trim(),
+      serving: servingClean,
       kcal: parseFloat(kM[1].replace(/,/g, "")),
-      carb: parseFloat((line.match(/탄수화물:\s*([\d,.]+)\s*g/i)||[,0])[1]),
-      prot: parseFloat((line.match(/단백질:\s*([\d,.]+)\s*g/i)||[,0])[1]),
-      fat: parseFloat((line.match(/지방:\s*([\d,.]+)\s*g/i)||[,0])[1]),
-      satFat:0, sugar:0, sodium:0, isWeb:true
+      carb: numVal(/탄수화물\s*:\s*([\d,.]+)\s*g/i),
+      prot: numVal(/단백질\s*:\s*([\d,.]+)\s*g/i),
+      fat: numVal(/지방\s*:\s*([\d,.]+)\s*g/i),
+      satFat: 0, sugar: 0, sodium: 0, isWeb: true, source: "fs"
     }));
   }
   return items;
@@ -1539,16 +1670,19 @@ async function fetchOpenFoodFacts(q) {
     const res = await fetch(url, { signal: ctrl.signal }); clearTimeout(id);
     if (!res.ok) return [];
     const data = await res.json();
+    const isKorQuery = /[가-힣]/.test(q);
     return (data.products || []).map(p => {
       const n = p.nutriments || {};
-      const title = (p.product_name_ko || p.product_name || "").trim();
-      const brand = (p.brands || "").split(",")[0].trim();
+      const rawTitle = decodeFoodText(p.product_name_ko || p.product_name || "");
+      const brand = decodeFoodText((p.brands || "").split(",")[0]);
       const kcal = n["energy-kcal_serving"] || n["energy-kcal_100g"] || (n.energy_100g ? Math.round(n.energy_100g / 4.184) : 0);
-      if (!title || !kcal) return null;
+      if (!rawTitle || isInvalidFoodTitle(rawTitle) || !kcal) return null;
+      const fullName = formatBrandAndFoodTitle(rawTitle, brand);
+      if (isKorQuery && !/[가-힣]/.test(fullName)) return null;
       const useServ = !!n["energy-kcal_serving"];
       const sfx = useServ ? "_serving" : "_100g";
       return validateNutritionItem({
-        name: `${brand && !title.includes(brand) ? `[${brand}] ` : ""}${title}`,
+        name: fullName,
         serving: useServ ? (p.serving_size || "1회 제공량") : "100g 기준",
         kcal,
         carb: n["carbohydrates" + sfx] || 0,
@@ -1557,7 +1691,8 @@ async function fetchOpenFoodFacts(q) {
         satFat: n["saturated-fat" + sfx] || 0,
         sugar: n["sugars" + sfx] || 0,
         sodium: (n["sodium" + sfx] || 0) * 1000,
-        isWeb: true
+        isWeb: true,
+        source: "off"
       });
     }).filter(Boolean);
   } catch (e) { return []; }
@@ -1582,9 +1717,6 @@ async function fetchFatSecretSingleQuery(q) {
   } catch (e) { return []; }
 }
 
-// [신규] 가공식품 바코드(EAN-13/KAN 등 8~14자리) 단건 조회 —
-// 키워드 검색(cgi/search.pl)은 한국어 매칭률이 낮지만, 바코드 단건 API는
-// 국내 편의점 음료·프로틴바·가공식품을 0.3초 내 정확히 반환
 async function fetchFoodByBarcode(code) {
   try {
     const ctrl = new AbortController(), id = setTimeout(() => ctrl.abort(), 5500);
@@ -1597,24 +1729,45 @@ async function fetchFoodByBarcode(code) {
     const useServ = n["energy-kcal_serving"] != null;
     const sfx = useServ ? "_serving" : "_100g";
     return validateNutritionItem({
-      name: `${p.brands ? `[${p.brands.split(",")[0].trim()}] ` : ""}${p.product_name_ko || p.product_name || code}`,
+      name: formatBrandAndFoodTitle(p.product_name_ko || p.product_name || code, (p.brands || "").split(",")[0]),
       serving: useServ ? (p.serving_size || "1회 제공량") : "100g 기준",
       kcal: n["energy-kcal" + sfx] || 0,
       carb: n["carbohydrates" + sfx] || 0,
       prot: n["proteins" + sfx] || 0,
-      fat:  n["fat" + sfx] || 0,
+      fat: n["fat" + sfx] || 0,
       satFat: n["saturated-fat" + sfx] || 0,
-      sugar:  n["sugars" + sfx] || 0,
+      sugar: n["sugars" + sfx] || 0,
       sodium: (n["sodium" + sfx] || 0) * 1000,
       isWeb: true
     });
   } catch (e) { return null; }
 }
 
+function rankWebFoodResults(list, coreQuery) {
+  const qNorm = normalizeStr(coreQuery);
+  const tokens = coreQuery.trim().split(/\s+/).map(normalizeStr).filter(Boolean);
+  const scored = list.map((it, idx) => {
+    const nNorm = normalizeStr(it.name);
+    let score = (it.source === "fs" ? 40 : 10) - idx * 0.5;
+    if (nNorm === qNorm) score += 320;
+    else if (nNorm.includes(qNorm)) score += 240;
+    let matched = 0;
+    for (const tk of tokens) {
+      if (nNorm.includes(tk)) { score += 80; matched++; }
+    }
+    if (tokens.length >= 2 && matched === tokens.length) score += 140;
+    return { it, score, matched };
+  });
+  scored.sort((a, b) => b.score - a.score);
+  const strongCount = scored.filter(s => s.matched > 0).length;
+  // 검색어 단어가 포함된 정확 매칭이 3건 이상 있으면 무관한 파생 항목 제외
+  const filtered = strongCount >= 3 ? scored.filter(s => s.matched > 0) : scored;
+  return filtered.map(s => s.it);
+}
+
 async function searchLiveWebFood() {
   const raw = $("foodSearchInput").value.trim();
   if (!raw) return alert("검색어를 먼저 입력해 주세요.");
-  // [신규] 바코드 숫자(8~14자리) 입력 시 키워드 검색을 건너뛰고 단건 API로 즉시 분기
   if (/^\d{8,14}$/.test(raw)) {
     const item = await fetchFoodByBarcode(raw);
     if (item) {
@@ -1626,26 +1779,47 @@ async function searchLiveWebFood() {
   const { coreQuery, mult } = parseSmartKoreanFoodQuery(raw);
   activeMult = mult || 1.0;
   const cacheKey = normalizeStr(coreQuery), local = searchLocalDB(coreQuery);
-  if (webFoodCache[cacheKey]?.length) return renderFoodSearchResults([...webFoodCache[cacheKey], ...local], `✅ 캐시된 실시간 웹 검색 결과 (${webFoodCache[cacheKey].length}건) + 공식 DB`, activeMult);
+  if (webFoodCache[cacheKey]?.length) {
+    return renderFoodSearchResults([...webFoodCache[cacheKey], ...local], `✅ 캐시된 실시간 웹 검색 결과 (${webFoodCache[cacheKey].length}건) + 공식 DB`, activeMult);
+  }
 
   const btn = $("btnWebSearch"); btn.textContent = "⏳ 검색중..."; btn.disabled = true;
-  renderFoodSearchResults(local, `🌐 <b>'${coreQuery}'</b> 외부 식품 영양성분 DB 실시간 검색 중...`, activeMult);
+  renderFoodSearchResults(local, `🌐 <b>'${esc(coreQuery)}'</b> 외부 식품 영양성분 DB 실시간 검색 중...`, activeMult);
 
   const tks = coreQuery.split(/\s+/).filter(Boolean);
-  const qs = [...new Set([coreQuery, ...(tks.length >= 2 ? [tks.slice(-2).join(" "), tks[0] + " " + tks[tks.length-1]] : [])])];
-  const settled = await Promise.allSettled([
-    fetchOpenFoodFacts(coreQuery),
-    ...qs.map(fetchFatSecretSingleQuery)
+  const qs = [...new Set([
+    coreQuery,
+    ...(tks.length >= 2 ? [tks.join("")] : []),
+    ...(tks.length >= 3 ? [tks.slice(1).join(" ")] : [])
+  ])];
+
+  // 한국어 데이터가 풍부한 FatSecret을 우선 수집하고 OpenFoodFacts를 보조 결합
+  let settled = await Promise.allSettled([
+    ...qs.map(fetchFatSecretSingleQuery),
+    fetchOpenFoodFacts(coreQuery)
   ]);
-  const webRes = [], seen = new Set();
-  settled.forEach(r => r.status === "fulfilled" && (r.value || []).forEach(it => {
+
+  let rawWeb = [];
+  settled.forEach(r => r.status === "fulfilled" && (r.value || []).forEach(it => rawWeb.push(it)));
+
+  // 복합어 전체 검색 결과가 없을 때만 핵심 단어별 2차 검색 수행
+  if (!rawWeb.length && tks.length >= 2) {
+    const fallbackSettled = await Promise.allSettled(tks.filter(w => w.length >= 2).slice(0, 2).map(fetchFatSecretSingleQuery));
+    fallbackSettled.forEach(r => r.status === "fulfilled" && (r.value || []).forEach(it => rawWeb.push(it)));
+  }
+
+  const deduped = [], seen = new Set();
+  for (const it of rawWeb) {
+    if (!it?.name || isInvalidFoodTitle(it.name)) continue;
     const k = normalizeStr(it.name) + "_" + it.kcal;
-    if (!seen.has(k)) { seen.add(k); webRes.push(it); }
-  }));
+    if (!seen.has(k)) { seen.add(k); deduped.push(it); }
+  }
+  const webRes = rankWebFoodResults(deduped, coreQuery);
+
   btn.textContent = "🌐 실시간 웹검색"; btn.disabled = false;
   if (webRes.length) {
     webFoodCache[cacheKey] = webRes.slice(0, 15); saveWebCache();
-    renderFoodSearchResults([...webFoodCache[cacheKey], ...local], `✅ 실시간 웹 검색 완료: 외부 식품 DB에서 <b>${webRes.length}건</b>을 찾았습니다! (클릭 시 즉시 선택)`, activeMult);
+    renderFoodSearchResults([...webFoodCache[cacheKey], ...local], `✅ 실시간 웹 검색 완료: 외부 식품 DB에서 <b>${webFoodCache[cacheKey].length}건</b>을 찾았습니다! (클릭 시 즉시 선택)`, activeMult);
   } else {
     renderFoodSearchResults(local, `⚠️ 외부 웹 응답이 지연되어 <b>내장 공식 DB 및 맞춤 추정치</b>를 표시합니다. 쿠팡/네이버 상품은 아래 버튼으로 복사하거나 캡처해 넣으세요!`, activeMult);
   }
