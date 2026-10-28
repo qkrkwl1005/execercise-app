@@ -1386,7 +1386,7 @@
         <div class="card">
           <div class="card-title">
             <span>🏋️ 내 신체 맞춤 웨이트 · 유산소 계산기</span
-            ><span class="badge" id="exTabBadge">-0 kcal</span>
+            ><span class="badge" id="exTabBadge">활동 -0 kcal</span>
           </div>
           <div class="quick-action-bar">
             <button class="btn-soft" onclick="copyYesterday('exercises')">
@@ -1619,10 +1619,12 @@
                 ><input type="text" id="exName" value="바벨 컬" />
               </div>
               <div>
-                <label class="field-label">최종 소모 칼로리(kcal)</label
+                <label class="field-label">활동 칼로리(kcal)</label
                 ><input type="number" id="exKcal" inputmode="numeric" />
               </div>
             </div>
+            <label class="field-label">총 칼로리(활동 + 기초대사)</label>
+            <input type="number" id="exTotalKcal" inputmode="numeric" readonly />
             <div class="ex-calc-preview" id="exCalcBreakdown"></div>
             <button class="btn-primary" onclick="addWeightExercise()">
               + 이 근력 운동 기록하기
@@ -2074,9 +2076,8 @@
       ];
       const WEB_FOOD_CACHE_KEY = "INBODY_FOOD_WEB_CACHE_V4";
 
-      // [핵심 개선 상수] 세트간 휴식 중 대사(MET), 1회 수행 템포(초), 세트 진입/정리 시간(초)
-      const REST_MET = 2.2,
-        TEMPO_SEC = 4.5,
+      // [근력운동 시간 추정] 1회 수행 템포(초), 세트 진입/정리 시간(초)
+      const TEMPO_SEC = 4.5,
         SET_OVERHEAD_SEC = 10;
       // [신규] 등척성(시간제) 종목: '회'가 아닌 '초' 단위 입력 처리 + 소수점 1자리 반올림 유틸
       const ISOMETRIC_IDS = new Set([
@@ -2084,6 +2085,58 @@
         "side_plank",
         "wall_sit",
         "farmer_walk",
+      ]);
+      const UNILATERAL_EXERCISE_NAME =
+        /원암|원레그|한\s*다리|스플릿|불가리안|런지|(?:one|single)[\s_-]?(?:arm|leg)|split|lunge|unilateral/i;
+      const COMPOUND_WEIGHT_EXERCISE_IDS = new Set([
+        "bench_press",
+        "smith_bench",
+        "incline_bench",
+        "smith_incline_bench",
+        "db_bench",
+        "incline_db_press",
+        "chest_press_machine",
+        "dips",
+        "deadlift",
+        "smith_deadlift",
+        "barbell_row",
+        "smith_row",
+        "lat_pulldown",
+        "seated_row",
+        "one_arm_db_row",
+        "arm_pulldown",
+        "ohp",
+        "smith_shoulder",
+        "db_shoulder",
+        "barbell_squat",
+        "smith_squat",
+        "leg_press",
+        "one_leg_press",
+        "lunge",
+        "pushup",
+        "pullup",
+        "bw_squat",
+        "burpee",
+        "close_grip_bench",
+        "bench_dip",
+        "chinup",
+        "wide_pullup",
+        "chest_supported_row",
+        "single_cable_row",
+        "upright_row",
+        "hip_thrust",
+        "glute_bridge",
+        "bulgarian_db",
+        "sumo_dead",
+        "front_squat",
+        "goblet_squat",
+        "step_up",
+        "leg_press_wide",
+        "jump_squat",
+        "mountain_climber",
+        "jumping_jack",
+        "farmer_walk",
+        "kettlebell_swing",
       ]);
       const round1 = (v) => Math.round((parseFloat(v) || 0) * 10) / 10;
 
@@ -5492,8 +5545,13 @@
           totalVolumeKg = Math.round((kg + bwLoad) * totalReps);
           est1RM = kg > 0 ? kg * (1 + reps / 30) : 0;
         }
-        // [핵심 개선 + 사실 교정] 시간 분배: 실제 수행 vs 세트간 휴식(2.2MET)
-        // 등척성 종목(plank·wall_sit 등)은 입력값이 '초'이므로 1회 템포(4.5초) 배수를 곱하지 않는다 (기존: 플랭크 60초→270초로 4.5배 과대계산)
+        const exerciseName = `${$("exName").value} ${ex.name} ${ex.id}`;
+        const sideMultiplier = UNILATERAL_EXERCISE_NAME.test(exerciseName)
+          ? 2
+          : 1;
+        totalReps *= sideMultiplier;
+        totalVolumeKg *= sideMultiplier;
+
         const isIso = ISOMETRIC_IDS.has(ex.id);
         const activeMin =
           totalReps > 0
@@ -5506,8 +5564,13 @@
             ? manualMin != null
               ? Math.max(0, manualMin - activeMin)
               : (Math.max(0, sets - 1) * restSecCfg) / 60
-            : Math.max(0, (manualMin || 0) - activeMin);
-        const totalMin = manualMin != null ? manualMin : activeMin + restMin;
+            : 0;
+        const totalMin =
+          manualMin != null
+            ? Math.max(manualMin, activeMin)
+            : activeMin + restMin;
+        if (manualMin != null && totalMin > manualMin)
+          $("exMin").value = Math.round(totalMin * 10) / 10;
         if (!exMinManual && totalMin > 0) {
           $("exMin").value = Math.round(totalMin * 10) / 10;
           $("lblExMin").innerHTML =
@@ -5516,30 +5579,37 @@
           $("lblExMin").innerHTML =
             `총 시간(분) <span style="color:var(--amber);">(수동 입력)</span>`;
 
-        const romMeters = ex.rom * ((p.height || 180) / 175),
-          smmRatio = p.smm / 32;
-        const mechanicalKcal =
-          ((totalVolumeKg * 9.81 * romMeters * 1.4) / (4184 * 0.185)) * ex.stab;
-        const activeMets = Math.max(1.5, ex.mets * ex.stab);
-        const activeTimeKcal =
-          (activeMets - 1) * p.weight * (activeMin / 60) * 1.05;
-        const restTimeKcal = (REST_MET - 1) * p.weight * (restMin / 60);
-        // [사실 교정] Compendium of Physical Activities(Ainsworth 2011; Herrmann 2024)의 저항운동 MET(3.5~6.0)는
-        // 외적 중량 거상 산소량을 이미 포함 — 역학 열량 + MET 열량을 100% 합산하면 수행 구간이 이중 계상됨.
-        // 두 모델 중 큰 값을 수행 구간 대사로 채택해 과대 추정 제거.
-        const workPhaseKcal = Math.max(mechanicalKcal, activeTimeKcal);
-        const activeTotal = Math.round(workPhaseKcal + restTimeKcal),
-          epocKcal = Math.round(activeTotal * ex.epoc * smmRatio),
-          finalKcal = activeTotal + epocKcal;
-        $("exKcal").value = finalKcal;
+        const averageLoadKg =
+            totalReps > 0
+              ? totalVolumeKg / totalReps
+              : (parseFloat($("exWeightKg").value) || 0) + bwLoad,
+          loadFactor = Math.max(
+            0,
+            Math.min(1, averageLoadKg / Math.max(1, p.weight)),
+          ),
+          compoundFactor = COMPOUND_WEIGHT_EXERCISE_IDS.has(ex.id) ? 0.5 : 0,
+          activeMets = Math.max(
+            4.2,
+            Math.min(5.2, 4.2 + compoundFactor + loadFactor * 0.5),
+          ),
+          activeKcal = Math.max(
+            0,
+            Math.round(((activeMets - 1) * p.weight * totalMin) / 60),
+          ),
+          restingKcal = Math.max(0, Math.round((p.bmr * totalMin) / 1440)),
+          totalKcal = activeKcal + restingKcal;
+        $("exKcal").value = activeKcal;
+        $("exTotalKcal").value = totalKcal;
         const volLine = isIso
-          ? `총 ${totalReps}초 등척성 유지`
-          : `총 ${totalReps}회 거상 = <b>${totalVolumeKg.toLocaleString()} kg</b> ${est1RM > 0 ? `| <b>추정 1RM: ${est1RM.toFixed(1)}kg</b>` : ""}`;
+          ? `총 ${esc(totalReps)}초 등척성 유지`
+          : `총 ${esc(totalReps)}회 거상 = <b>${esc(totalVolumeKg.toLocaleString())} kg</b> ${est1RM > 0 ? `| <b>추정 1RM: ${esc(est1RM.toFixed(1))}kg</b>` : ""}`;
         const tempoLine = isIso
           ? "(유지시간 합산)"
           : `(1회 약 ${TEMPO_SEC}초 템포)`;
+        const unilateralLine =
+          sideMultiplier === 2 ? " · 편측 좌우 합산 ×2 적용" : "";
         $("exCalcBreakdown").innerHTML =
-          `<b>🔬 내 신체(${p.height}cm · ${p.weight}kg · 골격근 ${p.smm}kg) 정밀 계산:</b><br/>• <b>총 볼륨(Volume):</b> ${volLine}<br/>• <b>시간 분배:</b> 실제 수행 <b>${activeMin.toFixed(1)}분</b> ${tempoLine} + <b>세트간 휴식 ${restMin.toFixed(1)}분</b> (${restSecCfg}초 × ${Math.max(0, sets - 1)}회) = 총 ${totalMin.toFixed(1)}분<br/>• <b>소모 분해:</b> 수행 구간 <b>${Math.round(workPhaseKcal)} kcal</b> (역학 ${Math.round(mechanicalKcal)} / MET 대사 ${Math.round(activeTimeKcal)} 중 큰 값 — 이중 합산 방지) + <b>휴식 중 대사(2.2MET): ${Math.round(restTimeKcal)} kcal</b><br/>• <b>골격근 애프터번(EPOC): +${epocKcal} kcal</b> → <b>🔥 총 ${finalKcal} kcal</b> (지방 약 <b>${(finalKcal / 7.7).toFixed(1)}g</b> 연소)<br/><span style="color:var(--sub);font-size:11px;">💡 ${ex.note} · 휴식 중에도 서서 호흡·심박 유지로 평좌(1MET)보다 높은 2.2MET 대사가 계속 소모됩니다.</span>`;
+          `<b>🔬 내 신체(${esc(p.height)}cm · ${esc(p.weight)}kg · 골격근 ${esc(p.smm)}kg) 계산:</b><br/>• <b>총 볼륨:</b> ${volLine}${unilateralLine}<br/>• <b>시간 분배:</b> 실제 수행 ${esc(activeMin.toFixed(1))}분 ${tempoLine} + 세트 간 휴식 ${esc(restMin.toFixed(1))}분 = 총 ${esc(totalMin.toFixed(1))}분<br/>• <b>운동 강도:</b> ${esc(activeMets.toFixed(1))} MET (종목의 다관절 여부·중량 반영, 총 시간에 연속 적용)<br/>• <b>활동 칼로리:</b> <b>${esc(activeKcal)} kcal</b> + <b>기초대사 에너지:</b> ${esc(restingKcal)} kcal = <b>🔥 총 칼로리: ${esc(totalKcal)} kcal</b><br/>• 체지방 약 <b>${esc((totalKcal / 7.7).toFixed(1))}g 상당 열량</b><br/><span style="color:var(--sub);font-size:11px;">💡 ${esc(ex.note)}</span>`;
         updateLiveSetBtn();
       }
       function addWeightExercise() {
@@ -5547,17 +5617,27 @@
           mins = parseFloat($("exMin").value) || 0,
           kcal = parseInt($("exKcal").value, 10);
         if (!baseName || isNaN(kcal)) return;
+        const totalKcal = parseInt($("exTotalKcal").value, 10);
         const ex = WEIGHT_EXERCISE_DB.find((x) => x.id === $("exPreset").value);
         const isIso = ex ? ISOMETRIC_IDS.has(ex.id) : false;
+        const sideMultiplier = UNILATERAL_EXERCISE_NAME.test(
+          `${baseName} ${ex?.name || ""} ${ex?.id || ""}`,
+        )
+          ? 2
+          : 1;
         const kg = parseFloat($("exWeightKg").value) || 0,
           reps = parseInt($("exReps").value || "0", 10),
           sets = parseInt($("exSets").value || "0", 10),
           restSec = Math.max(0, parseInt($("exRestSec").value, 10) || 0);
         const unit = isIso ? "초" : "회";
+        const unilateralVolume = pyramidSets.length
+          ? pyramidSets.reduce((sum, s) => sum + s.reps, 0) * sideMultiplier
+          : reps * sets * sideMultiplier;
+        const sideDetail = sideMultiplier === 2 ? ` · 좌우 합산 ${unilateralVolume}${unit}` : "";
         const detail = pyramidSets.length
-          ? `피라미드 ${pyramidSets.length}세트 [${pyramidSets.map((s) => `${s.kg}kg×${s.reps}${unit}`).join("/")}] · 휴식${restSec}초 · ${mins}분`
+          ? `피라미드 ${pyramidSets.length}세트 [${pyramidSets.map((s) => `${s.kg}kg×${s.reps}${unit}`).join("/")}]${sideDetail} · 휴식${restSec}초 · ${mins}분`
           : reps > 0 && sets > 0
-            ? `${kg > 0 ? kg + "kg · " : "맨몸 · "}${reps}${unit}×${sets}세트 · 휴식${restSec}초 · ${mins}분`
+            ? `${kg > 0 ? kg + "kg · " : "맨몸 · "}${reps}${unit}×${sets}세트${sideDetail} · 휴식${restSec}초 · ${mins}분`
             : `${mins}분`;
         ensureDateLog(currentDate);
         // [신규] meta 구조화 저장 → 직전 중량·횟수 복원/증량 계산 가능 (기존: 문자열 name만 저장)
@@ -5566,6 +5646,7 @@
           name: `[웨이트] ${baseName} (${detail})`,
           mins,
           kcal,
+          totalKcal: Number.isNaN(totalKcal) ? kcal : totalKcal,
           meta: {
             exId: ex?.id || "",
             cat: ex?.cat || "기타",
@@ -7196,6 +7277,7 @@
               $("exName").value = item.name.replace(/^\[웨이트\]\s*/, "");
               $("exMin").value = item.mins;
               $("exKcal").value = item.kcal;
+              $("exTotalKcal").value = item.totalKcal ?? item.kcal;
             }
           }
         }
@@ -7328,9 +7410,10 @@
           });
         }
         const fatG = totalDef < 0 ? Math.round(Math.abs(totalDef) / 7.7) : 0;
-        $("weeklyFatLossBadge").textContent = `7일 누적 지방 -${fatG}g 연소`;
+        $("weeklyFatLossBadge").textContent =
+          `7일 누적 적자: 체지방 약 ${fatG}g 상당 열량`;
         $("weeklySummaryBox").innerHTML =
-          `• <b>최근 7일 누적 칼로리 밸런스:</b> <b>${esc(totalDef > 0 ? "+" : "")}${esc(totalDef.toLocaleString())} kcal</b> (순수 체지방 약 <b>${esc(fatG)}g</b> 감량 상당)<br/>• <b>최근 7일 총 운동 소모량:</b> <b>-${esc(totalEx.toLocaleString())} kcal</b> | <b>누적 단백질 섭취:</b> <b>${esc(totalProt.toLocaleString())} g</b><br/>• <b>인바디 목표 진행도:</b> 시작 ${esc(p.baselineWeight || p.weight)}kg → 현재 <b>${esc(p.weight)}kg</b> (목표 ${esc(p.targetWeight)}kg까지 <b>${esc(Math.max(0, p.weight - p.targetWeight).toFixed(1))}kg</b> 남음)`;
+          `• <b>최근 7일 누적 칼로리 밸런스:</b> <b>${esc(totalDef > 0 ? "+" : "")}${esc(totalDef.toLocaleString())} kcal</b> (체지방 약 <b>${esc(fatG)}g 상당 열량</b>)<br/>• <b>최근 7일 총 운동 활동 칼로리:</b> <b>-${esc(totalEx.toLocaleString())} kcal</b> | <b>누적 단백질 섭취:</b> <b>${esc(totalProt.toLocaleString())} g</b><br/>• <b>인바디 목표 진행도:</b> 시작 ${esc(p.baselineWeight || p.weight)}kg → 현재 <b>${esc(p.weight)}kg</b> (목표 ${esc(p.targetWeight)}kg까지 <b>${esc(Math.max(0, p.weight - p.targetWeight).toFixed(1))}kg</b> 남음)`;
 
         // [신규] 공복 체중(점선·마커) vs 7일 이동평균(실선) 인라인 SVG 추세선 —
         // 수분 변동 노이즈와 실제 감량 추세를 한 눈에 구분 (외부 차트 라이브러리 0 의존)
@@ -7551,7 +7634,7 @@
           `체중 7일 이동평균 ${S.avgW}kg 연동 (기준 ${baseW}kg)`;
         $("valTdee").textContent = `${totalBurned.toLocaleString()} kcal`;
         $("valTdeeSub").textContent =
-          `기초·활동 대사 ${baseTdee.toLocaleString()} + 운동 ${exKcal.toLocaleString()} kcal`;
+          `기초·활동 대사 ${baseTdee.toLocaleString()} + 운동 활동 ${exKcal.toLocaleString()} kcal`;
         $("valTarget").textContent = `${targetIntake.toLocaleString()} kcal`;
         $("valEaten").textContent = `${eatenKcal.toLocaleString()} kcal`;
         const netDiff = eatenKcal - totalBurned;
@@ -7609,7 +7692,7 @@
 
         $("foodTabBadge").textContent =
           `${eatenKcal.toLocaleString()} kcal / 단백질 ${eatenProt}g`;
-        $("exTabBadge").textContent = `-${exKcal.toLocaleString()} kcal`;
+        $("exTabBadge").textContent = `활동 -${exKcal.toLocaleString()} kcal`;
         // [사실 교정] 영양제 시너지 kcal 가산 제거에 맞춰 배지도 운동 여부 기준 안내로 교정
         $("suppTabBadge").textContent =
           exKcal > 0
@@ -7652,7 +7735,7 @@
           ? log.exercises
               .map(
                 (ex, i) =>
-                  `<li class="log-item"><div class="log-left"><span class="log-title">${esc(ex.name)}</span><span class="log-sub">수행 시간: ${ex.mins}분</span></div><div class="log-right"><span class="log-kcal" style="color:var(--primary);">-${ex.kcal} kcal</span><button class="btn-quick" onclick="editLogItem('exercises',${i})">수정</button><button class="btn-del" onclick="removeLogItem('exercises',${i})">삭제</button></div></li>`,
+                  `<li class="log-item"><div class="log-left"><span class="log-title">${esc(ex.name)}</span><span class="log-sub">수행 시간: ${esc(ex.mins)}분</span></div><div class="log-right"><span class="log-kcal" style="color:var(--primary);">${ex.totalKcal != null ? `활동 -${esc(ex.kcal)} kcal<br/>총 -${esc(ex.totalKcal)} kcal` : `-${esc(ex.kcal)} kcal`}</span><button class="btn-quick" onclick="editLogItem('exercises',${i})">수정</button><button class="btn-del" onclick="removeLogItem('exercises',${i})">삭제</button></div></li>`,
               )
               .join("")
           : `<li class="empty-msg">오늘 기록된 운동이 없습니다.</li>`;
@@ -7667,7 +7750,7 @@
             ? `⚠️ <b>수면·컨디션 주의 (${log.sleepHours}시간):</b> 코르티솔 상승으로 근손실 위험이 있으니 오늘 유산소는 공복 대신 식후 경사걷기로 진행하시고 취침 전 <b>마그네슘</b>을 꼭 챙기세요.`
             : `✅ <b>수면·회복 양호 (${log.sleepHours}시간):</b> 호르몬 및 인슐린 민감성이 정상 상태라 웨이트 볼륨과 지방 연소 효율이 극대화됩니다.`;
         $("dailyInsightBox").innerHTML =
-          `• ${slpMsg}<br/>• <b>예상 체지방 감량 속도:</b> 오늘 현재 칼로리 밸런스(<b>${netDiff} kcal</b>) 기준 약 <b>${netDiff < 0 ? Math.round(Math.abs(netDiff) / 7.7) : 0}g</b>의 체지방이 연소되는 페이스입니다.<br/>• <b>영양제 10종 핵심 요약:</b> <b>기상 직후 공복</b>엔 유산균+물1컵, <b>운동 30분 전 공복</b>엔 아르기닌+카르니틴, <b>식사 직후</b>엔 크레아틴·오메가3·비타민B/C/D·밀크씨슬, <b>취침 전</b>엔 마그네슘을 드세요!`;
+          `• ${slpMsg}<br/>• <b>예상 체지방 상당 열량:</b> 오늘 현재 칼로리 밸런스(<b>${netDiff} kcal</b>)는 체지방 약 <b>${netDiff < 0 ? Math.round(Math.abs(netDiff) / 7.7) : 0}g 상당 열량</b>의 적자 페이스입니다.<br/>• <b>영양제 10종 핵심 요약:</b> <b>기상 직후 공복</b>엔 유산균+물1컵, <b>운동 30분 전 공복</b>엔 아르기닌+카르니틴, <b>식사 직후</b>엔 크레아틴·오메가3·비타민B/C/D·밀크씨슬, <b>취침 전</b>엔 마그네슘을 드세요!`;
 
         // [신규] 최근 7일 부위별 누적 세트 수 + 회복 주기 표시
         renderMuscleVolumeTracker();
