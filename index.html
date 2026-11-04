@@ -859,7 +859,38 @@
       input, textarea, select { font-size: 16px !important; min-height: 44px !important; }
       img { object-fit: cover !important; border-radius: 12px; }
     </style>
-  </head>
+  
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,600,1,0" rel="stylesheet" />
+    <style>
+      .material-symbols-rounded {
+        font-family: 'Material Symbols Rounded';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 1.25em;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        -webkit-font-feature-settings: 'liga';
+        -webkit-font-smoothing: antialiased;
+        vertical-align: -0.15em;
+        margin-right: 2px;
+      }
+      /* 하단 네비게이션 아이콘 크기 조정 */
+      .nav-btn .icon .material-symbols-rounded {
+        font-size: 28px;
+        margin-right: 0;
+      }
+      /* 특정 컨테이너 내 아이콘 정렬/색상 최적화 */
+      h1 .material-symbols-rounded { font-size: 1.1em; margin-right: 6px; }
+      .card-title .material-symbols-rounded { color: var(--primary); }
+      .cat-chip .material-symbols-rounded { font-size: 1.1em; margin-right: 4px; }
+      .timing-badge .material-symbols-rounded { font-size: 1em; margin-right: 3px; }
+    </style>
+</head>
   <body>
     <div class="container">
       <div class="header">
@@ -871,16 +902,16 @@
         </h1>
         <div class="header-actions">
           <button class="btn-outline" id="themeBtn" onclick="toggleDarkMode()">
-            🌙 다크
+            <span class='material-symbols-rounded'>dark_mode</span> 다크
           </button>
           <button class="btn-outline" onclick="openModal()">인바디 수정</button>
         </div>
       </div>
 
       <div class="date-bar">
-        <button onclick="changeDate(-1)">‹</button>
+        <button onclick="changeDate(-1)"><span class='material-symbols-rounded'>chevron_left</span></button>
         <input type="date" id="datePicker" onchange="onDateChange()" />
-        <button onclick="changeDate(1)">›</button>
+        <button onclick="changeDate(1)"><span class='material-symbols-rounded'>chevron_right</span></button>
       </div>
 
       <div class="timer-bar">
@@ -892,7 +923,7 @@
               color: var(--sub);
               margin-right: 6px;
             "
-            >⏱️ 세트 휴식 타이머</span
+            ><span class='material-symbols-rounded'>timer</span> 세트 휴식 타이머</span
           >
           <span class="timer-display" id="restTimerDisplay">대기중</span>
         </div>
@@ -914,7 +945,7 @@
       <div id="tab-home" class="tab-pane active">
         <div class="card">
           <div class="card-title">
-            <span>⚡ 오늘의 대사량 & 칼로리 밸런스</span
+            <span><span class='material-symbols-rounded'>bolt</span> 오늘의 대사량 & 칼로리 밸런스</span
             ><span class="badge" id="inbodyScoreBadge">인바디 79점</span>
           </div>
           <div class="inbody-chips">
@@ -959,9 +990,9 @@
                 onchange="saveDailyBio()"
                 style="margin-bottom: 4px"
               >
-                <option value="good">🔥 최상 (회복완벽)</option>
-                <option value="normal" selected>🙂 보통 (정상대사)</option>
-                <option value="tired">😴 피로/수면부족</option>
+                <option value="good">최상 (회복완벽)</option>
+                <option value="normal" selected>보통 (정상대사)</option>
+                <option value="tired">피로/수면부족</option>
               </select>
             </div>
           </div>
@@ -1019,28 +1050,28 @@
           </div>
           <div class="bank-banner" id="calorieBankBanner">
             <div class="bank-top">
-              <b>🏦 주간 칼로리 뱅크 (최근 6일 누적)</b>
+              <b><span class='material-symbols-rounded'>account_balance</span> 주간 칼로리 뱅크 (최근 6일 누적)</b>
               <button
                 class="btn-outline"
                 id="btnToggleBankAuto"
                 style="padding: 3px 8px; font-size: 10.5px"
                 onclick="toggleBankAutoAdjust()"
               >
-                ⚖️ 자동 보정 OFF
+                <span class='material-symbols-rounded'>balance</span> 자동 보정 OFF
               </button>
             </div>
             <div id="bankBodyText"></div>
           </div>
           <div class="macro-grid">
             <div class="macro-box">
-              <div class="mc-title">🍚 탄수화물 (복부관리)</div>
+              <div class="mc-title"><span class='material-symbols-rounded'>rice_bowl</span> 탄수화물 (복부관리)</div>
               <div class="mc-val" id="macroCarbText"></div>
               <div class="progress-bar-bg" style="height: 7px">
                 <div class="progress-bar-fill amber" id="macroCarbBar"></div>
               </div>
             </div>
             <div class="macro-box">
-              <div class="mc-title">🥩 단백질 (근손실방지)</div>
+              <div class="mc-title"><span class='material-symbols-rounded'>set_meal</span> 단백질 (근손실방지)</div>
               <div
                 class="mc-val"
                 style="color: var(--green)"
@@ -1051,7 +1082,7 @@
               </div>
             </div>
             <div class="macro-box">
-              <div class="mc-title">🥑 지방 (호르몬유지)</div>
+              <div class="mc-title"><span class='material-symbols-rounded'>nutrition</span> 지방 (호르몬유지)</div>
               <div class="mc-val" id="macroFatText"></div>
               <div class="progress-bar-bg" style="height: 7px">
                 <div class="progress-bar-fill purple" id="macroFatBar"></div>
@@ -1062,7 +1093,7 @@
 
         <div class="card">
           <div class="card-title">
-            <span>💧 수분 섭취 & 나트륨·크레아틴 연동</span
+            <span><span class='material-symbols-rounded'>water_drop</span> 수분 섭취 & 나트륨·크레아틴 연동</span
             ><span class="badge cyan" id="waterBadge"></span>
           </div>
           <div class="progress-wrap" style="margin: 0 0 10px">
@@ -1097,7 +1128,7 @@
 
         <div class="card">
           <div class="card-title">
-            <span>💡 수면·컨디션·대사 종합 피드백</span>
+            <span><span class='material-symbols-rounded'>lightbulb</span> 수면·컨디션·대사 종합 피드백</span>
           </div>
           <div
             id="dailyInsightBox"
@@ -1110,43 +1141,43 @@
       <div id="tab-food" class="tab-pane">
         <div class="card">
           <div class="card-title">
-            <span>⚡ 스마트 식단 · 사진판독 · 웹상품 연동</span
+            <span><span class='material-symbols-rounded'>bolt</span> 스마트 식단 · 사진판독 · 웹상품 연동</span
             ><span class="badge green" id="foodTabBadge">0 kcal</span>
           </div>
           <div class="quick-action-bar">
             <button class="btn-soft" onclick="copyYesterday('foods')">
-              📋 어제 식단 불러오기
+              <span class='material-symbols-rounded'>content_paste</span> 어제 식단 불러오기
             </button>
             <button class="btn-soft" onclick="managePreset('save', 'foods')">
-              ⭐ 현재 식단 세트저장
+              <span class='material-symbols-rounded'>star</span> 현재 식단 세트저장
             </button>
           </div>
           <div class="cat-chips" id="customMealPresetChips"></div>
 
           <!-- [신규] 인기·카테고리 바로선택 (검색 못 해도 터치만으로 선택) -->
           <label class="field-label"
-            >🔥 인기·카테고리 바로 선택 (터치만으로 즉시 성분표가
+            ><span class='material-symbols-rounded'>local_fire_department</span> 인기·카테고리 바로 선택 (터치만으로 즉시 성분표가
             열립니다)</label
           >
           <div class="cat-chips" id="foodCatChips"></div>
 
           <!-- 사진 판독 & 쿠팡·네이버 복사 원클릭 연동 바 -->
           <label class="field-label"
-            >📷 성분표·음식 사진 자동 판독 & 쿠팡·네이버 복사글 즉시 선택</label
+            ><span class='material-symbols-rounded'>photo_camera</span> 성분표·음식 사진 자동 판독 & 쿠팡·네이버 복사글 즉시 선택</label
           >
           <div class="photo-vision-bar">
             <button class="btn-vision" onclick="$('foodPhotoInput').click()">
-              📷 사진/캡처로 자동판독
+              <span class='material-symbols-rounded'>photo_camera</span> 사진/캡처로 자동판독
             </button>
             <button class="btn-clip" onclick="importFromClipboard()">
-              📥 쿠팡·네이버 복사글 적용
+              <span class='material-symbols-rounded'>download</span> 쿠팡·네이버 복사글 적용
             </button>
             <button
               class="btn-outline"
               style="padding: 8px 4px; font-size: 11px"
               onclick="openAiKeyModal()"
             >
-              ⚙️ AI키
+              <span class='material-symbols-rounded'>settings</span> AI키
             </button>
           </div>
           <input
@@ -1162,7 +1193,7 @@
             >음식·브랜드·식당 메뉴 검색 (입력 즉시 내장 124종 DB + 오타·부분검색
             자동보정, 1.8초 후 웹검색 자동실행)</label
           >
-          <button class="btn-outline" onclick="startBarcodeScan()" style="width: 100%; margin-bottom: 10px;">📷 바코드 카메라 스캐너 켜기</button>
+          <button class="btn-outline" onclick="startBarcodeScan()" style="width: 100%; margin-bottom: 10px;"><span class='material-symbols-rounded'>photo_camera</span> 바코드 카메라 스캐너 켜기</button>
           <div id="qr-reader" style="width: 100%; display: none; margin-bottom: 10px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border);"></div>
           <div class="search-bar-wrap">
             <input
@@ -1177,7 +1208,7 @@
               id="btnWebSearch"
               onclick="searchLiveWebFood()"
             >
-              🌐 실시간 웹검색
+              <span class='material-symbols-rounded'>language</span> 실시간 웹검색
             </button>
           </div>
           <div class="smart-parse-hint" id="smartParseHint"></div>
@@ -1187,58 +1218,58 @@
               class="cat-chip"
               onclick="quickSearchExample('사조대림 오븐구이 불고기')"
             >
-              🍢 사조대림 오븐구이
+              <span class='material-symbols-rounded'>kebab_dining</span> 사조대림 오븐구이
             </button>
             <button
               class="cat-chip"
               onclick="quickSearchExample('더단백 드링크 바나나')"
             >
-              🍌 더단백 바나나
+              <span class='material-symbols-rounded'>nutrition</span> 더단백 바나나
             </button>
             <button
               class="cat-chip"
               onclick="quickSearchExample('한마음 정육식당 삼겹살 1인분')"
             >
-              🥩 정육식당 삼겹살
+              <span class='material-symbols-rounded'>set_meal</span> 정육식당 삼겹살
             </button>
             <button
               class="cat-chip"
               onclick="quickSearchExample('풀무원 얇은피 고기만두')"
             >
-              🥟 얇은피 고기만두
+              <span class='material-symbols-rounded'>set_meal</span> 얇은피 고기만두
             </button>
             <button
               class="cat-chip"
               onclick="quickSearchExample('목살 김치찌개 1인분')"
             >
-              🍲 목살 김치찌개
+              <span class='material-symbols-rounded'>soup_kitchen</span> 목살 김치찌개
             </button>
             <button
               class="cat-chip"
               onclick="quickSearchExample('짜파게티 1개')"
             >
-              🍜 짜파게티 1개
+              <span class='material-symbols-rounded'>ramen_dining</span> 짜파게티 1개
             </button>
             <button
               class="cat-chip"
               onclick="quickSearchExample('닭가슴살 1팩')"
             >
-              🍗 닭가슴살 1팩
+              <span class='material-symbols-rounded'>kebab_dining</span> 닭가슴살 1팩
             </button>
           </div>
 
           <div class="portal-btns">
             <button onclick="openExternalSearch('coupang')">
-              🛒 쿠팡에서 찾기
+              <span class='material-symbols-rounded'>shopping_cart</span> 쿠팡에서 찾기
             </button>
             <button onclick="openExternalSearch('naver')">
-              📗 네이버 성분검색
+              <span class='material-symbols-rounded'>menu_book</span> 네이버 성분검색
             </button>
             <button onclick="openExternalSearch('google')">
-              🌐 구글 성분검색
+              <span class='material-symbols-rounded'>language</span> 구글 성분검색
             </button>
             <button onclick="togglePasteScanner()">
-              📋 텍스트 직접붙여넣기
+              <span class='material-symbols-rounded'>content_paste</span> 텍스트 직접붙여넣기
             </button>
           </div>
 
@@ -1389,7 +1420,7 @@
             style="width: 100%; margin-bottom: 6px"
             onclick="saveCurrentToCustomDB()"
           >
-            📌 이 영양성분을 '내 음식 사전'에 영구 등록
+            <span class='material-symbols-rounded'>push_pin</span> 이 영양성분을 '내 음식 사전'에 영구 등록
           </button>
           <button class="btn-primary btn-green" onclick="addFood()">
             + 식단에 추가하기
@@ -1402,25 +1433,25 @@
       <div id="tab-workout" class="tab-pane">
         <div class="card">
           <div class="card-title">
-            <span>💪 최근 7일 부위별 볼륨 & 회복 상태</span
+            <span><span class='material-symbols-rounded'>fitness_center</span> 최근 7일 부위별 볼륨 & 회복 상태</span
             ><span class="badge purple">권장 10~20세트/주</span>
           </div>
           <div class="row-3" id="muscleVolumeGrid"></div>
         </div>
         <div class="card">
           <div class="card-title">
-            <span>🏋️ 내 신체 맞춤 웨이트 · 유산소 계산기</span
+            <span><span class='material-symbols-rounded'>exercise</span> 내 신체 맞춤 웨이트 · 유산소 계산기</span
             ><span class="badge" id="exTabBadge">활동 -0 kcal</span>
           </div>
           <div class="quick-action-bar">
             <button class="btn-soft" onclick="copyYesterday('exercises')">
-              📋 어제 운동 그대로 불러오기
+              <span class='material-symbols-rounded'>content_paste</span> 어제 운동 그대로 불러오기
             </button>
             <button
               class="btn-soft"
               onclick="managePreset('save', 'exercises')"
             >
-              ⭐ 오늘 운동 루틴으로 저장
+              <span class='material-symbols-rounded'>star</span> 오늘 운동 루틴으로 저장
             </button>
           </div>
           <div class="cat-chips" id="customWorkoutRoutineChips"></div>
@@ -1430,14 +1461,14 @@
               id="btnModeWeight"
               onclick="switchWorkoutMode('weight')"
             >
-              🏋️ 근력 운동 (웨이트·맨몸)
+              <span class='material-symbols-rounded'>exercise</span> 근력 운동 (웨이트·맨몸)
             </button>
             <button
               class="sub-tab-btn"
               id="btnModeCardio"
               onclick="switchWorkoutMode('cardio')"
             >
-              🏃 유산소 (근력후·공복·속도)
+              <span class='material-symbols-rounded'>directions_run</span> 유산소 (근력후·공복·속도)
             </button>
           </div>
 
@@ -1558,7 +1589,7 @@
                   color: var(--sub);
                   flex-shrink: 0;
                 "
-                >⏳ 세트간 휴식</span
+                ><span class='material-symbols-rounded'>hourglass_bottom</span> 세트간 휴식</span
               >
               <button class="timer-btn" data-rest="45" onclick="setRestSec(45)">
                 45초
@@ -1599,7 +1630,7 @@
                   calcWeightKcal();
                 "
               >
-                ⏱️ 시간 자동계산 복귀
+                <span class='material-symbols-rounded'>timer</span> 시간 자동계산 복귀
               </button>
             </div>
             <!-- [신규] 실전 세트 카운터: 세트 완료 원클릭 → 진행 세트 추적 + 휴식 타이머 자동 가동 -->
@@ -1614,7 +1645,7 @@
                 "
                 onclick="completeOneLiveSet()"
               >
-                ✅ 세트 완료 & 휴식 시작 (0 / 4세트 완료)
+                <span class='material-symbols-rounded'>check_circle</span> 세트 완료 & 휴식 시작 (0 / 4세트 완료)
               </button>
               <button
                 class="btn-soft"
@@ -1626,7 +1657,7 @@
             </div>
             <div class="quick-action-bar" style="margin-top: -2px">
               <button class="btn-soft" onclick="addPyramidSet()">
-                ➕ 피라미드 세트 추가 (세트별 무게가 다를 때)
+                <span class='material-symbols-rounded'>add_circle</span> 피라미드 세트 추가 (세트별 무게가 다를 때)
               </button>
               <button
                 class="btn-soft"
@@ -1664,7 +1695,7 @@
                 class="timing-btn active"
                 onclick="selectCardioTiming('post_weight', this)"
               >
-                🔥 근력운동 후 유산소<br /><span
+                <span class='material-symbols-rounded'>local_fire_department</span> 근력운동 후 유산소<br /><span
                   style="font-size: 10px; font-weight: 500"
                   >지방연소 72%·시너지+10%</span
                 >
@@ -1673,7 +1704,7 @@
                 class="timing-btn"
                 onclick="selectCardioTiming('fasted', this)"
               >
-                🌅 아침 공복 유산소<br /><span
+                <span class='material-symbols-rounded'>wb_twilight</span> 아침 공복 유산소<br /><span
                   style="font-size: 10px; font-weight: 500"
                   >지방연소 76%·인슐린최저</span
                 >
@@ -1682,7 +1713,7 @@
                 class="timing-btn"
                 onclick="selectCardioTiming('normal', this)"
               >
-                👟 일반 식후 유산소<br /><span
+                <span class='material-symbols-rounded'>directions_walk</span> 일반 식후 유산소<br /><span
                   style="font-size: 10px; font-weight: 500"
                   >기본 대사(지방 50%)</span
                 >
@@ -1775,7 +1806,7 @@
             "
           >
             <div style="font-size: 14px; font-weight: 800; margin-bottom: 4px">
-              📋 오늘 수행한 운동 기록 목록
+              <span class='material-symbols-rounded'>content_paste</span> 오늘 수행한 운동 기록 목록
             </div>
             <ul class="log-list" id="exList"></ul>
           </div>
@@ -1786,7 +1817,7 @@
       <div id="tab-supp" class="tab-pane">
         <div class="card">
           <div class="card-title">
-            <span>💊 영양제 10종 골든타임 & 약학 팩트</span
+            <span><span class='material-symbols-rounded'>medication</span> 영양제 10종 골든타임 & 약학 팩트</span
             ><span class="badge purple" id="suppTabBadge">복용 가이드</span>
           </div>
           <div class="timeline-box">
@@ -1799,19 +1830,19 @@
                 class="slot-btn"
                 onclick="checkSuppSlot('morning_fasted')"
               >
-                🌅 <b>1. 기상 직후 공복</b><br /><span
+                <span class='material-symbols-rounded'>wb_twilight</span> <b>1. 기상 직후 공복</b><br /><span
                   style="color: var(--sub); font-size: 10px"
                   >유산균 1캡슐 + 물 1컵</span
                 >
               </button>
               <button class="slot-btn" onclick="checkSuppSlot('morning_meal')">
-                ☀️ <b>2. 아침/점심 식후 15분</b><br /><span
+                <span class='material-symbols-rounded'>light_mode</span> <b>2. 아침/점심 식후 15분</b><br /><span
                   style="color: var(--sub); font-size: 10px"
                   >비타민B군 + 비타민C 500mg</span
                 >
               </button>
               <button class="slot-btn" onclick="checkSuppSlot('pre_workout')">
-                ⚡ <b>3. 운동 30~45분전 공복</b><br /><span
+                <span class='material-symbols-rounded'>bolt</span> <b>3. 운동 30~45분전 공복</b><br /><span
                   style="color: var(--sub); font-size: 10px"
                   >아르기닌 4,000 + 카르니틴</span
                 >
@@ -1820,7 +1851,7 @@
                 class="slot-btn"
                 onclick="checkSuppSlot('post_workout_dinner')"
               >
-                🍽️ <b>4. 운동후/저녁 식후즉시</b><br /><span
+                <span class='material-symbols-rounded'>restaurant</span> <b>4. 운동후/저녁 식후즉시</b><br /><span
                   style="color: var(--sub); font-size: 10px"
                   >크레아틴+오메가3+비타민D/C+밀크씨슬</span
                 >
@@ -1831,7 +1862,7 @@
               style="width: 100%; margin-top: 6px; text-align: center"
               onclick="checkSuppSlot('before_sleep')"
             >
-              🌙 <b>5. 취침 30~60분 전:</b> 마그네슘 350mg (근이완·수면·코르티솔
+              <span class='material-symbols-rounded'>dark_mode</span> <b>5. 취침 30~60분 전:</b> 마그네슘 350mg (근이완·수면·코르티솔
               억제)
             </button>
           </div>
@@ -1843,7 +1874,7 @@
       <div id="tab-report" class="tab-pane">
         <div class="card">
           <div class="card-title">
-            <span>📈 최근 7일 칼로리 적자 & 체중 추이</span
+            <span><span class='material-symbols-rounded'>trending_up</span> 최근 7일 칼로리 적자 & 체중 추이</span
             ><span class="badge" id="weeklyFatLossBadge">7일 누적 분석</span>
           </div>
           <div
@@ -1863,14 +1894,14 @@
         </div>
         <div class="card">
           <div class="card-title">
-            <span>🧬 인바디 골격근·체지방 변화 기록</span
+            <span><span class='material-symbols-rounded'>vital_signs</span> 인바디 골격근·체지방 변화 기록</span
             ><span class="badge cyan">측정 이력 자동 누적</span>
           </div>
           <div id="inbodyHistoryBox" style="font-size: 12px"></div>
         </div>
         <div class="card">
           <div class="card-title">
-            <span>📱 아이폰 홈 화면 전용 앱 아이콘 설정</span
+            <span><span class='material-symbols-rounded'>smartphone</span> 아이폰 홈 화면 전용 앱 아이콘 설정</span
             ><span class="badge purple">고해상도 512px</span>
           </div>
           <div
@@ -1899,19 +1930,19 @@
           </div>
           <div class="row-3">
             <button class="btn-soft" onclick="changeIconTheme('navy')">
-              🌌 다크 네이비
+              <span class='material-symbols-rounded'>nights_stay</span> 다크 네이비
             </button>
             <button class="btn-soft" onclick="changeIconTheme('emerald')">
-              🌿 에메랄드 핏
+              <span class='material-symbols-rounded'>eco</span> 에메랄드 핏
             </button>
             <button class="btn-soft" onclick="changeIconTheme('purple')">
-              ⚡ 퍼플 부스터
+              <span class='material-symbols-rounded'>bolt</span> 퍼플 부스터
             </button>
           </div>
         </div>
         <div class="card">
           <div class="card-title">
-            <span>💾 데이터 영구 백업 & 복원 (증발 방지)</span>
+            <span><span class='material-symbols-rounded'>save</span> 데이터 영구 백업 & 복원 (증발 방지)</span>
           </div>
           <div class="row-2" style="margin-bottom: 8px">
             <button
@@ -1919,14 +1950,14 @@
               style="margin-top: 0"
               onclick="exportBackupClipboard()"
             >
-              📋 백업코드 복사하기
+              <span class='material-symbols-rounded'>content_paste</span> 백업코드 복사하기
             </button>
             <button
               class="btn-primary btn-green"
               style="margin-top: 0"
               onclick="downloadBackupFile()"
             >
-              📥 백업파일(.json) 저장
+              <span class='material-symbols-rounded'>download</span> 백업파일(.json) 저장
             </button>
           </div>
           <label class="field-label"
@@ -1940,14 +1971,14 @@
           ></textarea>
           <div class="row-2">
             <button class="btn-outline" onclick="$('backupFileInput').click()">
-              📂 백업 파일 불러오기
+              <span class='material-symbols-rounded'>folder_open</span> 백업 파일 불러오기
             </button>
             <button
               class="btn-primary btn-amber"
               style="margin-top: 0"
               onclick="restoreFromTextarea()"
             >
-              🔄 데이터 복원하기
+              <span class='material-symbols-rounded'>restore</span> 데이터 복원하기
             </button>
           </div>
           <input
@@ -1963,19 +1994,19 @@
 
     <nav class="bottom-nav">
       <button class="nav-btn active" onclick="switchTab('home', this)">
-        <span class="icon">📊</span><span>홈</span>
+        <span class="icon"><span class='material-symbols-rounded'>dashboard</span></span><span>홈</span>
       </button>
       <button class="nav-btn" onclick="switchTab('food', this)">
-        <span class="icon">🥗</span><span>식단</span>
+        <span class="icon"><span class='material-symbols-rounded'>restaurant_menu</span></span><span>식단</span>
       </button>
       <button class="nav-btn" onclick="switchTab('workout', this)">
-        <span class="icon">🏋️</span><span>운동</span>
+        <span class="icon"><span class='material-symbols-rounded'>exercise</span></span><span>운동</span>
       </button>
       <button class="nav-btn" onclick="switchTab('supp', this)">
-        <span class="icon">💊</span><span>영양제(10종)</span>
+        <span class="icon"><span class='material-symbols-rounded'>medication</span></span><span>영양제(10종)</span>
       </button>
       <button class="nav-btn" onclick="switchTab('report', this)">
-        <span class="icon">📈</span><span>리포트·아이콘</span>
+        <span class="icon"><span class='material-symbols-rounded'>trending_up</span></span><span>리포트·아이콘</span>
       </button>
     </nav>
 
@@ -2046,7 +2077,7 @@
     <!-- AI 비전 키 설정 모달 -->
     <div class="modal-overlay" id="aiKeyModal">
       <div class="modal">
-        <h3>🤖 사진 AI 비전 설정 (선택사항)</h3>
+        <h3><span class='material-symbols-rounded'>smart_toy</span> 사진 AI 비전 설정 (선택사항)</h3>
         <p
           style="
             font-size: 12px;
@@ -4781,7 +4812,7 @@
           100,
           100,
           "fasted",
-          "🌅 아침 기상 직후 공복 + 물 1컵(200ml) (비타민C와 간격 둘 것)",
+          "<span class='material-symbols-rounded'>wb_twilight</span> 아침 기상 직후 공복 + 물 1컵(200ml) (비타민C와 간격 둘 것)",
           "밤새 분비된 위산을 <b>생수 1컵으로 희석</b>해 복용하면 유익균이 위장에 머무는 시간이 줄어들어 십이지장으로 빠르게 통과합니다. (강산성인 비타민 C와 동시 복용 시 균 사멸 위험이 있으므로 최소 1시간 간격을 두세요.)",
           "고단백 식단(130g/일) 시 대장 내 단백질 부패균이 만드는 암모니아·가스를 억제하고 장내 유익균 증식·배변 활동·장 면역계를 정상 유지합니다.",
           "고단백 식단 장내 부패균 억제 및 소화 흡수 환경이 최적화되었습니다.",
@@ -4795,7 +4826,7 @@
           5000,
           3000,
           "meal",
-          "🏋️ 운동 직후 식사 또는 탄수화물·단백질 섭취 직후 (15분 내)",
+          "<span class='material-symbols-rounded'>exercise</span> 운동 직후 식사 또는 탄수화물·단백질 섭취 직후 (15분 내)",
           "골격근 세포막의 크레아틴 수송체(<b>SLC6A8</b>)는 <b>인슐린</b>에 의해 열립니다. 따라서 공복보다 운동 직후 탄수화물·단백질 식사와 함께 복용할 때 근육 저장 효율이 극대화됩니다.",
           "근육 내 인산크레아틴(PCr)을 채워 무산소 웨이트 시 ATP 에너지를 즉각 재합성하고 골격근(36.9kg) 중량·볼륨을 높입니다. (근세포 내 수분을 끌어당기므로 <b>섭취 시 하루 물 목표량이 +500ml 자동 증가</b>합니다.)",
           "근육 내 ATP 재합성 및 세포내수분(29.8L) 보유력이 강화되었습니다.",
@@ -4809,7 +4840,7 @@
           4000,
           3000,
           "fasted",
-          "⚡ 운동 30~45분 전 완전 공복 (식후 최소 2시간 뒤 단독 섭취)",
+          "<span class='material-symbols-rounded'>bolt</span> 운동 30~45분 전 완전 공복 (식후 최소 2시간 뒤 단독 섭취)",
           "소장 흡수 통로(CAT-1)를 일반 단백질 아미노산(라이신 등)과 공유합니다. <b>식사 직후나 단백질 쉐이크와 함께 먹으면 흡수 경쟁에서 밀려 효과가 반감</b>되므로 반드시 공복에 드세요.",
           "산화질소(NO)를 생성해 혈관을 확장시키고 근육 산소·영양 공급(펌핑) 및 암모니아(피로물질) 해독을 돕습니다.",
           "산화질소 혈관 확장 활성화!",
@@ -4823,7 +4854,7 @@
           1500,
           1000,
           "fasted",
-          "🔥 운동 30~60분 전 또는 아침/점심 식후",
+          "<span class='material-symbols-rounded'>local_fire_department</span> 운동 30~60분 전 또는 아침/점심 식후",
           "복용 후 1~2시간 뒤 혈중 농도가 정점에 도달하므로 운동 전에 복용하거나, 인슐린이 분비되는 식후에 복용하면 근육 내 흡수가 잘 됩니다.",
           "긴사슬 지방산을 미토콘드리아 내부로 실어 나르는 <b>CPT-I 효소 셔틀</b> 역할을 하여 유산소 운동 시 체지방(16.5kg) 연소 효율과 운동 피로 개선을 돕습니다.",
           "미토콘드리아 지방산 수송 셔틀 활성화!",
@@ -4837,7 +4868,7 @@
           100,
           100,
           "meal",
-          "☀️ 아침 또는 점심 식사 직후 (15분 내 / 늦은 밤 복용 피하기)",
+          "<span class='material-symbols-rounded'>light_mode</span> 아침 또는 점심 식사 직후 (15분 내 / 늦은 밤 복용 피하기)",
           "에너지 대사를 깨우는 조효소이므로 오전에 먹어야 하루 활력이 올라가고 수면을 방해하지 않습니다. 고함량은 빈속에 위장 장애(울렁거림)가 있을 수 있어 식후 즉시 복용합니다.",
           "탄수화물(B1)·단백질(B6)·지방(B2·B5)을 에너지(ATP)로 전환하는 TCA 회로의 필수 조효소로, 기초대사량(1,764kcal) 회전율을 유지합니다.",
           "탄·단·지 에너지 전환 대사 효소가 정상 가동 중입니다.",
@@ -4851,7 +4882,7 @@
           1200,
           1000,
           "meal",
-          "🍽️ 점심 또는 저녁 식사 직후 ~ 15분 이내 (공복 절대 비권장)",
+          "<span class='material-symbols-rounded'>restaurant</span> 점심 또는 저녁 식사 직후 ~ 15분 이내 (공복 절대 비권장)",
           "지용성 지방산이므로 식사 중 분비되는 <b>담즙산</b>과 리파아제 효소가 있어야 유화되어 소장 흡수율이 공복 대비 최대 3배 높아지고 비린내 역류가 없습니다.",
           "혈중 중성지질·혈행 개선 및 인슐린 민감성을 높이고 지방 산화 유전자(PPAR-α) 발현과 운동 후 근육 염증(DOMS) 회복을 보조합니다.",
           "혈행 개선 및 항염·지방산 대사 보조 중입니다.",
@@ -4865,7 +4896,7 @@
           2000,
           2000,
           "meal",
-          "🍽️ 점심 또는 저녁 식사 직후 (오메가-3와 동시 복용 최적)",
+          "<span class='material-symbols-rounded'>restaurant</span> 점심 또는 저녁 식사 직후 (오메가-3와 동시 복용 최적)",
           "지용성 비타민이므로 지방이 포함된 식사 직후나 <b>오메가-3와 함께 복용할 때 담즙산에 의해 흡수율이 30~50% 상승</b>합니다.",
           "칼슘 흡수를 도와 높은 골무기질량(3.73kg)을 유지하고, 골격근 세포 내 비타민 D 수용체(VDR)와 결합해 근력 유지 및 면역·호르몬 합성을 돕습니다.",
           "골무기질(3.73kg) 및 골격근 수용체(VDR) 기능 유지 중입니다.",
@@ -4879,7 +4910,7 @@
           1000,
           500,
           "meal",
-          "🍽️ 아침·저녁 식사 직후 ~ 15분 이내 (500~1,000mg 분할 복용)",
+          "<span class='material-symbols-rounded'>restaurant</span> 아침·저녁 식사 직후 ~ 15분 이내 (500~1,000mg 분할 복용)",
           "산성(pH 2.5)이라 공복엔 속쓰림을 유발하며, 1회 1,000mg 초과 시 소장 수송체(SVCT1) 포화로 흡수율이 50% 이하로 떨어지므로 아침·저녁 식후 나누어 드세요.",
           "운동 중 급증하는 활성산소(ROS)와 코르티솔을 억제해 골격근 손실을 막고, 체내 L-카르니틴 생합성의 필수 보조인자로 작용합니다.",
           "활성산소 제거 및 코르티솔 억제·카르니틴 합성 보조 중입니다.",
@@ -4893,7 +4924,7 @@
           130,
           130,
           "meal",
-          "🍽️ 저녁 식사 직후 ~ 30분 이내 (오메가-3와 동시 복용 최적)",
+          "<span class='material-symbols-rounded'>restaurant</span> 저녁 식사 직후 ~ 30분 이내 (오메가-3와 동시 복용 최적)",
           "실리마린은 물에 잘 안 녹는 난용성·지용성 성질을 띠므로 식사 직후 담즙 분비 시 오메가-3와 함께 복용할 때 간문맥 흡수율이 가장 높습니다.",
           "간세포막 안정화 및 글루타치온(항산화 효소) 유지를 통해 고단백 식단(130g/일) 대사 시 발생하는 간의 암모니아 해독 피로를 덜어줍니다.",
           "간세포 보호 및 고단백 대사 보조 기준치를 충족했습니다.",
@@ -4907,7 +4938,7 @@
           350,
           350,
           "night",
-          "🌙 저녁 식후 또는 취침 30~60분 전",
+          "<span class='material-symbols-rounded'>dark_mode</span> 저녁 식후 또는 취침 30~60분 전",
           "신경계를 안정시키는 <b>GABA 수용체</b>를 활성화하고 근육의 칼슘 채널을 차단해 이완을 유도하므로 저녁이나 취침 전에 복용해야 수면의 질이 높아집니다.",
           "300종 이상의 대사 효소 보조인자 및 ATP 안정화에 필수적이며, 웨이트 후 근경련·눈떨림 방지 및 수면 중 코르티솔 억제를 돕습니다.",
           "신경·근육 이완 및 야간 수면 회복 모드가 준비되었습니다.",
@@ -4940,7 +4971,7 @@
           factCheck,
           getEffectText: (amt, hasEx) =>
             amt > 0
-              ? `✅ <b>오늘 ${amt}${unit} 섭취 완료:</b> ${ok}${hasEx ? exB : ""}`
+              ? `<span class='material-symbols-rounded'>check_circle</span> <b>오늘 ${amt}${unit} 섭취 완료:</b> ${ok}${hasEx ? exB : ""}`
               : `미섭취: ${no}`,
         }),
       );
@@ -5130,7 +5161,7 @@
       }
       function applyTheme() {
         document.body.classList.toggle("dark", !!state.darkMode);
-        $("themeBtn").textContent = state.darkMode ? "☀️ 라이트" : "🌙 다크";
+        $("themeBtn").innerHTML = state.darkMode ? "<span class='material-symbols-rounded'>light_mode</span> 라이트" : "<span class='material-symbols-rounded'>dark_mode</span> 다크";
       }
       function toggleDarkMode() {
         state.darkMode = !state.darkMode;
@@ -5200,10 +5231,10 @@
         if (remain <= 0) {
           clearInterval(restTimerInterval);
           restEndTime = 0;
-          $("restTimerDisplay").textContent = "🔔 휴식 끝! 세트 시작!";
+          $("restTimerDisplay").innerHTML = "<span class='material-symbols-rounded'>notifications_active</span> 휴식 끝! 세트 시작!";
           playTimerAlarm();
         } else {
-          $("restTimerDisplay").textContent =
+          $("restTimerDisplay").innerHTML =
             `${Math.floor(remain / 60)}:${String(remain % 60).padStart(2, "0")} 남음`;
         }
       }
@@ -5224,7 +5255,7 @@
       function stopRestTimer() {
         clearInterval(restTimerInterval);
         restEndTime = 0;
-        $("restTimerDisplay").textContent = "대기중";
+        $("restTimerDisplay").innerHTML = "대기중";
       }
       // 화면 복귀 시 즉시 동기화 (백그라운드에서 멈춰 보이던 카운트다운 교정)
       document.addEventListener("visibilitychange", () => {
@@ -5447,14 +5478,14 @@
         if (last?.entry?.meta) {
           const m = last.entry.meta;
           $("prevRecordBanner").innerHTML =
-            `📌 직전(${esc(last.date.slice(5))}): ${esc(m.kg)}kg × ${esc(m.reps)}${isIso ? "초" : "회"} × ${esc(m.sets)}세트
+            `<span class='material-symbols-rounded'>push_pin</span> 직전(${esc(last.date.slice(5))}): ${esc(m.kg)}kg × ${esc(m.reps)}${isIso ? "초" : "회"} × ${esc(m.sets)}세트
       <button class="btn-quick" style="padding:3px 6px;" onclick="applyLastOverload('same')">그대로</button>
       <button class="btn-quick" style="padding:3px 6px;" onclick="applyLastOverload('reps')">+1회</button>
       <button class="btn-quick" style="padding:3px 6px;" onclick="applyLastOverload('weight')">+2.5kg</button>`;
         } else {
           $("prevRecordBanner").textContent = last
-            ? `📌 직전 수행 기록 (${last.date.slice(5)}): ${last.entry.name}`
-            : `💡 첫 기록 종목입니다. 평소 다루는 중량(kg)을 입력해 보세요.`;
+            ? `<span class='material-symbols-rounded'>push_pin</span> 직전 수행 기록 (${last.date.slice(5)}): ${last.entry.name}`
+            : `<span class='material-symbols-rounded'>lightbulb</span> 첫 기록 종목입니다. 평소 다루는 중량(kg)을 입력해 보세요.`;
         }
         $("lblExWeight").textContent =
           ex.isBodyweight && ex.defKg === 0
@@ -5510,7 +5541,7 @@
         if (pyramidSets.length) {
           const isIso = ISOMETRIC_IDS.has($("exPreset").value);
           box.innerHTML =
-            `<div style="font-size:11px;font-weight:800;color:var(--primary);margin-bottom:4px;">📊 피라미드 세트 구성 (${pyramidSets.length}세트 누적중)</div>` +
+            `<div style="font-size:11px;font-weight:800;color:var(--primary);margin-bottom:4px;"><span class='material-symbols-rounded'>dashboard</span> 피라미드 세트 구성 (${pyramidSets.length}세트 누적중)</div>` +
             pyramidSets
               .map(
                 (s, i) =>
@@ -5632,7 +5663,7 @@
         const unilateralLine =
           sideMultiplier === 2 ? " · 편측 좌우 합산 ×2 적용" : "";
         $("exCalcBreakdown").innerHTML =
-          `<b>🔬 내 신체(${esc(p.height)}cm · ${esc(p.weight)}kg · 골격근 ${esc(p.smm)}kg) 계산:</b><br/>• <b>총 볼륨:</b> ${volLine}${unilateralLine}<br/>• <b>시간 분배:</b> 실제 수행 ${esc(activeMin.toFixed(1))}분 ${tempoLine} + 세트 간 휴식 ${esc(restMin.toFixed(1))}분 = 총 ${esc(totalMin.toFixed(1))}분<br/>• <b>운동 강도:</b> ${esc(activeMets.toFixed(1))} MET (종목의 다관절 여부·중량 반영, 총 시간에 연속 적용)<br/>• <b>활동 칼로리:</b> <b>${esc(activeKcal)} kcal</b> + <b>기초대사 에너지:</b> ${esc(restingKcal)} kcal = <b>🔥 총 칼로리: ${esc(totalKcal)} kcal</b><br/>• 체지방 약 <b>${esc((totalKcal / 7.7).toFixed(1))}g 상당 열량</b><br/><span style="color:var(--sub);font-size:11px;">💡 ${esc(ex.note)}</span>`;
+          `<b><span class='material-symbols-rounded'>science</span> 내 신체(${esc(p.height)}cm · ${esc(p.weight)}kg · 골격근 ${esc(p.smm)}kg) 계산:</b><br/>• <b>총 볼륨:</b> ${volLine}${unilateralLine}<br/>• <b>시간 분배:</b> 실제 수행 ${esc(activeMin.toFixed(1))}분 ${tempoLine} + 세트 간 휴식 ${esc(restMin.toFixed(1))}분 = 총 ${esc(totalMin.toFixed(1))}분<br/>• <b>운동 강도:</b> ${esc(activeMets.toFixed(1))} MET (종목의 다관절 여부·중량 반영, 총 시간에 연속 적용)<br/>• <b>활동 칼로리:</b> <b>${esc(activeKcal)} kcal</b> + <b>기초대사 에너지:</b> ${esc(restingKcal)} kcal = <b><span class='material-symbols-rounded'>local_fire_department</span> 총 칼로리: ${esc(totalKcal)} kcal</b><br/>• 체지방 약 <b>${esc((totalKcal / 7.7).toFixed(1))}g 상당 열량</b><br/><span style="color:var(--sub);font-size:11px;"><span class='material-symbols-rounded'>lightbulb</span> ${esc(ex.note)}</span>`;
         updateLiveSetBtn();
       }
       function addWeightExercise() {
@@ -5702,7 +5733,7 @@
         const btn = $("btnLiveSetCheck");
         if (!btn) return;
         const targetSets = parseInt($("exSets").value || "4", 10);
-        btn.textContent = `✅ 세트 완료 & 휴식 시작 (${liveDoneSets} / ${targetSets}세트 완료)`;
+        btn.innerHTML = `<span class='material-symbols-rounded'>check_circle</span> 세트 완료 & 휴식 시작 (${liveDoneSets} / ${targetSets}세트 완료)`;
       }
       function completeOneLiveSet() {
         const targetSets = parseInt($("exSets").value || "4", 10);
@@ -5711,7 +5742,7 @@
         const restSec = parseInt($("exRestSec").value, 10) || 60;
         if (liveDoneSets < targetSets && restSec > 0) startRestTimer(restSec);
         else if (liveDoneSets === targetSets)
-          $("restTimerDisplay").textContent = "🎉 목표 세트 완료!";
+          $("restTimerDisplay").innerHTML = "<span class='material-symbols-rounded'>celebration</span> 목표 세트 완료!";
       }
       function resetLiveSetCount() {
         liveDoneSets = 0;
@@ -5779,17 +5810,17 @@
           fatR = spd <= 7.5 ? 0.72 : 0.65;
           tTitle = "[근력운동 후]";
           advice =
-            "✅ <b>최적 타이밍:</b> 근력운동으로 글리코겐이 고갈된 상태라 시작 직후부터 체지방이 주 에너지원으로 타며 대사 시너지(+10%)가 적용됩니다.";
+            "<span class='material-symbols-rounded'>check_circle</span> <b>최적 타이밍:</b> 근력운동으로 글리코겐이 고갈된 상태라 시작 직후부터 체지방이 주 에너지원으로 타며 대사 시너지(+10%)가 적용됩니다.";
         } else if (currentCardioTiming === "fasted") {
           mult = 1.03;
           fatR = spd <= 6.5 ? 0.76 : 0.62;
           tTitle = "[공복 유산소]";
           advice =
             log.sleepHours < 6 || log.condition === "tired"
-              ? "🚨 <b>수면부족/피로 감지 경고:</b> 오늘 수면이 부족해 코르티솔(근손실 호르몬)이 높은 상태입니다! 아침 공복 유산소 대신 <b>식후 가벼운 경사걷기</b>로 전환하고 비타민 C·마그네슘을 보충하세요."
+              ? "<span class='material-symbols-rounded'>error</span> <b>수면부족/피로 감지 경고:</b> 오늘 수면이 부족해 코르티솔(근손실 호르몬)이 높은 상태입니다! 아침 공복 유산소 대신 <b>식후 가벼운 경사걷기</b>로 전환하고 비타민 C·마그네슘을 보충하세요."
               : spd > 7.5 || mins > 45
-                ? "⚠️ <b>근손실 주의:</b> 공복에 고강도(7.5km/h 초과) 또는 45분 이상 수행 시 골격근(36.9kg)이 손실될 수 있습니다! 시속 5.0~6.0km 경사 걷기 30~40분을 권장합니다."
-                : "✅ <b>공복 지방 타겟:</b> 인슐린 수치가 최저인 아침 공복 상태라 지방 동원율(76%)이 극대화됩니다.";
+                ? "<span class='material-symbols-rounded'>warning</span> <b>근손실 주의:</b> 공복에 고강도(7.5km/h 초과) 또는 45분 이상 수행 시 골격근(36.9kg)이 손실될 수 있습니다! 시속 5.0~6.0km 경사 걷기 30~40분을 권장합니다."
+                : "<span class='material-symbols-rounded'>check_circle</span> <b>공복 지방 타겟:</b> 인슐린 수치가 최저인 아침 공복 상태라 지방 동원율(76%)이 극대화됩니다.";
         }
         const finalKcal = Math.round(baseKcal * mult),
           fatKcal = Math.round(finalKcal * fatR),
@@ -5808,7 +5839,7 @@
           `${tTitle} ${mLabel} (${spd}km/h${grd > 0 ? "·경사" + grd + "%" : ""})`;
         $("cardioKcal").value = finalKcal;
         $("cardioCalcBreakdown").innerHTML =
-          `<b>🏃 ACSM 공식 × 내 체중(${p.weight}kg) 정밀 분석 (${modeText}):</b><br/>• <b>총 소모 열량:</b> <b>${finalKcal} kcal</b> (분당 ${(finalKcal / Math.max(1, mins)).toFixed(1)} kcal · 순 산소섭취량 ${vo2.toFixed(1)} ml/kg/min — 안정시 3.5 차감)<br/>• <b>에너지원 분해 비율:</b> 지방 연소 <b>${fatKcal} kcal (${Math.round(fatR * 100)}%)</b> + 탄수화물 <b>${carbKcal} kcal (${Math.round((1 - fatR) * 100)}%)</b><br/>• <b>🔥 실제 태운 순수 체지방량: 약 ${(fatKcal / 7.7).toFixed(1)} g</b><br/><span style="display:block;margin-top:4px;">${advice}</span>`;
+          `<b><span class='material-symbols-rounded'>directions_run</span> ACSM 공식 × 내 체중(${p.weight}kg) 정밀 분석 (${modeText}):</b><br/>• <b>총 소모 열량:</b> <b>${finalKcal} kcal</b> (분당 ${(finalKcal / Math.max(1, mins)).toFixed(1)} kcal · 순 산소섭취량 ${vo2.toFixed(1)} ml/kg/min — 안정시 3.5 차감)<br/>• <b>에너지원 분해 비율:</b> 지방 연소 <b>${fatKcal} kcal (${Math.round(fatR * 100)}%)</b> + 탄수화물 <b>${carbKcal} kcal (${Math.round((1 - fatR) * 100)}%)</b><br/>• <b><span class='material-symbols-rounded'>local_fire_department</span> 실제 태운 순수 체지방량: 약 ${(fatKcal / 7.7).toFixed(1)} g</b><br/><span style="display:block;margin-top:4px;">${advice}</span>`;
       }
       function addCardioExercise() {
         const name = $("cardioName").value.trim(),
@@ -6034,7 +6065,7 @@
       function renderFoodCategoryChips() {
         $("foodCatChips").innerHTML = FOOD_CATS.map(
           (c) =>
-            `<button class="cat-chip${c === currentFoodCat ? " active" : ""}" onclick="browseFoodCategory('${c}',this)">${c === "인기" ? "🔥 인기" : c}</button>`,
+            `<button class="cat-chip${c === currentFoodCat ? " active" : ""}" onclick="browseFoodCategory('${c}',this)">${c === "인기" ? "<span class='material-symbols-rounded'>local_fire_department</span> 인기" : c}</button>`,
         ).join("");
       }
       function browseFoodCategory(cat, btnEl) {
@@ -6056,7 +6087,7 @@
               : "카테고리";
         renderFoodSearchResults(
           list.slice(0, 20),
-          `🔥 <b>${currentFoodCat}</b> — ${tag} · 항목 터치 시 아래 성분표에 바로 선택됩니다`,
+          `<span class='material-symbols-rounded'>local_fire_department</span> <b>${currentFoodCat}</b> — ${tag} · 항목 터치 시 아래 성분표에 바로 선택됩니다`,
           activeMult || 1.0,
         );
       }
@@ -6301,13 +6332,13 @@
         hintBox.style.display =
           parsed.unitLabel || parsed.coreQuery !== raw ? "block" : "none";
         if (hintBox.style.display === "block")
-          hintBox.innerHTML = `🔍 스마트 인식: <b>'${esc(parsed.coreQuery)}'</b> ${parsed.unitLabel ? `× <b>${parsed.unitLabel} (${activeMult}배 자동 적용)</b>` : "(단어 자동 보정됨)"}`;
+          hintBox.innerHTML = `<span class='material-symbols-rounded'>search</span> 스마트 인식: <b>'${esc(parsed.coreQuery)}'</b> ${parsed.unitLabel ? `× <b>${parsed.unitLabel} (${activeMult}배 자동 적용)</b>` : "(단어 자동 보정됨)"}`;
         const local = searchLocalDB(parsed.coreQuery),
           cached = webFoodCache[normalizeStr(parsed.coreQuery)] || [];
         renderFoodSearchResults(
           [...cached, ...local],
           cached.length
-            ? `✅ 캐시된 실시간 웹검색 결과 (${cached.length}건) + 공식 DB`
+            ? `<span class='material-symbols-rounded'>check_circle</span> 캐시된 실시간 웹검색 결과 (${cached.length}건) + 공식 DB`
             : "",
           activeMult,
         );
@@ -6334,7 +6365,7 @@
         if (!list || !list.length) {
           resBox.innerHTML =
             bHtml +
-            `<div style="padding:14px;font-size:12px;color:var(--sub);text-align:center;line-height:1.5;">일치하는 항목이 없습니다.<br/>위의 <b>[🌐 실시간 웹검색]</b> 또는 <b>[📷 사진/캡처로 자동판독]</b>을 눌러보세요!</div>`;
+            `<div style="padding:14px;font-size:12px;color:var(--sub);text-align:center;line-height:1.5;">일치하는 항목이 없습니다.<br/>위의 <b>[<span class='material-symbols-rounded'>language</span> 실시간 웹검색]</b> 또는 <b>[<span class='material-symbols-rounded'>photo_camera</span> 사진/캡처로 자동판독]</b>을 눌러보세요!</div>`;
           return;
         }
         const mLbl =
@@ -6765,7 +6796,7 @@
             setPortionMultiplier(1.0);
             return renderFoodSearchResults(
               [item],
-              `✅ 바코드(${esc(raw)}) 제품 조회 완료`,
+              `<span class='material-symbols-rounded'>check_circle</span> 바코드(${esc(raw)}) 제품 조회 완료`,
               1.0,
             );
           }
@@ -6777,17 +6808,17 @@
         if (webFoodCache[cacheKey]?.length) {
           return renderFoodSearchResults(
             [...webFoodCache[cacheKey], ...local],
-            `✅ 캐시된 실시간 웹 검색 결과 (${webFoodCache[cacheKey].length}건) + 공식 DB`,
+            `<span class='material-symbols-rounded'>check_circle</span> 캐시된 실시간 웹 검색 결과 (${webFoodCache[cacheKey].length}건) + 공식 DB`,
             activeMult,
           );
         }
 
         const btn = $("btnWebSearch");
-        btn.textContent = "⏳ 검색중...";
+        btn.innerHTML = "<span class='material-symbols-rounded'>hourglass_bottom</span> 검색중...";
         btn.disabled = true;
         renderFoodSearchResults(
           local,
-          `🌐 <b>'${esc(coreQuery)}'</b> 외부 식품 영양성분 DB 실시간 검색 중...`,
+          `<span class='material-symbols-rounded'>language</span> <b>'${esc(coreQuery)}'</b> 외부 식품 영양성분 DB 실시간 검색 중...`,
           activeMult,
         );
 
@@ -6840,20 +6871,20 @@
         }
         const webRes = rankWebFoodResults(deduped, coreQuery);
 
-        btn.textContent = "🌐 실시간 웹검색";
+        btn.innerHTML = "<span class='material-symbols-rounded'>language</span> 실시간 웹검색";
         btn.disabled = false;
         if (webRes.length) {
           webFoodCache[cacheKey] = webRes.slice(0, 15);
           saveWebCache();
           renderFoodSearchResults(
             [...webFoodCache[cacheKey], ...local],
-            `✅ 실시간 웹 검색 완료: 외부 식품 DB에서 <b>${webFoodCache[cacheKey].length}건</b>을 찾았습니다! (클릭 시 즉시 선택)`,
+            `<span class='material-symbols-rounded'>check_circle</span> 실시간 웹 검색 완료: 외부 식품 DB에서 <b>${webFoodCache[cacheKey].length}건</b>을 찾았습니다! (클릭 시 즉시 선택)`,
             activeMult,
           );
         } else {
           renderFoodSearchResults(
             local,
-            `⚠️ 외부 웹 응답이 지연되어 <b>내장 공식 DB 및 맞춤 추정치</b>를 표시합니다. 쿠팡/네이버 상품은 아래 버튼으로 복사하거나 캡처해 넣으세요!`,
+            `<span class='material-symbols-rounded'>warning</span> 외부 웹 응답이 지연되어 <b>내장 공식 DB 및 맞춤 추정치</b>를 표시합니다. 쿠팡/네이버 상품은 아래 버튼으로 복사하거나 캡처해 넣으세요!`,
             activeMult,
           );
         }
@@ -7035,21 +7066,21 @@
         try {
           const dataUrl = await fileToBase64(file);
           if (state.geminiApiKey) {
-            statusBox.innerHTML = `🤖 <b>AI 비전이 사진을 정밀 판독 중입니다...</b> (음식/상품명 및 영양성분 추출)`;
+            statusBox.innerHTML = `<span class='material-symbols-rounded'>smart_toy</span> <b>AI 비전이 사진을 정밀 판독 중입니다...</b> (음식/상품명 및 영양성분 추출)`;
             try {
               const aiItem = await analyzePhotoWithGemini(dataUrl);
               if (aiItem && aiItem.kcal > 0) {
                 selectedFoodBase = aiItem;
                 activeMult = 1.0;
                 applyFoodToForm(1.0);
-                statusBox.innerHTML = `✅ <b>AI 사진 판독 완료:</b> <b>${esc(aiItem.name)}</b> (${aiItem.kcal}kcal · 탄${aiItem.carb}g · 단${aiItem.prot}g · 지${aiItem.fat}g)가 아래 성분표에 자동 선택되었습니다!`;
+                statusBox.innerHTML = `<span class='material-symbols-rounded'>check_circle</span> <b>AI 사진 판독 완료:</b> <b>${esc(aiItem.name)}</b> (${aiItem.kcal}kcal · 탄${aiItem.carb}g · 단${aiItem.prot}g · 지${aiItem.fat}g)가 아래 성분표에 자동 선택되었습니다!`;
                 ev.target.value = "";
                 return;
               }
             } catch (err) {}
           }
 
-          statusBox.innerHTML = `📸 <b>사진 속 영양성분표/상품명을 스캔 중입니다...</b> (약 3~6초 소요)`;
+          statusBox.innerHTML = `<span class='material-symbols-rounded'>camera</span> <b>사진 속 영양성분표/상품명을 스캔 중입니다...</b> (약 3~6초 소요)`;
           const Tesseract = await loadTesseract();
           const {
             data: { text },
@@ -7063,7 +7094,7 @@
             selectedFoodBase = extracted;
             activeMult = 1.0;
             applyFoodToForm(1.0);
-            statusBox.innerHTML = `✅ <b>사진 성분표 스캔 완료:</b> <b>${esc(extracted.name)}</b> (${extracted.kcal}kcal · 탄${extracted.carb}g · 단${extracted.prot}g · 지${extracted.fat}g)가 자동 입력되었습니다!`;
+            statusBox.innerHTML = `<span class='material-symbols-rounded'>check_circle</span> <b>사진 성분표 스캔 완료:</b> <b>${esc(extracted.name)}</b> (${extracted.kcal}kcal · 탄${extracted.carb}g · 단${extracted.prot}g · 지${extracted.fat}g)가 자동 입력되었습니다!`;
           } else {
             const ocrWords = text
               .replace(/[^가-힣a-zA-Z0-9\s]/g, " ")
@@ -7075,13 +7106,13 @@
               selectedFoodBase = { ...matches[0] };
               activeMult = 1.0;
               applyFoodToForm(1.0);
-              statusBox.innerHTML = `✅ <b>사진 속 상품명 인식 완료:</b> <b>'${esc(matches[0].name)}'</b> 항목으로 자동 선택되었습니다!`;
+              statusBox.innerHTML = `<span class='material-symbols-rounded'>check_circle</span> <b>사진 속 상품명 인식 완료:</b> <b>'${esc(matches[0].name)}'</b> 항목으로 자동 선택되었습니다!`;
             } else {
-              statusBox.innerHTML = `⚠️ 사진에서 영양성분 숫자를 찾지 못했습니다. 영양성분표가 잘 보이게 찍거나 우측 <b>[⚙️ AI키]</b>에 무료 Gemini 키를 등록하면 일반 음식 사진도 판독됩니다.`;
+              statusBox.innerHTML = `<span class='material-symbols-rounded'>warning</span> 사진에서 영양성분 숫자를 찾지 못했습니다. 영양성분표가 잘 보이게 찍거나 우측 <b>[<span class='material-symbols-rounded'>settings</span> AI키]</b>에 무료 Gemini 키를 등록하면 일반 음식 사진도 판독됩니다.`;
             }
           }
         } catch (e) {
-          statusBox.innerHTML = `⚠️ 이미지 분석 중 오류가 발생했습니다. 다시 시도해 주세요.`;
+          statusBox.innerHTML = `<span class='material-symbols-rounded'>warning</span> 이미지 분석 중 오류가 발생했습니다. 다시 시도해 주세요.`;
         }
         ev.target.value = "";
       }
@@ -7170,7 +7201,7 @@
         $("foodProt").value = p;
         $("foodFat").value = f;
         $("nutritionLabelBox").style.display = "block";
-        $("nfTitle").textContent = `📋 ${it.name}`;
+        $("nfTitle").innerHTML = `<span class='material-symbols-rounded'>content_paste</span> ${it.name}`;
         $("nfServing").textContent = `${it.serving || "1회 제공량"} × ${m}배`;
         $("nfKcal").textContent = `${k} kcal`;
         $("nfCarb").textContent = `${c} g`;
@@ -7193,7 +7224,7 @@
         };
         const statusBox = $("ocrStatusBox");
         statusBox.style.display = "block";
-        statusBox.innerHTML = `💡 <b>쿠팡/네이버 연동 안내:</b> 열린 창에서 원하는 상품명이나 성분표를 <b>복사</b>한 뒤 돌아와 위 <b>[📥 쿠팡·네이버 복사글 적용]</b>을 누르거나, 화면을 <b>캡처</b>해 <b>[📷 사진/캡처로 자동판독]</b>에 넣으면 즉시 선택됩니다!`;
+        statusBox.innerHTML = `<span class='material-symbols-rounded'>lightbulb</span> <b>쿠팡/네이버 연동 안내:</b> 열린 창에서 원하는 상품명이나 성분표를 <b>복사</b>한 뒤 돌아와 위 <b>[<span class='material-symbols-rounded'>download</span> 쿠팡·네이버 복사글 적용]</b>을 누르거나, 화면을 <b>캡처</b>해 <b>[<span class='material-symbols-rounded'>photo_camera</span> 사진/캡처로 자동판독]</b>에 넣으면 즉시 선택됩니다!`;
         window.open(urls[pf], "_blank");
       }
 
@@ -7216,7 +7247,7 @@
           setPortionMultiplier(1.0);
           $("pasteScannerBox").style.display = "none";
           statusBox.style.display = "block";
-          statusBox.innerHTML = `✅ <b>복사한 영양성분 적용 완료:</b> <b>${esc(extracted.name)}</b> (${extracted.kcal}kcal · 탄${extracted.carb}g · 단${extracted.prot}g · 지${extracted.fat}g)`;
+          statusBox.innerHTML = `<span class='material-symbols-rounded'>check_circle</span> <b>복사한 영양성분 적용 완료:</b> <b>${esc(extracted.name)}</b> (${extracted.kcal}kcal · 탄${extracted.carb}g · 단${extracted.prot}g · 지${extracted.fat}g)`;
           return;
         }
 
@@ -7238,7 +7269,7 @@
           selectedFoodBase = validateNutritionItem(matches[0]);
           setPortionMultiplier(activeMult);
           statusBox.style.display = "block";
-          statusBox.innerHTML = `✅ <b>복사한 상품 자동 선택 완료:</b> <b>'${esc(matches[0].name)}'</b> 성분이 아래에 적용되었습니다! 다른 세부 상품을 고르려면 아래 실시간 검색 결과를 터치하세요.`;
+          statusBox.innerHTML = `<span class='material-symbols-rounded'>check_circle</span> <b>복사한 상품 자동 선택 완료:</b> <b>'${esc(matches[0].name)}'</b> 성분이 아래에 적용되었습니다! 다른 세부 상품을 고르려면 아래 실시간 검색 결과를 터치하세요.`;
         }
         $("pasteScannerBox").style.display = "none";
         searchLiveWebFood();
@@ -7427,7 +7458,7 @@
               (now - log.suppTimes[conflictId]) / 60000,
             );
             alert(
-              `⚠️ 흡수 저해 주의: '${conflictId === "vitc" ? "비타민 C" : "유산균"}' 복용 후 ${diffMin}분 경과했습니다. 위산·산도 영향 방지를 위해 최소 60분 간격을 권장합니다.`,
+              `<span class='material-symbols-rounded'>warning</span> 흡수 저해 주의: '${conflictId === "vitc" ? "비타민 C" : "유산균"}' 복용 후 ${diffMin}분 경과했습니다. 위산·산도 영향 방지를 위해 최소 60분 간격을 권장합니다.`,
             );
           }
           log.suppTimes[id] = now;
@@ -7491,7 +7522,7 @@
         const rawLine = wPts.map((p) => `${p.x},${toY(p.w)}`).join(" ");
         const maLine = wPts.map((p) => `${p.x},${toY(p.ma)}`).join(" ");
         $("weightTrendSvgBox").innerHTML = `
-    <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:4px;">📉 공복 체중(회색 점선) vs 7일 이동평균(파란 실선)</div>
+    <div style="font-size:11px;font-weight:700;color:var(--sub);margin-bottom:4px;"><span class='material-symbols-rounded'>trending_down</span> 공복 체중(회색 점선) vs 7일 이동평균(파란 실선)</div>
     <svg viewBox="0 0 364 112" style="width:100%;height:112px;background:var(--box);border:1px solid var(--border);border-radius:12px;">
       <polyline fill="none" stroke="var(--sub)" stroke-width="1.5" stroke-dasharray="3,3" points="${rawLine}" />
       <polyline fill="none" stroke="var(--primary)" stroke-width="2.5" points="${maLine}" />
@@ -7640,7 +7671,7 @@
         const bank = calcWeeklyCalorieBank(),
           banner = $("calorieBankBanner"),
           btnAuto = $("btnToggleBankAuto");
-        btnAuto.textContent = `⚖️ 자동 보정 ${state.bankAutoAdjust ? "ON" : "OFF"}`;
+        btnAuto.innerHTML = `<span class='material-symbols-rounded'>balance</span> 자동 보정 ${state.bankAutoAdjust ? "ON" : "OFF"}`;
         btnAuto.style.background = state.bankAutoAdjust
           ? "var(--primary)"
           : "var(--card)";
@@ -7656,7 +7687,7 @@
           banner.classList.remove("debt");
           $("bankBodyText").innerHTML =
             bank.cumulativeDiff < -50
-              ? `🎉 최근 6일간 목표보다 <b>${Math.abs(bank.cumulativeDiff).toLocaleString()} kcal를 추가로 더 감량(저축)</b>하셨습니다!`
+              ? `<span class='material-symbols-rounded'>celebration</span> 최근 6일간 목표보다 <b>${Math.abs(bank.cumulativeDiff).toLocaleString()} kcal를 추가로 더 감량(저축)</b>하셨습니다!`
               : `최근 6일간 초과 섭취 부채가 없습니다. 오늘 권장 목표만 지키시면 됩니다!`;
         }
 
@@ -7708,7 +7739,7 @@
           );
         $("calBar").style.width = `${calPct}%`;
         $("calBar").classList.toggle("danger", remain < 0);
-        $("calStatusText").textContent =
+        $("calStatusText").innerHTML =
           remain >= 0
             ? `남은 섭취 가능: ${remain.toLocaleString()} kcal`
             : `권장 목표 초과: +${Math.abs(remain).toLocaleString()} kcal`;
@@ -7740,13 +7771,13 @@
         $("customMealPresetChips").innerHTML = (state.mealPresets || [])
           .map(
             (mp, i) =>
-              `<span class="cat-chip" onclick="managePreset('apply','foods',${i})">🍱 ${esc(mp.name)} <b style="color:var(--danger);margin-left:4px;" onclick="managePreset('del','foods',${i},event)">×</b></span>`,
+              `<span class="cat-chip" onclick="managePreset('apply','foods',${i})"><span class='material-symbols-rounded'>bento</span> ${esc(mp.name)} <b style="color:var(--danger);margin-left:4px;" onclick="managePreset('del','foods',${i},event)">×</b></span>`,
           )
           .join("");
         $("customWorkoutRoutineChips").innerHTML = (state.workoutRoutines || [])
           .map(
             (wr, i) =>
-              `<span class="cat-chip" onclick="managePreset('apply','exercises',${i})">🔥 ${esc(wr.name)} <b style="color:var(--danger);margin-left:4px;" onclick="managePreset('del','exercises',${i},event)">×</b></span>`,
+              `<span class="cat-chip" onclick="managePreset('apply','exercises',${i})"><span class='material-symbols-rounded'>local_fire_department</span> ${esc(wr.name)} <b style="color:var(--danger);margin-left:4px;" onclick="managePreset('del','exercises',${i},event)">×</b></span>`,
           )
           .join("");
 
@@ -7778,7 +7809,7 @@
                   : `<span style="color:var(--amber);font-size:11px;">단백질 ${mProt}g</span>`;
               return (
                 `<li style="padding:8px 4px 4px;font-size:12px;font-weight:800;color:var(--primary);display:flex;justify-content:space-between;border-bottom:2px solid var(--border);">
-        <span>🍽️ ${mType} 소계 (${mKcal} kcal)</span>${protOk}
+        <span><span class='material-symbols-rounded'>restaurant</span> ${mType} 소계 (${mKcal} kcal)</span>${protOk}
       </li>` +
                 items
                   .map(
@@ -7802,13 +7833,13 @@
 
         $("suppContainer").innerHTML = SUPP_META.map((m) => {
           const amt = supps[m.id] || 0;
-          return `<div class="supp-item"><div class="supp-top"><span class="supp-name">${m.name}</span><span class="supp-target">권장 ${m.target}${m.unit} (${Math.min(100, Math.round((amt / m.target) * 100))}%)</span></div><div><span class="timing-badge ${m.badgeType}">${m.timingBadge}</span></div><div class="supp-controls"><input type="number" value="${amt}" inputmode="numeric" onchange="updateSupp('${m.id}',this.value)" /><span style="font-size:13px;font-weight:600;">${m.unit}</span><button class="btn-quick" onclick="updateSupp('${m.id}',${m.step},true)">+${m.step}${m.unit}</button><button class="btn-del" onclick="updateSupp('${m.id}',0)">초기화</button></div><div class="supp-effect"><b>🔬 약학적 흡수 원리:</b> ${m.whyTiming}<br/><b>📋 팩트 체크:</b> ${m.factCheck}<br/><span style="display:block;margin-top:4px;color:var(--primary);">${m.getEffectText(amt, exKcal > 0)}</span></div></div>`;
+          return `<div class="supp-item"><div class="supp-top"><span class="supp-name">${m.name}</span><span class="supp-target">권장 ${m.target}${m.unit} (${Math.min(100, Math.round((amt / m.target) * 100))}%)</span></div><div><span class="timing-badge ${m.badgeType}">${m.timingBadge}</span></div><div class="supp-controls"><input type="number" value="${amt}" inputmode="numeric" onchange="updateSupp('${m.id}',this.value)" /><span style="font-size:13px;font-weight:600;">${m.unit}</span><button class="btn-quick" onclick="updateSupp('${m.id}',${m.step},true)">+${m.step}${m.unit}</button><button class="btn-del" onclick="updateSupp('${m.id}',0)">초기화</button></div><div class="supp-effect"><b><span class='material-symbols-rounded'>science</span> 약학적 흡수 원리:</b> ${m.whyTiming}<br/><b><span class='material-symbols-rounded'>content_paste</span> 팩트 체크:</b> ${m.factCheck}<br/><span style="display:block;margin-top:4px;color:var(--primary);">${m.getEffectText(amt, exKcal > 0)}</span></div></div>`;
         }).join("");
 
         const slpMsg =
           log.sleepHours < 6 || log.condition === "tired"
-            ? `⚠️ <b>수면·컨디션 주의 (${log.sleepHours}시간):</b> 코르티솔 상승으로 근손실 위험이 있으니 오늘 유산소는 공복 대신 식후 경사걷기로 진행하시고 취침 전 <b>마그네슘</b>을 꼭 챙기세요.`
-            : `✅ <b>수면·회복 양호 (${log.sleepHours}시간):</b> 호르몬 및 인슐린 민감성이 정상 상태라 웨이트 볼륨과 지방 연소 효율이 극대화됩니다.`;
+            ? `<span class='material-symbols-rounded'>warning</span> <b>수면·컨디션 주의 (${log.sleepHours}시간):</b> 코르티솔 상승으로 근손실 위험이 있으니 오늘 유산소는 공복 대신 식후 경사걷기로 진행하시고 취침 전 <b>마그네슘</b>을 꼭 챙기세요.`
+            : `<span class='material-symbols-rounded'>check_circle</span> <b>수면·회복 양호 (${log.sleepHours}시간):</b> 호르몬 및 인슐린 민감성이 정상 상태라 웨이트 볼륨과 지방 연소 효율이 극대화됩니다.`;
         $("dailyInsightBox").innerHTML =
           `• ${slpMsg}<br/>• <b>예상 체지방 상당 열량:</b> 오늘 현재 칼로리 밸런스(<b>${netDiff} kcal</b>)는 체지방 약 <b>${netDiff < 0 ? Math.round(Math.abs(netDiff) / 7.7) : 0}g 상당 열량</b>의 적자 페이스입니다.<br/>• <b>영양제 10종 핵심 요약:</b> <b>기상 직후 공복</b>엔 유산균+물1컵, <b>운동 30분 전 공복</b>엔 아르기닌+카르니틴, <b>식사 직후</b>엔 크레아틴·오메가3·비타민B/C/D·밀크씨슬, <b>취침 전</b>엔 마그네슘을 드세요!`;
 
