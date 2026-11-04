@@ -336,7 +336,7 @@
       .macro-grid {
         margin-top: 12px;
         padding-top: 12px;
-        border-top: 1px dashed var(--border);
+        border-top: 1px solid rgba(128,128,128,0.15);
       }
       .macro-box .mc-title,
       .field-label,
@@ -636,7 +636,7 @@
       .pyramid-box {
         display: none;
         background: var(--box);
-        border: 1px dashed var(--sub);
+        border: 1px solid rgba(128,128,128,0.2);
         border-radius: 12px;
         padding: 10px;
         margin-bottom: 10px;
@@ -769,7 +769,7 @@
       .supp-effect {
         margin-top: 8px;
         padding-top: 8px;
-        border-top: 1px dashed var(--border);
+        border-top: 1px solid rgba(128,128,128,0.15);
         font-size: 11.5px;
         line-height: 1.5;
       }
@@ -5097,67 +5097,46 @@
         } catch (e) {}
       }
 
-      function generateAppIcon(themeName) {
-        const theme = themeName || state.iconTheme || "navy",
-          canvas = document.createElement("canvas");
+      function generateAppIcon() {
+        const canvas = document.createElement("canvas");
         canvas.width = canvas.height = 512;
-        const ctx = canvas.getContext("2d"),
-          grad = ctx.createLinearGradient(0, 0, 512, 512);
-        const colors =
-          theme === "emerald"
-            ? ["#064E3B", "#10B981"]
-            : theme === "purple"
-              ? ["#2E1065", "#7C3AED"]
-              : ["#0F172A", "#1D4ED8"];
-        grad.addColorStop(0, colors[0]);
-        grad.addColorStop(1, colors[1]);
-        ctx.fillStyle = grad;
+        const ctx = canvas.getContext("2d");
+        
+        // 미니멀 블랙 바탕
+        ctx.fillStyle = "#000000";
         ctx.fillRect(0, 0, 512, 512);
-        ctx.strokeStyle = "rgba(255,255,255,0.12)";
-        ctx.lineWidth = 18;
-        ctx.beginPath();
-        ctx.arc(256, 256, 210, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.fillStyle = "#FFF";
-        [
-          [146, 138, 220, 18],
-          [102, 102, 26, 90],
-          [132, 114, 18, 66],
-          [384, 102, 26, 90],
-          [362, 114, 18, 66],
-        ].forEach((r) => ctx.fillRect(...r));
-        ctx.strokeStyle = "#34D399";
-        ctx.lineWidth = 16;
-        ctx.lineCap = ctx.lineJoin = "round";
-        ctx.beginPath();
-        [
-          [96, 285],
-          [175, 285],
-          [215, 220],
-          [265, 330],
-          [315, 240],
-          [360, 270],
-          [416, 215],
-        ].forEach((p, i) => (i ? ctx.lineTo(...p) : ctx.moveTo(...p)));
-        ctx.stroke();
-        ctx.textAlign = "center";
-        ctx.font = "900 58px -apple-system,sans-serif";
-        ctx.fillText("INBODY", 256, 412);
-        ctx.fillStyle = "#6EE7B7";
-        ctx.font = "800 32px -apple-system,sans-serif";
-        ctx.fillText("PRO 79 · MASTER", 256, 456);
+        
+        // 화이트 덤벨 그리기
+        ctx.fillStyle = "#FFFFFF";
+        const drawRect = (x, y, w, h, r) => {
+          ctx.beginPath();
+          ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
+          ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+          ctx.lineTo(x + w, y + h - r);
+          ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+          ctx.lineTo(x + r, y + h);
+          ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+          ctx.lineTo(x, y + r);
+          ctx.quadraticCurveTo(x, y, x + r, y);
+          ctx.fill();
+        };
+        
+        // 덤벨 손잡이
+        drawRect(186, 236, 140, 40, 6);
+        // 안쪽 큰 원판
+        drawRect(136, 146, 50, 220, 10);
+        drawRect(326, 146, 50, 220, 10);
+        // 바깥쪽 작은 원판
+        drawRect(96, 186, 40, 140, 8);
+        drawRect(376, 186, 40, 140, 8);
+
         const url = canvas.toDataURL("image/png");
-        ["appleTouchIconLink", "favIconLink"].forEach((id) => {
+        ["appleTouchIconLink", "favIconLink"].forEach(id => {
           if ($(id)) $(id).href = url;
         });
-        ["headerLogoImg", "iconPreviewLarge"].forEach((id) => {
+        ["headerLogoImg", "iconPreviewLarge"].forEach(id => {
           if ($(id)) $(id).src = url;
         });
-      }
-      function changeIconTheme(t) {
-        state.iconTheme = t;
-        saveState();
-        generateAppIcon(t);
       }
       function applyTheme() {
         document.body.classList.toggle("dark", !!state.darkMode);
@@ -7953,7 +7932,7 @@
       // ===== 초기화 =====
       $("datePicker").value = currentDate;
       $("activitySelect").value = String(state.profile.activity);
-      generateAppIcon(state.iconTheme);
+      generateAppIcon();
       populateWeightExSelect();
       renderFoodCategoryChips();
       onFoodSearchInput();
